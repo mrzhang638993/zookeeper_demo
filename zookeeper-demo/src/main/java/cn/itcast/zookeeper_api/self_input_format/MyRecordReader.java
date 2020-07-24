@@ -1,6 +1,6 @@
 package cn.itcast.zookeeper_api.self_input_format;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;

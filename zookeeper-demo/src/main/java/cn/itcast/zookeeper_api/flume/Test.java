@@ -11,7 +11,7 @@ public class Test {
     }
 
     public static void main(String[] args) {
-        String str = "\u5916";
+        String str = "\u002c";
         String content = unicodeToString(str);
         System.out.println(content);
     }

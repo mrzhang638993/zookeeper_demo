@@ -1,5 +1,6 @@
 package cn.itcast.zookeeper_api.flume;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -75,6 +76,7 @@ public class CustomerParameterInterceptor implements Interceptor {
             // 获取需要得到的索引的序号信息
             String[] indexs_split = indexs.split(indexs_separator);
             String newLine = "";
+            System.out.println("======="+JSON.toJSON(indexs_split)+"=======");
             //  需要设置加密之后的event的body信息内容。对应的是索引的序列号信息
             for (int i = 0; i < indexs_split.length; i++) {
                 // 0,1,3,5,6 对应的是索引号信息

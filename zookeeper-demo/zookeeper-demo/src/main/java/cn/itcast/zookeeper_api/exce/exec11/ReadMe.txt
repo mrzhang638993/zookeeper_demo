@@ -1,1 +1,0 @@
-CombineTextInputFormat：用于小文件过多的场景，它可以将多个小文件从逻辑上规划到一个切片中，这样，多个小文件就可以交给一个 MapTask 处理。

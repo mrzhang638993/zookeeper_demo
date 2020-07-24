@@ -1,3 +1,0 @@
-pd001    apple
-pd002    xiaomi
-pd003    cuizi

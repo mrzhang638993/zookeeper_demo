@@ -88,7 +88,7 @@ public class CustomerParameterInterceptor implements Interceptor {
                     newLine += StringUtils.GetMD5Code(fields_spilts[parseInt]);
                 } else {
                     //  其他的字段不用进行加密操作实现管理。
-                    newLine += fields_spilts[0];
+                    newLine += fields_spilts[parseInt];
                 }
                 if (i != indexs_split.length - 1) {
                     //  字段之间使用原来的分隔符进行分割操作

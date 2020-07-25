@@ -77,6 +77,7 @@ public class CustomerParameterInterceptor implements Interceptor {
             String[] indexs_split = indexs.split(indexs_separator);
             String newLine = "";
             System.out.println("======="+JSON.toJSON(indexs_split)+"=======");
+            System.out.println("======="+JSON.toJSON(fields_spilts)+"=======");
             //  需要设置加密之后的event的body信息内容。对应的是索引的序列号信息
             for (int i = 0; i < indexs_split.length; i++) {
                 // 0,1,3,5,6 对应的是索引号信息
@@ -87,7 +88,7 @@ public class CustomerParameterInterceptor implements Interceptor {
                     newLine += StringUtils.GetMD5Code(fields_spilts[parseInt]);
                 } else {
                     //  其他的字段不用进行加密操作实现管理。
-                    newLine += fields_spilts[parseInt];
+                    newLine += fields_spilts[0];
                 }
                 if (i != indexs_split.length - 1) {
                     //  字段之间使用原来的分隔符进行分割操作

@@ -243,7 +243,55 @@ public class QueryMysql {
         return null;
     }
 
-    public long getRunQueryDelay() {
-        return 1;
+
+    //关闭相关资源
+    void close() {
+        try {
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    int getCurrentIndex() {
+        return currentIndex;
+    }
+
+    void setCurrentIndex(int newValue) {
+        currentIndex = newValue;
+    }
+
+    // 设置查询的延时时间，时间太快的话，会导致堆溢出
+    int getRunQueryDelay() {
+        return runQueryDelay;
+    }
+
+    String getQuery() {
+        return query;
+    }
+
+    String getConnectionURL() {
+        return connectionURL;
+    }
+
+    private boolean isCustomQuerySet() {
+        return (customQuery != null);
+    }
+
+    Context getContext() {
+        return context;
+    }
+
+    public String getConnectionUserName() {
+        return connectionUserName;
+    }
+
+    public String getConnectionPassword() {
+        return connectionPassword;
+    }
+
+    String getDefaultCharsetResultSet() {
+        return defaultCharsetResultSet;
     }
 }

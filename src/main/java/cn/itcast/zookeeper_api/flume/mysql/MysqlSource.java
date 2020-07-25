@@ -26,6 +26,7 @@ public class MysqlSource  extends AbstractSource implements Configurable, Pollab
     /**
      *  主要需要重写的业务逻辑
      *  查询数据库记录写入到channel中
+     *  // 这个方法对应的会一直执行的，一直监控的。
      * */
     @Override
     public Status process() throws EventDeliveryException {
@@ -37,7 +38,7 @@ public class MysqlSource  extends AbstractSource implements Configurable, Pollab
             //存放event头集合
             HashMap<String, String> header = new HashMap<>();
             //如果有返回数据，则将数据封装为event
-            if (!result.isEmpty()) {
+            if (result!=null&&!result.isEmpty()) {
                 List<String> allRows = queryMysql.getAllRows(result);
                 Event event = null;
                 for (String row : allRows) {

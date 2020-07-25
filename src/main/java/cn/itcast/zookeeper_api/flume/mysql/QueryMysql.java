@@ -134,7 +134,7 @@ public class QueryMysql {
             LOG.info(execSql.toString()+ "=====");
             return execSql.toString();
         } else {
-            //  包含where的语句进行操作。这个根本没有使用到的
+            //  包含where的语句进行操作。这个根本没有使用到的。修改之后对应的会报错的。
             int length = execSql.toString().length();
             LOG.info(execSql.toString()+ "=====");
             //  select  * from  student where 1=1

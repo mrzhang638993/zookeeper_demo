@@ -112,20 +112,27 @@ public class QueryMysql {
         //获取当前id
         currentIndex = getStatusDBIndex(startFrom);
         LOG.info(currentIndex + "");
+        //customQuery  等于null的,所以会一直查询select * from  student ,customQuery=select * from  student
         if (customQuery == null) {
             sql = "SELECT " + columnsToSelect + " FROM " + table;
         } else {
+            //  //  select  * from  student where 1=1
             sql = customQuery;
         }
+        LOG.info(sql + "=====");
         StringBuilder execSql = new StringBuilder(sql);
-        //以id作为offset
+        //以id作为offset. 对应的sql=select * from  student
         if (!sql.contains("where")) {
             execSql.append(" where ");
             execSql.append("id").append(">").append(currentIndex);
+            //  最终一直会执行 select * from  student where id >  currentIndex  语句的
+            LOG.info(execSql.toString()+ "=====");
             return execSql.toString();
         } else {
-            //  包含where的语句进行操作
+            //  包含where的语句进行操作。这个根本没有使用到的
             int length = execSql.toString().length();
+            LOG.info(execSql.toString()+ "=====");
+            //  select  * from  student where 1=1
             return execSql.toString().substring(0, length - String.valueOf(currentIndex).length()) + currentIndex;
         }
     }

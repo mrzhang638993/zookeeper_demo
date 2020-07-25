@@ -1,5 +1,6 @@
 package cn.itcast.zookeeper_api.flume.mysql;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.flume.Context;
 import org.apache.flume.conf.ConfigurationException;
 import org.slf4j.Logger;
@@ -63,6 +64,8 @@ public class QueryMysql {
      *  获取上下文环境
      * */
     public QueryMysql(Context context) {
+
+        LOG.info("========"+ JSON.toJSONString(context)+"=============");
         this.context = context;
 
         //有默认值参数：获取flume任务配置文件中的参数，读不到的采用默认值
@@ -74,6 +77,7 @@ public class QueryMysql {
         //无默认值参数：获取flume任务配置文件中的参数
         this.table = context.getString("table");
         this.customQuery = context.getString("custom.query");
+        LOG.info("========"+ JSON.toJSONString(this.customQuery)+"=============");
         connectionURL = context.getString("connection.url");
         connectionUserName = context.getString("connection.user");
         connectionPassword = context.getString("connection.password");
@@ -113,6 +117,7 @@ public class QueryMysql {
         currentIndex = getStatusDBIndex(startFrom);
         LOG.info(currentIndex + "");
         //customQuery  等于null的,所以会一直查询select * from  student ,customQuery=select * from  student
+        LOG.info("========"+ JSON.toJSONString(this.customQuery)+"=============");
         if (customQuery == null) {
             sql = "SELECT " + columnsToSelect + " FROM " + table;
         } else {

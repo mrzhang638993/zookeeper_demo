@@ -9,6 +9,7 @@ etl阶段的3步走：
 3.针对于flume上传的数据，需要进行etl数据分析操作，进行上面的etl阶段的3步走。创建相关的pageviews模型和vists模型。
 
 #  需要注意的是业务输出对象的bean，需要重写tostring方法逻辑实现操作。
+#  mapreduce 对应的是离线分析操作的，spark以及flink对应的是实时分析操作的。
 网站分析的pageviews模型的关键点:
 1.识别单个客户的每一步操作，操作持续的时间
 2.创建不同的sessionid，需要根基时间创建sessionid实现创建操作(业界默认的是30分钟)。
@@ -22,5 +23,11 @@ k2   Text(ip地址，可以是其他的识别单个客户的内容), WebLogBean(
 对应的mapreduce阶段的key以及value的类型如下：
 K1 LongWritable(文本的偏移量),  v1 Text(行文本记录),
 k2 Text(sessionid),    v2 PageViewsBean(自定义的业务输出对象)
+
+
+# 逻辑上这个flume上传操作可以一直进行的。系统埋点数据的。
+# mr操作需要交给定义调度任务执行的，执行mapreduce操作的话，对应的是昨天的日志文件数据的。需要结合oozie执行定时调度操作的。
+
+
 
 

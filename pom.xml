@@ -12,6 +12,13 @@
         <hive.version>2.5.42</hive.version>
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/eu.bitwalker/UserAgentUtils -->
+        <!--UserAgent的开源解析库-->
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+            <version>1.21</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -187,6 +194,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <!--可以排除切面的冲突-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

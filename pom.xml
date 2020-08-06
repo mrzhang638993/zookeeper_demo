@@ -183,6 +183,22 @@
     </dependencies>
     <build>
         <plugins>
+            <!-- 指定maven打包的jar依赖操作实现的-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <!-- 是否添加依赖的jar路径配置 -->
+                        <addClassPath>true</addClassPath>
+                        <!-- 依赖的jar包存放位置，和生成的jar放在同一级目录下 -->
+                        <classpathPrefix>lib/</classpathPrefix>
+                        <!-- 指定入口函数 -->
+                        <mainClass></mainClass>
+                    </archive>
+                </configuration>
+            </plugin>
             <!-- java编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

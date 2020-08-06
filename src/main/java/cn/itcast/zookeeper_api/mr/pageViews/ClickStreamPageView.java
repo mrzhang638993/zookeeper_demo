@@ -210,11 +210,11 @@ public class ClickStreamPageView {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
 
-//		FileInputFormat.setInputPaths(job, new Path(args[0]));
-//		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		FileInputFormat.setInputPaths(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
-		FileInputFormat.setInputPaths(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\output"));
-		FileOutputFormat.setOutputPath(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\pageViews\\output"));
+		//FileInputFormat.setInputPaths(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\output"));
+		//FileOutputFormat.setOutputPath(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\pageViews\\output"));
 
 		job.waitForCompletion(true);
 

@@ -61,8 +61,8 @@ public class WeblogPreProcess {
 
 	public static void main(String[] args) throws Exception {
 
-		//String inPath = args[0];
-		//String outpath =args[1];
+		String inPath = args[0];
+		String outpath =args[1];
 
 		Configuration conf = new Configuration();
 		Job job = Job.getInstance(conf);
@@ -74,10 +74,10 @@ public class WeblogPreProcess {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(NullWritable.class);
 
-//		 FileInputFormat.setInputPaths(job, new Path(args[0]));
-//		 FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		FileInputFormat.setInputPaths(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\input\\access.log.20181101.dat"));
-		FileOutputFormat.setOutputPath(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\output"));
+		 FileInputFormat.setInputPaths(job, new Path(args[0]));
+		 FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		//FileInputFormat.setInputPaths(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\input\\access.log.20181101.dat"));
+		//FileOutputFormat.setOutputPath(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\output"));
         //  设置reduceTask的个数为0,代表的是没有reduce阶段的数据。
 		job.setNumReduceTasks(0);
 

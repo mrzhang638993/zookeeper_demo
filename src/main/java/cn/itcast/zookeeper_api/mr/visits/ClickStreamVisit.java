@@ -116,10 +116,10 @@ public class ClickStreamVisit {
 		job.setOutputValueClass(VisitBean.class);
 		
 		
-//		FileInputFormat.setInputPaths(job, new Path(args[0]));
-//		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		FileInputFormat.setInputPaths(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\pageViews\\output"));
-		FileOutputFormat.setOutputPath(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\visits\\output"));
+		FileInputFormat.setInputPaths(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		//FileInputFormat.setInputPaths(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\pageViews\\output"));
+		//FileOutputFormat.setOutputPath(job, new Path("F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\mr\\visits\\output"));
 		
 		boolean res = job.waitForCompletion(true);
 		System.exit(res?0:1);

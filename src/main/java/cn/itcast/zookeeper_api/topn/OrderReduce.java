@@ -21,7 +21,7 @@ public class OrderReduce extends Reducer<OrderBean, Text, Text, NullWritable> {
         for (Text value : values) {
             context.write(value, NullWritable.get());
             i++;
-            if (i >= 2) {
+            if (i >= 1) {
                 break;
             }
         }

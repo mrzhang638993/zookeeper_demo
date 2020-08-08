@@ -1,4 +1,4 @@
-package cn.itcast.zookeeper_api.stage1.mr_stage1;
+package cn.itcast.zookeeper_api.stage1.mr_stage2;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.hadoop.io.LongWritable;
@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * 这是mapper阶段的业务逻辑处理
  * */
-public class AccessMapper  extends Mapper<LongWritable, Text,Text,AccessLogBean> {
+public class AccessMapper  extends Mapper<LongWritable, Text,Text, AccessLogBean> {
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {

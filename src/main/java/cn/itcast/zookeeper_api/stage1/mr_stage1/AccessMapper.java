@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * 这是mapper阶段的业务逻辑处理
  * */
-public class AccessMapper  extends Mapper<LongWritable, Text,Text,AccessLogBean> {
+public class AccessMapper  extends Mapper<LongWritable, Text,AccessLogBean,Text> {
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -22,6 +22,6 @@ public class AccessMapper  extends Mapper<LongWritable, Text,Text,AccessLogBean>
         accessLogBean.setTime(split[1]);
         accessLogBean.setUrl(split[2]);
         accessLogBean.setCount(1);
-        context.write(new Text(split[0]),accessLogBean);
+        context.write(accessLogBean,value);
     }
 }

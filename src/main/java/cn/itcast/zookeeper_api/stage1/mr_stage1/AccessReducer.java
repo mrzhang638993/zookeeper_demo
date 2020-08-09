@@ -1,6 +1,5 @@
 package cn.itcast.zookeeper_api.stage1.mr_stage1;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -60,7 +59,6 @@ public class AccessReducer extends Reducer<AccessLogBean, Text, AccessLogBean, N
             }
         }
         if (accessLogBean.getCount()==1){
-           // key.setUrl(url);
             accessLogBeanList.add(accessLogBean);
         }
         //  进行key的排序操作

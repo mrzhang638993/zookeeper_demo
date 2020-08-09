@@ -1,4 +1,4 @@
-package cn.itcast.zookeeper_api;
+package cn.itcast.zookeeper_api.zookeeper;
 
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;

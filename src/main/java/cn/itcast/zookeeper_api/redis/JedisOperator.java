@@ -8,6 +8,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * jedis实际的具体的操作类
@@ -62,6 +63,9 @@ public class JedisOperator {
         // 对应的获取所有的key和value的
         Map<String, String> key1 = jedis.hgetAll("key1");
         key1.entrySet().forEach((x)->{System.out.println(x.getKey()+"=="+x.getValue());});
+        //获取所有的key以及所有的value操作逻辑
+        Set<String> key11 = jedis.hkeys("key1");
+        
     }
 
     @After

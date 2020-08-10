@@ -7,7 +7,10 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+<<<<<<< HEAD
 import java.util.List;
+=======
+>>>>>>> c46ee63ab235cf367f349036aac21b52a90824bd
 import java.util.Map;
 import java.util.Set;
 
@@ -81,7 +84,7 @@ public class JedisOperator {
 
     @After
     public void close(){
-        if (jedis!=null){
+        if(jedis!=null){
             jedis.close();
         }
     }

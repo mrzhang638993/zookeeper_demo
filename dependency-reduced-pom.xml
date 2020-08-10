@@ -14,7 +14,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>cn.itcast.zookeeper_api.mr.visits.ClickStreamVisit</mainClass>
+              <mainClass>cn.itcast.zookeeper_api.mr.pageViews.ClickStreamPageView</mainClass>
             </manifest>
           </archive>
         </configuration>

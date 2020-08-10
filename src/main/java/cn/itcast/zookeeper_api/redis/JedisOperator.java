@@ -7,6 +7,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,9 +15,8 @@ import java.util.Set;
  * jedis实际的具体的操作类
  * */
 public class JedisOperator {
-
-    private   JedisPool jedisPool;
-    private   Jedis  jedis;
+    private JedisPool jedisPool;
+    private Jedis jedis;
 
     /**
      *  连接redis
@@ -63,10 +63,21 @@ public class JedisOperator {
         // 对应的获取所有的key和value的
         Map<String, String> key1 = jedis.hgetAll("key1");
         key1.entrySet().forEach((x)->{System.out.println(x.getKey()+"=="+x.getValue());});
-        //获取所有的key以及所有的value操作逻辑
+        //  修改hash的数据结构
+        Long hset = jedis.hset("key1", "field1", "linevalue");
+        System.out.println("修改hash数据结构"+hset);
+        //  获取所有的key
         Set<String> key11 = jedis.hkeys("key1");
-
+        for(String key:key11){
+            System.out.println(key);
+        }
+        //  获取所有的value
+        List<String> key12 = jedis.hvals("key1");
+        key12.stream().forEachOrdered(x->{
+            System.out.println("=====获取所有的数值====="+key12);
+        });
     }
+
 
     @After
     public void close(){

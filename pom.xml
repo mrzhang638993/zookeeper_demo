@@ -12,7 +12,6 @@
         <hive.version>2.5.42</hive.version>
     </properties>
     <dependencies>
-        <!--增加redis的java api的使用-->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>

@@ -187,25 +187,36 @@
         </dependency>
     </dependencies>
     <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>2.0.1.RELEASE</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+            </plugin>
+
             <!-- 指定maven打包的jar依赖操作实现的-->
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <!-- 是否添加依赖的jar路径配置 -->
                             <addClasspath>true</addClasspath>
-                            <!-- 依赖的jar包存放位置，和生成的jar放在同一级目录下 -->
                             <classpathPrefix>lib/</classpathPrefix>
-                            <!-- 指定入口函数 -->
                             <mainClass>cn.itcast.zookeeper_api.mr.pageViews.ClickStreamPageView</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
-            </plugin>
+            </plugin> -->
             <!-- java编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -249,5 +260,23 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.json</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.json</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 </project>

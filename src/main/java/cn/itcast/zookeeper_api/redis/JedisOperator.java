@@ -31,7 +31,7 @@ public class JedisOperator {
         jedisPoolConfig.setMaxWaitMillis(5000);
         //  设置redis连接的最大的客户端数
         jedisPoolConfig.setMaxTotal(50);
-        jedisPool=new JedisPool(jedisPoolConfig,"node03",6379);
+        jedisPool=new JedisPool(jedisPoolConfig,"192.168.1.203",6379);
     }
 
     @Test
@@ -76,6 +76,49 @@ public class JedisOperator {
         key12.stream().forEachOrdered(x->{
             System.out.println("=====获取所有的数值====="+key12);
         });
+    }
+
+    /**
+     * 对于set集合进行操作实现
+     * */
+    @Test
+    public void listOperate(){
+        jedis = jedisPool.getResource();
+        //  list元素会不断的增加的，需要进行关注的。
+        jedis.lpush("listkey","listvalue1","listvalue2","listvalue3");
+        // 获取下标为0,1的.listvalue3,listvalue2
+        List<String> listkey = jedis.lrange("listkey", 0, 1);
+        listkey.forEach(x->{
+            System.out.println(x);
+        });
+        String listkey1 = jedis.rpop("listkey");
+        System.out.println(listkey1+"从右边弹出元素");
+        String listkey2 = jedis.lpop("listkey");
+        System.out.println(listkey2+"从左边弹出元素");
+        //  lpushx，linsert等的操作的。
+    }
+
+    /***
+     * 对set集合进行操作
+     */
+    @Test
+     public void testSet(){
+        jedis=jedisPool.getResource();
+        jedis.sadd("setkey","setvalue1","setvalue2","setvalue3","setvalue4");
+         Set<String> setkey = jedis.smembers("setkey");
+         for (String value:setkey
+              ) {
+             System.out.println(value);
+         }
+         // 移除元素setvalue1
+        Long srem = jedis.srem("setkey1", "setvalue1");
+        jedis.sadd("setkey","setvalue1","setvalue2","setvalue3","setvalue4");
+        Set<String> setkey1 = jedis.smembers("setkey");
+        for (String value:setkey1
+        ) {
+            System.out.println(value);
+        }
+        //  还有其他的操作方式实现的。
     }
 
 

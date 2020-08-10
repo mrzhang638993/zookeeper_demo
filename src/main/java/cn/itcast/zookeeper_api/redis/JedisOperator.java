@@ -65,7 +65,7 @@ public class JedisOperator {
         key1.entrySet().forEach((x)->{System.out.println(x.getKey()+"=="+x.getValue());});
         //获取所有的key以及所有的value操作逻辑
         Set<String> key11 = jedis.hkeys("key1");
-        
+
     }
 
     @After

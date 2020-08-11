@@ -6,7 +6,9 @@ import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisSentinelPool;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +19,7 @@ import java.util.Set;
 public class JedisOperator {
     private JedisPool jedisPool;
     private Jedis jedis;
+    private  JedisSentinelPool jedisSentinelPool;
 
     /**
      *  连接redis
@@ -122,10 +125,37 @@ public class JedisOperator {
     }
 
 
+    /**
+     * 哨兵模式下面的redis代码逻辑
+     * */
+    @Test
+    public  void testSentinel(){
+        //String masterName, Set<String> sentinels.存储的是host以及port的数据
+        HashSet<String> nodes = new HashSet<>();
+        nodes.add("192.168.1.201:26379");
+        nodes.add("192.168.1.202:26379");
+        nodes.add("192.168.1.203:26379");
+        JedisPoolConfig poolConfig=new JedisPoolConfig();
+        //  默认超时时间是2000秒
+        poolConfig.setMinIdle(5);
+        poolConfig.setMaxTotal(30);
+        poolConfig.setMaxWaitMillis(3000);
+        poolConfig.setMaxIdle(10);
+        jedisSentinelPool=new JedisSentinelPool("mymaster",nodes,poolConfig);
+        //  获取jedis连接
+        jedis = jedisSentinelPool.getResource();
+        // 使用哨兵模式加入key进行操作。
+        jedis.set("jediskey","jedisvalue");
+
+    }
+
     @After
     public void close(){
         if(jedis!=null){
             jedis.close();
+        }
+        if (jedisSentinelPool!=null){
+            jedisSentinelPool.close();
         }
     }
 }

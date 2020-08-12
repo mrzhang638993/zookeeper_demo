@@ -12,6 +12,12 @@
         <hive.version>2.5.42</hive.version>
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.glassfish/javax.el -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>3.0.1-b06</version>
+        </dependency>
         <!--增加hbase的Java代码开发-->
         <!-- https://mvnrepository.com/artifact/org.apache.hbase/hbase-client -->
         <dependency>

@@ -3,8 +3,7 @@ package cn.itcast.zookeeper_api.hbase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.filter.BinaryComparator;
-import org.apache.hadoop.hbase.filter.RowFilter;
+import org.apache.hadoop.hbase.filter.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.Before;
@@ -190,8 +189,29 @@ public class HbaseOperate {
      * scan的进一步的过滤操作实现
      * */
     @Test
-    public void familyFilter(){
-       // 对应的实现相关的代码查询操作
+    public void familyFilter() throws IOException {
+        table = connection.getTable(TableName.valueOf("myuser"));
+        Scan scan=new Scan();
+        // 查询比f2列族小的所有的列族的数据
+        //FamilyFilter f2 = new FamilyFilter(CompareOperator.LESS, new SubstringComparator("f2"));
+        //scan.setFilter(f2);
+        //  列过滤器,增加对于name的过滤操作
+        //QualifierFilter name = new QualifierFilter(CompareOperator.EQUAL, new SubstringComparator("name"));
+        //scan.setFilter(name);
+        //  下面是值过滤器,查询列中包含8的进行过滤操作。
+        //ValueFilter valueFilter=new ValueFilter(CompareOperator.EQUAL,new SubstringComparator("8"));
+        //scan.setFilter(valueFilter);
+        // 其他的专用的过滤器进行操作实现
+        //  单列值过滤器：
+        //SingleColumnValueFilter singleColumnValueFilter=new SingleColumnValueFilter("f1".getBytes(),"name".getBytes(),CompareOperator.EQUAL,"刘备".getBytes());
+        //scan.setFilter(singleColumnValueFilter);
+        // 前缀过滤器，查询rowkey对应的前缀以00开头的
+        PrefixFilter prefixFilter=new PrefixFilter(Bytes.toBytes("00"));
+        scan.setFilter(prefixFilter);
+        ResultScanner scanner = table.getScanner(scan);
+        for(Result result:scanner){
+            printResult(result);
+        }
     }
 
     private  void  printResult(Result result){

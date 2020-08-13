@@ -206,6 +206,8 @@ public class HbaseOperate {
         //SingleColumnValueFilter singleColumnValueFilter=new SingleColumnValueFilter("f1".getBytes(),"name".getBytes(),CompareOperator.EQUAL,"刘备".getBytes());
         //scan.setFilter(singleColumnValueFilter);
         // 前缀过滤器，查询rowkey对应的前缀以00开头的
+        // 分页过滤器
+
         PrefixFilter prefixFilter=new PrefixFilter(Bytes.toBytes("00"));
         scan.setFilter(prefixFilter);
         ResultScanner scanner = table.getScanner(scan);

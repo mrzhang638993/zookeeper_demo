@@ -1,1 +1,4 @@
 读取hdfs文件到hbase去
+
+如果需要读取hbase的数据，需要继承TableReducer
+如果需要向hbase中写入数据，需要继承TableReducer。

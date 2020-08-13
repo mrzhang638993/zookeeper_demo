@@ -12,6 +12,7 @@
         <hive.version>2.5.42</hive.version>
     </properties>
     <dependencies>
+        <!--补充maven依赖-->
         <!-- https://mvnrepository.com/artifact/org.glassfish/javax.el -->
         <dependency>
             <groupId>org.glassfish</groupId>

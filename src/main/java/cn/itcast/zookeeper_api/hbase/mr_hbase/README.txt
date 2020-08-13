@@ -1,0 +1,1 @@
+读取hdfs文件到hbase去

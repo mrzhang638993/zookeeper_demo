@@ -5,20 +5,25 @@
   <artifactId>java</artifactId>
   <version>1.0-SNAPSHOT</version>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.xml</include>
+          <include>**/*.properties</include>
+          <include>**/*.json</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*.xml</include>
+          <include>**/*.properties</include>
+          <include>**/*.json</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.0</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>cn.itcast.zookeeper_api.mr.pageViews.ClickStreamPageView</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>

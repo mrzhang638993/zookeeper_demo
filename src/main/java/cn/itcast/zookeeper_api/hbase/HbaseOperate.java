@@ -27,8 +27,8 @@ public class HbaseOperate {
         configuration.set("hbase.zookeeper.quorum", "node01,node02,node03");
         //集群配置↓
         //configuration.set("hbase.zookeeper.quorum", "101.236.39.141,101.236.46.114,101.236.46.113");
-        configuration.set("hbase.master", "node01:60000");
-        //configuration.set("hbase.zookeeper.querum","node01:2181,node02:2181,node03:2181");
+        //configuration.set("hbase.master", "node01:60000");
+        configuration.set("hbase.zookeeper.querum","node01:2181,node02:2181,node03:2181");
         //  获取hbase的连接
         connection = ConnectionFactory.createConnection(configuration);
         //获取管理员对象,创建hbase的数据表

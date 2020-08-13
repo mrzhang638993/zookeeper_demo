@@ -25,7 +25,8 @@ public class HBaseMain  extends Configured implements Tool {
      //  程序的入口类
     public static void main(String[] args) throws Exception {
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.querum","node01:2181,node02:2181,node03:2181");
+        configuration.set("hbase.zookeeper.property.clientPort", "2181");
+        configuration.set("hbase.zookeeper.quorum", "node01,node02,node03");
         int run = ToolRunner.run(configuration, new HBaseMain(), args);
         System.exit(run);
     }

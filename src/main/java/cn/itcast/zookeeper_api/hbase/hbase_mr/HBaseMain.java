@@ -15,6 +15,8 @@ public class HBaseMain  extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         Job hbase = Job.getInstance(super.getConf(), "hbase");
+        //  使用hadoop上传代码操作实现
+        hbase.setJarByClass(HBaseMain.class);
         //  定义mapper类和reducer类的数据
         Scan scan=new Scan();
         TableMapReduceUtil.initTableMapperJob("myuser",scan,HBaseSourceMapper.class, Text.class, Put.class,hbase,false);

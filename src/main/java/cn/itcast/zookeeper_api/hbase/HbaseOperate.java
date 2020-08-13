@@ -266,14 +266,14 @@ public class HbaseOperate {
     }
 
     /**
-     *  多个过滤器综合查询
-     *  需求：查询f1列族，name等于刘备的数据
-     * */
+     * 多个过滤器综合查询
+     * 需求：查询f1列族，name等于刘备的数据
+     */
     @Test
     public void composeFilter() throws IOException {
-        SingleColumnValueFilter singleColumnValueFilter=new SingleColumnValueFilter("f1".getBytes(),"name".getBytes(),CompareOperator.EQUAL,"刘备".getBytes());
+        SingleColumnValueFilter singleColumnValueFilter = new SingleColumnValueFilter("f1".getBytes(), "name".getBytes(), CompareOperator.EQUAL, "刘备".getBytes());
         PrefixFilter prefixFilter = new PrefixFilter("00".getBytes());
-        FilterList filterList = new FilterList(singleColumnValueFilter,prefixFilter);
+        FilterList filterList = new FilterList(singleColumnValueFilter, prefixFilter);
         //filterList.addFilter(singleColumnValueFilter);
         //filterList.addFilter(prefixFilter);
         Scan scan = new Scan();
@@ -283,6 +283,40 @@ public class HbaseOperate {
         for (Result result : scanner) {
             printResult(result);
         }
+    }
+
+
+    /**
+     * 根据rowkey删除数据
+     */
+    @Test
+    public void deleteByRowKey() throws IOException {
+        Delete delete=new Delete("0001".getBytes());
+        table = connection.getTable(TableName.valueOf("myuser"));
+        table.delete(delete);
+    }
+
+    /**
+     * 删除表的操作实现
+     * */
+    @Test
+    public  void deleteTable() throws IOException {
+        Admin admin = connection.getAdmin();
+        TableName tableName=TableName.valueOf("myuser");
+        //  先禁用表
+        admin.disableTable(tableName);
+        //  然后执行删除操作
+        admin.deleteTable(tableName);
+    }
+
+    /**
+     * 更新表的操作实现,更新操作和insert操作是一模一样的。
+     * 如果rowkey不存在的话，执行新增操作。存在的话执行更新操作。
+     * */
+    @Test
+    public  void  updateTable(){
+        //  执行更新表的操作逻辑
+
     }
 
     private void printResult(Result result) {

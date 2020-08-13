@@ -273,9 +273,9 @@ public class HbaseOperate {
     public void composeFilter() throws IOException {
         SingleColumnValueFilter singleColumnValueFilter=new SingleColumnValueFilter("f1".getBytes(),"name".getBytes(),CompareOperator.EQUAL,"刘备".getBytes());
         PrefixFilter prefixFilter = new PrefixFilter("00".getBytes());
-        FilterList filterList = new FilterList();
-        filterList.addFilter(singleColumnValueFilter);
-        filterList.addFilter(prefixFilter);
+        FilterList filterList = new FilterList(singleColumnValueFilter,prefixFilter);
+        //filterList.addFilter(singleColumnValueFilter);
+        //filterList.addFilter(prefixFilter);
         Scan scan = new Scan();
         scan.setFilter(filterList);
         table = connection.getTable(TableName.valueOf("myuser"));

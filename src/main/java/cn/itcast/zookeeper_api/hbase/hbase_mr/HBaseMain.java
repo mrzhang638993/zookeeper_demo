@@ -15,7 +15,7 @@ public class HBaseMain  extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         Job hbase = Job.getInstance(super.getConf(), "hbase");
-        //  使用hadoop上传代码操作实现
+        //  使用hadoop上传代码操作实现，打包上传到hadoop的话，必须设置这个选项的。
         hbase.setJarByClass(HBaseMain.class);
         //  定义mapper类和reducer类的数据
         Scan scan=new Scan();

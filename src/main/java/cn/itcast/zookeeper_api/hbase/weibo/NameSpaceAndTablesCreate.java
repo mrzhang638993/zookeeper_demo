@@ -3,9 +3,11 @@ package cn.itcast.zookeeper_api.hbase.weibo;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.filter.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NameSpaceAndTablesCreate {
@@ -19,7 +21,8 @@ public class NameSpaceAndTablesCreate {
         //nameSpaceAndTablesCreate.createRelationTable();
         //nameSpaceAndTablesCreate.createTableReceiveEmails();
 
-        nameSpaceAndTablesCreate.publishWeiboContent("1","今天天气还不错");
+        nameSpaceAndTablesCreate.publishWeiboContent("M","今天天气还不错MMM");
+        //nameSpaceAndTablesCreate.addUserAttention("1","2","3","M");
     }
 
     /**
@@ -159,7 +162,73 @@ public class NameSpaceAndTablesCreate {
         table1.close();
         table.close();
         connection.close();
+    }
 
+    /**
+     * 添加用户关注
+     * userId  用户id
+     * attentionId ：被关注的用户id
+     * A关注了用户B,C,D,即A用户是B,C,D的粉丝
+     * 可变参数的使用
+     * 步骤一：需要在weibo:relations记录关注关系。A作为rowkey的，B,C,D作为列值保存到attends中的
+     * 同时B,C,D多了一个粉丝的，需要与B,C,D作为rowkey，A作为列名和列值保存到fans中的
+     * 步骤二：需要在weibo:receive_content_email中增加关注的微博记录。增加如下的记录。A的用户id作为rowkey，B,C,D作为列名称，同时对应的微博id作为列值
+     *  问题：知道了B,C,D的用户id，怎么查询到对应的微博的rowkey的，可以实现前缀过滤器查询的。
+     * */
+    public void addUserAttention(String userId,String ...attentionIds) throws IOException {
+        if (attentionIds.length==0){
+            return ;
+        }else {
+            Connection connection = initConnection();
+            TableName tableName = TableName.valueOf("weibo:relations");
+            Table table = connection.getTable(tableName);
+            List<Put> puts=new ArrayList<>();
+            TableName content = TableName.valueOf("weibo:content");
+            Table table1 = connection.getTable(content);
+            FilterList filters=new FilterList();
+            Scan scan=new Scan();
+            for (String attenId:attentionIds) {
+                //  A关注了B,C,D
+                // 对应的是A的代码的
+                 Put put=new Put(userId.getBytes());
+                 put.addColumn("attends".getBytes(),attenId.getBytes(),attenId.getBytes());
+                 puts.add(put);
+                 //  对应的下面是A作为分析的内容的
+                Put put1=new Put(attenId.getBytes());
+                put1.addColumn("fans".getBytes(),userId.getBytes(),userId.getBytes());
+                puts.add(put1);
+                // 前缀匹配操作，匹配rowkey查询。
+                RowFilter rowFilter = new RowFilter(CompareOperator.EQUAL, new SubstringComparator(attenId + "_"));
+                //PrefixFilter prefixFilter = new PrefixFilter(attenId.getBytes());
+                filters.addFilter(rowFilter);
+            }
+            table.put(puts);
+            // 下面执行的是weibo:content 的帮助信息
+            scan.setFilter(filters);
+            ResultScanner scanner = table1.getScanner(scan);
+            if (scanner==null){
+                return ;
+            }else {
+                TableName email = TableName.valueOf("weibo:receive_content_email");
+                Table table2 = connection.getTable(email);
+                List<Put>puts1=new ArrayList<>();
+                for (Result result:scanner) {
+                    //  获取rowkey
+                    byte[] row = result.getRow();
+                    String rowkey = Bytes.toString(row);
+                    Put put=new Put(userId.getBytes());
+                    String[] splitValue= rowkey.split("_");
+                    //  还需要获取到时间戳信息。这个很关键的，涉及到版本的上限和下限的。
+                    put.addColumn("info".getBytes(),splitValue[0].getBytes(),Long.valueOf(splitValue[1]),rowkey.getBytes());
+                    puts1.add(put);
+                }
+                table2.put(puts1);
+                table2.close();
+            }
+            table1.close();
+            table.close();
+            connection.close();
+        }
     }
     /**
      *  创建命名空间

@@ -2,22 +2,24 @@ package cn.itcast.zookeeper_api.hbase.weibo;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
-import org.apache.hadoop.hbase.client.Admin;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.List;
 
 public class NameSpaceAndTablesCreate {
 
     public static void main(String[] args) throws IOException {
         NameSpaceAndTablesCreate nameSpaceAndTablesCreate=new NameSpaceAndTablesCreate();
         // 初始化命名空间
-        nameSpaceAndTablesCreate.initNamespace();
+        //nameSpaceAndTablesCreate.initNamespace();
         //  创建三张hbase表
-        nameSpaceAndTablesCreate.createWeiboContent();
-        nameSpaceAndTablesCreate.createRelationTable();
-        nameSpaceAndTablesCreate.createTableReceiveEmails();
+        //nameSpaceAndTablesCreate.createWeiboContent();
+        //nameSpaceAndTablesCreate.createRelationTable();
+        //nameSpaceAndTablesCreate.createTableReceiveEmails();
+
+        nameSpaceAndTablesCreate.publishWeiboContent("1","今天天气还不错");
     }
 
     /**
@@ -104,8 +106,9 @@ public class NameSpaceAndTablesCreate {
             HTableDescriptor hTableDescriptor=new HTableDescriptor(tableName);
             //  创建列族信息
             HColumnDescriptor info=new HColumnDescriptor("info");
-            info.setMinVersions(1);
-            info.setMaxVersions(1);
+            //  可以保存1000个记录的。一个cell中可以查看一个用户的1000条微博记录的
+            info.setMinVersions(1000);
+            info.setMaxVersions(1000);
             info.setBlockCacheEnabled(true);
             //  设置2m的大小
             hTableDescriptor.addFamily(info);
@@ -113,6 +116,50 @@ public class NameSpaceAndTablesCreate {
         }
         admin.close();
         connection.close();
+    }
+
+    /**
+     * 用户id
+     * 发布微博的内容
+     * */
+    public void publishWeiboContent(String userid,String content) throws IOException {
+        // 步骤一：将发布的微博的内容保存到content中
+        Connection connection = initConnection();
+        TableName tableName = TableName.valueOf("weibo:content");
+        Table table = connection.getTable(tableName);
+        // 解析内容，封装put操作。获取微博的id
+        Put put=new Put((userid+"_"+System.currentTimeMillis()).getBytes());
+        //  解析微博的内容
+        put.addColumn("info".getBytes(),"content".getBytes(),System.currentTimeMillis(),content.getBytes());
+        table.put(put);
+        //  步骤二： 查看用户id对应的所有的粉丝信息，需要查询relation关系
+        TableName relation = TableName.valueOf("weibo:relations");
+        Table relate = connection.getTable(relation);
+        Get get=new Get(userid.getBytes());
+        //  只查询fans的列信息
+        get.addFamily("fans".getBytes());
+        Result result = relate.get(get);
+        List<Cell> cells = result.listCells();
+        TableName email = TableName.valueOf("weibo:receive_content_email");
+        Table table1 = connection.getTable(email);
+        if (cells==null||cells.size()<0){
+            return ;
+        }
+        //给weibo:receive_content_email 增加记录  其中rowkey对应的是粉丝的id的
+        for(Cell cell:cells){
+                //微博的粉丝。获取的是粉丝的uid
+                String uid = Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength());
+                // 粉丝的id作为rowkey
+                Put  put1=new Put(uid.getBytes());
+                //  对应的是userid作为key，微博的id作为value的，执行的是更新的操作的,内部保存了.多版本的操作必须要时间戳的。
+                put1.addColumn("info".getBytes(),userid.getBytes(),System.currentTimeMillis(),(userid+"_"+System.currentTimeMillis()).getBytes());
+                // 还需要对应的的修改微博的内容的.
+                table1.put(put1);
+        }
+        table1.close();
+        table.close();
+        connection.close();
+
     }
     /**
      *  创建命名空间

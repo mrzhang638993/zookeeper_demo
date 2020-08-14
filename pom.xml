@@ -10,6 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hive.version>2.5.42</hive.version>
+        <lib.path>F:/software/lib</lib.path>
     </properties>
     <dependencies>
         <!--实现hbase和mapreduce的集成-->
@@ -91,7 +92,7 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/hive_metastore.jar</systemPath>
+            <systemPath>${lib.path}/hive_metastore.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -99,7 +100,7 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/hive_service.jar</systemPath>
+            <systemPath>${lib.path}/hive_service.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -116,7 +117,7 @@
             <artifactId>ImpalaJDBC41</artifactId>
             <version>2.5.41</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/ImpalaJDBC41.jar</systemPath>
+            <systemPath>${lib.path}/ImpalaJDBC41.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
@@ -124,7 +125,7 @@
             <version>0.9.0</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/libfb303-0.9.0.jar</systemPath>
+            <systemPath>${lib.path}/libfb303-0.9.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
@@ -132,7 +133,7 @@
             <version>0.9.0</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/libthrift-0.9.0.jar</systemPath>
+            <systemPath>${lib.path}/libthrift-0.9.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -140,7 +141,7 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/ql.jar</systemPath>
+            <systemPath>${lib.path}/ql.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -148,7 +149,7 @@
             <version>1.5.11</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/slf4j-api-1.5.11.jar</systemPath>
+            <systemPath>${lib.path}/slf4j-api-1.5.11.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -156,7 +157,7 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/ql.jar</systemPath>
+            <systemPath>${lib.path}/ql.jar</systemPath>
         </dependency>
         <!--增加对于hive的依赖处理-->
         <dependency>

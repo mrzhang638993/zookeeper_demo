@@ -5,6 +5,7 @@ import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.*;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hive.ql.plan.HashTableDummyDesc;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class HbaseOperate {
         //集群配置↓
         //configuration.set("hbase.zookeeper.quorum", "101.236.39.141,101.236.46.114,101.236.46.113");
         //configuration.set("hbase.master", "node01:60000");
-        configuration.set("hbase.zookeeper.querum","node01:2181,node02:2181,node03:2181");
+        //configuration.set("hbase.zookeeper.querum","node01:2181,node02:2181,node03:2181");
         //  获取hbase的连接
         connection = ConnectionFactory.createConnection(configuration);
         //获取管理员对象,创建hbase的数据表
@@ -317,6 +318,31 @@ public class HbaseOperate {
     public  void  updateTable(){
         //  执行更新表的操作逻辑
 
+    }
+
+
+    /**
+     * 使用Java api实现预分区操作
+     * 预分区的操作可以实现如下的优点
+     * * 增加数据读写效率
+     * * 负载均衡，防止数据倾斜
+     * * 方便集群容灾调度region
+     * * 优化Map数量
+     * hbase的表没有做预分区操作的话，文件大小达到了10g的时候会执行split操作的，对应的一个region
+     * 会变化为2个的，但是还是在一个节点上的。实际的hbase的使用过程中，还是需要使用到预分区操作的。
+     * 预分区的操作效果参见前面的预分区的优点的。
+     * */
+    @Test
+    public void regionSplit() throws IOException {
+        Admin admin = connection.getAdmin();
+        byte[][] splitkeys={{'1','2','3','4','5'},{'a','b','c','d','e'}};
+        HTableDescriptor tableDescriptor=new HTableDescriptor(TableName.valueOf("staff3"));
+        HColumnDescriptor f1=new HColumnDescriptor("f1");
+        HColumnDescriptor f2=new HColumnDescriptor("f2");
+        tableDescriptor.addFamily(f1);
+        tableDescriptor.addFamily(f2);
+        admin.createTable(tableDescriptor,splitkeys);
+        // 分区间隔 12345，abcde
     }
 
     private void printResult(Result result) {

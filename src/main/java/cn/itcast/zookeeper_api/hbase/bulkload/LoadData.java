@@ -21,7 +21,6 @@ public class LoadData {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.property.clientPort", "2181");
         configuration.set("hbase.zookeeper.quorum", "node01,node02,node03");
-
         Connection connection =  ConnectionFactory.createConnection(configuration);
         Admin admin = connection.getAdmin();
         Table table = connection.getTable(TableName.valueOf("myuser2"));

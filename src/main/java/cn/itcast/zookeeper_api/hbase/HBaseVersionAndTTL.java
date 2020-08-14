@@ -1,4 +1,4 @@
-package cn.itcast.zookeeper_api.hbase.weibo;
+package cn.itcast.zookeeper_api.hbase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;

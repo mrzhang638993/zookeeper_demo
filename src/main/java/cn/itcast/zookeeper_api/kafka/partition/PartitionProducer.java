@@ -10,6 +10,7 @@ import java.util.Properties;
  * 1.如果指定了分区号的话，数据落入到指定的分区中的；
  * 2.没有指定分区号码，出现了数据的key的话，通过key的hshcode决定数据落入到那个partition中的。
  * 3.没有分区号，也没有指定数据的key，根据轮询的机制来确定数据对应的partition的。
+ * 4.自定义分区策略，不自定义分区规则的话，数据使用默认的DefaultPartitioner的轮询策略的.使用自定义分区策略的
  * */
 public class PartitionProducer {
 

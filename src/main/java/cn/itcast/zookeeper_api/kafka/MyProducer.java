@@ -22,7 +22,7 @@ public class MyProducer {
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         KafkaProducer kafkaProducer = new KafkaProducer<>(props);
         for (int i=0;i<100;i++){
-            ProducerRecord<String ,String > producerRecord=new ProducerRecord("test","messageabc"+i);
+            ProducerRecord<String ,String > producerRecord=new ProducerRecord("mypartitioner","messageabcde"+i);
             kafkaProducer.send(producerRecord);
         }
         kafkaProducer.close();

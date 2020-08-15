@@ -1,5 +1,6 @@
 package cn.itcast.zookeeper_api.hbase.weibo;
 
+import com.google.inject.internal.cglib.core.$DuplicatesPredicate;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
@@ -22,8 +23,11 @@ public class NameSpaceAndTablesCreate {
         //nameSpaceAndTablesCreate.createTableReceiveEmails();
 
         //nameSpaceAndTablesCreate.publishWeiboContent("2","今天天气还不错222");
+        //nameSpaceAndTablesCreate.publishWeiboContent("3","今天天气还不错333");
+        //nameSpaceAndTablesCreate.publishWeiboContent("M","今天天气还不错MMM");
         //nameSpaceAndTablesCreate.addUserAttention("1","2","3","M");
         nameSpaceAndTablesCreate.cancelConcern("1","2");
+        nameSpaceAndTablesCreate.getContent("1");
     }
 
     /**
@@ -132,7 +136,8 @@ public class NameSpaceAndTablesCreate {
         TableName tableName = TableName.valueOf("weibo:content");
         Table table = connection.getTable(tableName);
         // 解析内容，封装put操作。获取微博的id
-        Put put=new Put((userid+"_"+System.currentTimeMillis()).getBytes());
+        byte[] bytes = (userid + "_" + System.currentTimeMillis()).getBytes();
+        Put put=new Put(bytes);
         //  解析微博的内容
         put.addColumn("info".getBytes(),"content".getBytes(),System.currentTimeMillis(),content.getBytes());
         table.put(put);
@@ -156,7 +161,7 @@ public class NameSpaceAndTablesCreate {
                 // 粉丝的id作为rowkey
                 Put  put1=new Put(uid.getBytes());
                 //  对应的是userid作为key，微博的id作为value的，执行的是更新的操作的,内部保存了.多版本的操作必须要时间戳的。
-                put1.addColumn("info".getBytes(),userid.getBytes(),System.currentTimeMillis(),(userid+"_"+System.currentTimeMillis()).getBytes());
+                put1.addColumn("info".getBytes(),userid.getBytes(),System.currentTimeMillis(),bytes);
                 // 还需要对应的的修改微博的内容的.
                 table1.put(put1);
         }
@@ -268,6 +273,44 @@ public class NameSpaceAndTablesCreate {
         table.close();
         connection.close();
     }
+
+
+    /**
+     * 获取关注人的微博内容
+     * */
+    public  void  getContent(String userId) throws IOException {
+        Connection connection = initConnection();
+        TableName email = TableName.valueOf("weibo:receive_content_email");
+        Table table2 = connection.getTable(email);
+        Scan scan=new Scan(userId.getBytes());
+        //  获取最近的5个微博记录
+        scan.setMaxVersions(5);
+        ResultScanner scanner = table2.getScanner(scan);
+        //  疯转所有的博文的rowkey内容的
+        List<Get> gets=new ArrayList<>();
+        for (Result result : scanner) {
+            Cell[] cells = result.rawCells();
+            for (Cell cell : cells) {
+                //  需要获取到对应的博文的rowkey的信息的
+                Get  get=new Get(CellUtil.cloneValue(cell));
+                get.addColumn("info".getBytes(),"content".getBytes());
+                get.setMaxVersions(5);
+                gets.add(get);
+            }
+        }
+        TableName tableName = TableName.valueOf("weibo:content");
+        Table table = connection.getTable(tableName);
+        Result[] results = table.get(gets);
+        for (Result result : results) {
+            byte[] value = result.getValue("info".getBytes(), "content".getBytes());
+            System.out.println(Bytes.toString(value));
+        }
+        table.close();
+        table2.close();
+        connection.close();
+    }
+
+ 
     /**
      *  创建命名空间
      * */

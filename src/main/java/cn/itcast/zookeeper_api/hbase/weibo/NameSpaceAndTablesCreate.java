@@ -21,8 +21,9 @@ public class NameSpaceAndTablesCreate {
         //nameSpaceAndTablesCreate.createRelationTable();
         //nameSpaceAndTablesCreate.createTableReceiveEmails();
 
-        nameSpaceAndTablesCreate.publishWeiboContent("M","今天天气还不错MMM");
+        //nameSpaceAndTablesCreate.publishWeiboContent("2","今天天气还不错222");
         //nameSpaceAndTablesCreate.addUserAttention("1","2","3","M");
+        nameSpaceAndTablesCreate.cancelConcern("1","2");
     }
 
     /**
@@ -229,6 +230,43 @@ public class NameSpaceAndTablesCreate {
             table.close();
             connection.close();
         }
+    }
+
+
+    /**
+     * 用户取消关注的代码
+     * 步骤一：需要在weibo:relations删除相关的关注关系。包括attend的代码以及fans的代码。
+     * 步骤二：需要删除weibo:receive_content_email中的关注的微博的记录。
+     * */
+    public void cancelConcern(String userId,String ...attend) throws IOException {
+        Connection connection = initConnection();
+        TableName tableName = TableName.valueOf("weibo:relations");
+        Table table = connection.getTable(tableName);
+        TableName email = TableName.valueOf("weibo:receive_content_email");
+        Table table2 = connection.getTable(email);
+        if (attend.length<=0){
+            return ;
+        }
+        //删除关注的对象的
+        List<Delete> deletes=new ArrayList<>();
+        List<Delete> deletes1=new ArrayList<>();
+        for (String s : attend) {
+            Delete delete=new Delete(userId.getBytes());
+            delete.addColumn("attends".getBytes(),s.getBytes());
+            deletes.add(delete);
+            // 删除粉丝对象
+            Delete delete1=new Delete(s.getBytes());
+            delete1.addColumn("fans".getBytes(),userId.getBytes());
+            deletes.add(delete1);
+            Delete delete2=new Delete(userId.getBytes());
+            delete2.addColumn("info".getBytes(),s.getBytes());
+            deletes1.add(delete2);
+        }
+        table.delete(deletes);
+        table2.delete(deletes1);
+        table2.close();
+        table.close();
+        connection.close();
     }
     /**
      *  创建命名空间

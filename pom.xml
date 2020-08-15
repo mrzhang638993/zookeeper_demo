@@ -13,6 +13,17 @@
         <lib.path>F:/software/lib</lib.path>
     </properties>
     <dependencies>
+        <!--增加kafka的客户端依赖-->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version> 0.10.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <version>0.10.0.0</version>
+        </dependency>
         <!--实现hbase和mapreduce的集成-->
         <!-- https://mvnrepository.com/artifact/org.apache.hbase/hbase-mapreduce -->
         <dependency>

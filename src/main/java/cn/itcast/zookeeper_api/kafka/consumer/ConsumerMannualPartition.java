@@ -5,11 +5,12 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * 消费topic的指定分区的数据
- * */
+ */
 public class ConsumerMannualPartition {
 
     public static void main(String[] args) {
@@ -28,12 +29,12 @@ public class ConsumerMannualPartition {
         //Collection<TopicPartition> partitions
         // String topic, int partition
         // 订阅topic中的指定分区的数据
-        consumer.assign(Arrays.asList(new TopicPartition("mypartitioner",0),new TopicPartition("mypartitioner",1)));
+        consumer.assign(Arrays.asList(new TopicPartition("mypartitioner", 0), new TopicPartition("mypartitioner", 1)));
         while (true) {
             //  主动拉取数据,1000毫秒的超时时间
             ConsumerRecords<String, String> records = consumer.poll(1000);
             for (ConsumerRecord<String, String> record : records) {
-                System.out.println("数据值为===="+record.value()+"=====offset====="+record.offset());
+                System.out.println("数据值为====" + record.value() + "=====offset=====" + record.offset());
             }
             // 手动提交确认offset
             consumer.commitSync();

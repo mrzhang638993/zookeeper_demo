@@ -3,22 +3,20 @@ package cn.itcast.zookeeper_api.es;
 public class Person {
 
 
-    private  Integer id;
+    private Integer id;
 
-    private  String  name;
+    private String name;
 
-    private  Integer age;
+    private Integer age;
 
-    private  Integer sex;
+    private Integer sex;
+    private String address;
+    private String phone;
+    private String email;
+    private String say;
 
-    public Person( ) {
+    public Person() {
     }
-
-    private  String address;
-
-    private  String phone;
-
-    private  String email ;
 
     public Person(Integer id, String name, Integer age, Integer sex, String address, String phone, String email, String say) {
         this.id = id;
@@ -30,8 +28,6 @@ public class Person {
         this.email = email;
         this.say = say;
     }
-
-    private  String say;
 
     public Integer getId() {
         return id;

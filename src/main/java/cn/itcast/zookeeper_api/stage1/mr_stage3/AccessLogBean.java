@@ -1,7 +1,5 @@
 package cn.itcast.zookeeper_api.stage1.mr_stage3;
 
-import cn.itcast.zookeeper_api.stage1.mr_stage3.topN.VistsUrlBean;
-import com.google.common.base.Objects;
 import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
@@ -9,6 +7,14 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public class AccessLogBean implements WritableComparable<AccessLogBean> {
+
+    private String ip;
+    private String time;
+    private String url;
+    private Integer count;
+    private String user;
+    private Integer oper;
+    private String time1;
 
     public String getIp() {
         return ip;
@@ -34,60 +40,52 @@ public class AccessLogBean implements WritableComparable<AccessLogBean> {
         this.url = url;
     }
 
-    private  String ip;
-    private  String  time;
-    private  String  url;
-    private  Integer count;
-    private  String user;
-    private  Integer oper;
-    private  String time1;
-
     /**
      * 设置排序规则和业务代码实现逻辑.根据ip地址实现排序规则
-     * */
+     */
     @Override
     public int compareTo(AccessLogBean o) {
         //  根据ip的升序，ip一样的话，根据url进行升序排列
-        int result= this.getIp().compareTo(o.getIp());
-        if (result==0){
+        int result = this.getIp().compareTo(o.getIp());
+        if (result == 0) {
             return this.getUrl().compareTo(o.getUrl());
-        }else {
-            return  result;
+        } else {
+            return result;
         }
     }
 
     @Override
     public void write(DataOutput out) throws IOException {
-      out.writeUTF(this.ip);
-      out.writeUTF(this.time);
-      out.writeUTF(this.url);
-      out.writeInt(this.count);
-      out.writeUTF(this.user);
-      out.writeInt(this.oper);
-      out.writeUTF(this.time1);
+        out.writeUTF(this.ip);
+        out.writeUTF(this.time);
+        out.writeUTF(this.url);
+        out.writeInt(this.count);
+        out.writeUTF(this.user);
+        out.writeInt(this.oper);
+        out.writeUTF(this.time1);
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
-      this.ip=in.readUTF();
-      this.time=in.readUTF();
-      this.url=in.readUTF();
-      this.count=in.readInt();
-      this.user=in.readUTF();
-      this.oper=in.readInt();
-      this.time1=in.readUTF();
+        this.ip = in.readUTF();
+        this.time = in.readUTF();
+        this.url = in.readUTF();
+        this.count = in.readInt();
+        this.user = in.readUTF();
+        this.oper = in.readInt();
+        this.time1 = in.readUTF();
     }
 
     @Override
     public String toString() {
         return
-                 ip + '\t' +
-                 time + '\t' +
-                 url + '\t'
-                +count+'\t'
-                +user+"\t"
-                +oper+"\t"
-                +time1;
+                ip + '\t' +
+                        time + '\t' +
+                        url + '\t'
+                        + count + '\t'
+                        + user + "\t"
+                        + oper + "\t"
+                        + time1;
     }
 
     public Integer getCount() {

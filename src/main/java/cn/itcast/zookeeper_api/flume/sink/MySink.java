@@ -5,10 +5,11 @@ import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 public class MySink extends AbstractSink implements Configurable {
-    private Context context ;
+    private Context context;
     private String filePath = "";
     private String fileName = "";
     private File fileDir;
@@ -21,13 +22,14 @@ public class MySink extends AbstractSink implements Configurable {
             filePath = context.getString("filePath");
             fileName = context.getString("fileName");
             fileDir = new File(filePath);
-            if(!fileDir.exists()){
+            if (!fileDir.exists()) {
                 fileDir.mkdirs();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     //这个方法会被反复调用
     @Override
     public Status process() throws EventDeliveryException {
@@ -35,22 +37,22 @@ public class MySink extends AbstractSink implements Configurable {
         Channel channel = this.getChannel();
         Transaction transaction = channel.getTransaction();
         transaction.begin();
-        while(true){
+        while (true) {
             event = channel.take();
-            if(null != event){
+            if (null != event) {
                 break;
             }
         }
         byte[] body = event.getBody();
         String line = new String(body);
         try {
-            FileUtils.write(new File(filePath+File.separator+fileName),line,true);
+            FileUtils.write(new File(filePath + File.separator + fileName), line, true);
             transaction.commit();
         } catch (IOException e) {
             transaction.rollback();
             e.printStackTrace();
             return Status.BACKOFF;
-        }finally {
+        } finally {
             transaction.close();
         }
         return Status.READY;

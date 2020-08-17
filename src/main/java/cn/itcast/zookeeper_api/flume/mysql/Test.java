@@ -1,6 +1,5 @@
 package cn.itcast.zookeeper_api.flume.mysql;
 
-import org.apache.flume.Context;
 import org.apache.flume.EventDeliveryException;
 
 public class Test {

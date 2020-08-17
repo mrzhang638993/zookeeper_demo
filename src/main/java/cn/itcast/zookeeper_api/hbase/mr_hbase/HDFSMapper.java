@@ -1,7 +1,6 @@
 package cn.itcast.zookeeper_api.hbase.mr_hbase;
 
 
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -15,11 +14,11 @@ import java.io.IOException;
  * VALUEIN, v1  Text
  * KEYOUT, k2  Text
  * VALUEOUT, v2  NullWritable
- * */
-public class HDFSMapper extends Mapper<LongWritable, Text,Text, NullWritable> {
+ */
+public class HDFSMapper extends Mapper<LongWritable, Text, Text, NullWritable> {
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-        context.write(value,NullWritable.get());
+        context.write(value, NullWritable.get());
     }
 }

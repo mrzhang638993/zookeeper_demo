@@ -6,24 +6,25 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TopNBean  implements WritableComparable<TopNBean> {
-    private   String url;
-    private   Integer count;
+public class TopNBean implements WritableComparable<TopNBean> {
+    private String url;
+    private Integer count;
+
     @Override
     public int compareTo(TopNBean o) {
-        return o.getCount()-this.count;
+        return o.getCount() - this.count;
     }
 
     @Override
     public void write(DataOutput out) throws IOException {
-       out.writeUTF(this.url);
+        out.writeUTF(this.url);
         out.writeInt(this.count);
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
-       this.url=in.readUTF();
-       this.count=in.readInt();
+        this.url = in.readUTF();
+        this.count = in.readInt();
     }
 
     public String getUrl() {
@@ -45,7 +46,7 @@ public class TopNBean  implements WritableComparable<TopNBean> {
     @Override
     public String toString() {
         return
-                 url + '\001' +
-                 count ;
+                url + '\001' +
+                        count;
     }
 }

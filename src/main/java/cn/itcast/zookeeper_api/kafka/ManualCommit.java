@@ -11,12 +11,12 @@ import java.util.Properties;
 
 /**
  * 手动提交消息
- * */
+ */
 public class ManualCommit {
 
 
     public static void main(String[] args) {
-        Properties props=new Properties();
+        Properties props = new Properties();
         props.put("bootstrap.servers", "node01:9092,node02:9092:node03:9092");
         props.put("group.id", "test");
         // 手动提交
@@ -26,7 +26,7 @@ public class ManualCommit {
         //指定key和value的反序列化操作。
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        KafkaConsumer<String,String> consumer=new KafkaConsumer<String, String>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
         //  指定消费topic的中的数据
         consumer.subscribe(Arrays.asList("test"));
         final int minBatchSize = 200;

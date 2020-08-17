@@ -18,7 +18,7 @@ public class ConsumerPartition {
      * 消费每一个分区里面的数据，然后一个个的分区进行提交的。
      * 这样的话安全性更加的高的，推荐使用这种方式提交的。
      * 减少数据丢失的可能性的。
-     * */
+     */
     public static void main(String[] args) {
         Properties props = new Properties();
         props.put("bootstrap.servers", "node01:9092,node02:9092:node03:9092");
@@ -43,13 +43,13 @@ public class ConsumerPartition {
                 //  获取分区里面的所有的数据
                 List<ConsumerRecord<String, String>> records1 = records.records(partition);
                 for (ConsumerRecord<String, String> record : records1) {
-                    System.out.println(record.value()+"====="+record.offset());
+                    System.out.println(record.value() + "=====" + record.offset());
                 }
                 // 分区里面的数据处理完成了
                 // 获取分区最后一条记录的offset的。
                 long offset = records1.get(records1.size() - 1).offset();
                 // 提交offset,并且给offset加上1。表示下一次从没有消费的那一条数据开始消费的。
-                consumer.commitSync(Collections.singletonMap(partition,new OffsetAndMetadata(offset+1)));
+                consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(offset + 1)));
             }
         }
     }

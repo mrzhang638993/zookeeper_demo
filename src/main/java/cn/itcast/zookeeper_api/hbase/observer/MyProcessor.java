@@ -16,9 +16,12 @@ import java.util.Optional;
 
 public class MyProcessor implements RegionObserver, RegionCoprocessor {
 
+    private static final String FAMAILLY_NAME = "info";
+    private static final String QUALIFIER_NAME = "name";
     static Connection connection = null;
     static Table table = null;
-    static{
+
+    static {
         Configuration conf = HBaseConfiguration.create();
         conf.set("hbase.zookeeper.property.clientPort", "2181");
         conf.set("hbase.zookeeper.quorum", "node01,node02,node03");
@@ -29,27 +32,31 @@ public class MyProcessor implements RegionObserver, RegionCoprocessor {
             e.printStackTrace();
         }
     }
+
     private RegionCoprocessorEnvironment env = null;
-    private static final String FAMAILLY_NAME = "info";
-    private static final String QUALIFIER_NAME = "name";
+
     //2.0加入该方法，否则无法生效
     @Override
     public Optional<RegionObserver> getRegionObserver() {
         // Extremely important to be sure that the coprocessor is invoked as a RegionObserver
         return Optional.of(this);
     }
+
     @Override
     public void start(CoprocessorEnvironment e) throws IOException {
         env = (RegionCoprocessorEnvironment) e;
     }
+
     @Override
     public void stop(CoprocessorEnvironment e) throws IOException {
         // nothing to do here
     }
+
     /**
      * 覆写prePut方法，在我们数据插入之前进行拦截，
+     *
      * @param e
-     * @param put  put对象里面封装了我们需要插入到目标表的数据
+     * @param put        put对象里面封装了我们需要插入到目标表的数据
      * @param edit
      * @param durability
      * @throws IOException
@@ -74,11 +81,11 @@ public class MyProcessor implements RegionObserver, RegionCoprocessor {
             String nameValue = Bytes.toString(CellUtil.cloneValue(cell2));
             //创建put对象，将数据插入到proc2表里面去
             Put put2 = new Put(rowkey.getBytes());
-            put2.addColumn(Bytes.toBytes(FAMAILLY_NAME), Bytes.toBytes(QUALIFIER_NAME),  nameValue.getBytes());
+            put2.addColumn(Bytes.toBytes(FAMAILLY_NAME), Bytes.toBytes(QUALIFIER_NAME), nameValue.getBytes());
             table.put(put2);
             table.close();
         } catch (Exception e1) {
-            return ;
+            return;
         }
     }
 }

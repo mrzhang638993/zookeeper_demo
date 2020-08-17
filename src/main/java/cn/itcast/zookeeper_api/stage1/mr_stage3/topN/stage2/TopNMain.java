@@ -1,7 +1,6 @@
 package cn.itcast.zookeeper_api.stage1.mr_stage3.topN.stage2;
 
 
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -15,9 +14,14 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class TopNMain extends Configured implements Tool {
 
+    public static void main(String[] args) throws Exception {
+        int run = ToolRunner.run(new Configuration(), new TopNMain(), args);
+        System.exit(run);
+    }
+
     @Override
     public int run(String[] args) throws Exception {
-       // 编写主要的业务逻辑
+        // 编写主要的业务逻辑
         Job orderJob = Job.getInstance(super.getConf(), "accessJob");
         orderJob.setJarByClass(TopNMain.class);
 
@@ -28,7 +32,7 @@ public class TopNMain extends Configured implements Tool {
         orderJob.setMapperClass(TopNMapper.class);
         orderJob.setMapOutputKeyClass(TopNBean.class);
         orderJob.setMapOutputValueClass(Text.class);
-       //orderJob.setPartitionerClass(TopNPartition.class);
+        //orderJob.setPartitionerClass(TopNPartition.class);
         // 设置分区个数的话,对应的输出结果会指定n个文件存放，不指定的话，对应的是一个分区的，只会形成一个文件的。
         //  指定分组
         //orderJob.setGroupingComparatorClass(TopNGroup.class);
@@ -40,10 +44,5 @@ public class TopNMain extends Configured implements Tool {
         TextOutputFormat.setOutputPath(orderJob, new Path("file:///F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\stage1\\mr_stage3\\topN\\stage2\\output"));
         boolean res = orderJob.waitForCompletion(true);
         return res ? 0 : 1;
-    }
-
-    public static void main(String[] args) throws Exception {
-        int run = ToolRunner.run(new Configuration(), new TopNMain(), args);
-        System.exit(run);
     }
 }

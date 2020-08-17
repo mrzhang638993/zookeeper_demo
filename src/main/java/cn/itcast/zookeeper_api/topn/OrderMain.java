@@ -1,6 +1,5 @@
 package cn.itcast.zookeeper_api.topn;
 
-import cn.itcast.zookeeper_api.exce.exec12.MySelfInput;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;

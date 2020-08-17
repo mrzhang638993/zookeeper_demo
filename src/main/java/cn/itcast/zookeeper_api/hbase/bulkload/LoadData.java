@@ -13,7 +13,7 @@ import org.apache.hadoop.hbase.tool.LoadIncrementalHFiles;
 
 /**
  * 加载数据到hbase中
- * */
+ */
 public class LoadData {
 
     public static void main(String[] args) throws Exception {
@@ -21,10 +21,10 @@ public class LoadData {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.property.clientPort", "2181");
         configuration.set("hbase.zookeeper.quorum", "node01,node02,node03");
-        Connection connection =  ConnectionFactory.createConnection(configuration);
+        Connection connection = ConnectionFactory.createConnection(configuration);
         Admin admin = connection.getAdmin();
         Table table = connection.getTable(TableName.valueOf("myuser2"));
         LoadIncrementalHFiles load = new LoadIncrementalHFiles(configuration);
-        load.doBulkLoad(new Path("hdfs://node01:8020/hbase/hfile_out"), admin,table,connection.getRegionLocator(TableName.valueOf("myuser2")));
+        load.doBulkLoad(new Path("hdfs://node01:8020/hbase/hfile_out"), admin, table, connection.getRegionLocator(TableName.valueOf("myuser2")));
     }
 }

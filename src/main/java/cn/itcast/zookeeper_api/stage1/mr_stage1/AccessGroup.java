@@ -5,8 +5,8 @@ import org.apache.hadoop.io.WritableComparator;
 
 public class AccessGroup extends WritableComparator {
 
-    public  AccessGroup(){
-        super(AccessLogBean.class,true);
+    public AccessGroup() {
+        super(AccessLogBean.class, true);
     }
 
     /**

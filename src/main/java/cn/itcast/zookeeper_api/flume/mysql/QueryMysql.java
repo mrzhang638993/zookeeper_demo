@@ -12,40 +12,20 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- *  实现mysql查询的功能和实现逻辑
- *  包含有上下面环境变量context
- * */
+ * 实现mysql查询的功能和实现逻辑
+ * 包含有上下面环境变量context
+ */
 public class QueryMysql {
     private static final Logger LOG = LoggerFactory.getLogger(QueryMysql.class);
-
-    private int runQueryDelay, //两次查询的时间间隔
-            startFrom,            //开始id
-            currentIndex,	     //当前id
-            recordSixe = 0,      //每次查询返回结果的条数
-            maxRow;                //每次查询的最大条数
-
-
-    private String table,       //要操作的表
-            columnsToSelect,     //用户传入的查询的列
-            customQuery,          //用户传入的查询语句
-            query,                 //构建的查询语句
-            defaultCharsetResultSet;//编码集
-
-    //上下文，用来获取配置文件
-    private Context context;
-
     //为定义的变量赋值（默认值），可在flume任务的配置文件中修改
     private static final int DEFAULT_QUERY_DELAY = 10000;
     private static final int DEFAULT_START_VALUE = 0;
     private static final int DEFAULT_MAX_ROWS = 2000;
     private static final String DEFAULT_COLUMNS_SELECT = "*";
     private static final String DEFAULT_CHARSET_RESULTSET = "UTF-8";
-
     private static Connection conn = null;
     private static PreparedStatement ps = null;
     private static String connectionURL, connectionUserName, connectionPassword;
-
-
 
     //加载静态资源
     static {
@@ -60,12 +40,26 @@ public class QueryMysql {
             LOG.error(e.toString());
         }
     }
+
+    private int runQueryDelay, //两次查询的时间间隔
+            startFrom,            //开始id
+            currentIndex,         //当前id
+            recordSixe = 0,      //每次查询返回结果的条数
+            maxRow;                //每次查询的最大条数
+    private String table,       //要操作的表
+            columnsToSelect,     //用户传入的查询的列
+            customQuery,          //用户传入的查询语句
+            query,                 //构建的查询语句
+            defaultCharsetResultSet;//编码集
+    //上下文，用来获取配置文件
+    private Context context;
+
     /**
-     *  获取上下文环境
-     * */
+     * 获取上下文环境
+     */
     public QueryMysql(Context context) {
 
-        LOG.info("========"+ JSON.toJSONString(context)+"=============");
+        LOG.info("========" + JSON.toJSONString(context) + "=============");
         this.context = context;
 
         //有默认值参数：获取flume任务配置文件中的参数，读不到的采用默认值
@@ -77,7 +71,7 @@ public class QueryMysql {
         //无默认值参数：获取flume任务配置文件中的参数
         this.table = context.getString("table");
         this.customQuery = context.getString("custom.query");
-        LOG.info("========"+ JSON.toJSONString(this.customQuery)+"=============");
+        LOG.info("========" + JSON.toJSONString(this.customQuery) + "=============");
         connectionURL = context.getString("connection.url");
         connectionUserName = context.getString("connection.user");
         connectionPassword = context.getString("connection.password");
@@ -89,6 +83,19 @@ public class QueryMysql {
         currentIndex = getStatusDBIndex(startFrom);
         //构建查询语句
         query = buildQuery();
+    }
+
+    //获取JDBC连接
+    private static Connection InitConnection(String url, String user, String pw) {
+        try {
+            Connection conn = DriverManager.getConnection(url, user, pw);
+            if (conn == null)
+                throw new SQLException();
+            return conn;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //校验相应的配置信息（表，查询语句以及数据库连接的参数）
@@ -108,8 +115,8 @@ public class QueryMysql {
     }
 
     /**
-     *   需要明白构建这些sql语句内在的逻辑特性在那个地方？
-     * */
+     * 需要明白构建这些sql语句内在的逻辑特性在那个地方？
+     */
     //构建sql语句
     private String buildQuery() {
         String sql = "";
@@ -117,7 +124,7 @@ public class QueryMysql {
         currentIndex = getStatusDBIndex(startFrom);
         LOG.info(currentIndex + "");
         //customQuery  等于null的,所以会一直查询select * from  student ,customQuery=select * from  student
-        LOG.info("========"+ JSON.toJSONString(this.customQuery)+"=============");
+        LOG.info("========" + JSON.toJSONString(this.customQuery) + "=============");
         if (customQuery == null) {
             sql = "SELECT " + columnsToSelect + " FROM " + table;
         } else {
@@ -131,27 +138,15 @@ public class QueryMysql {
             execSql.append(" where ");
             execSql.append("id").append(">").append(currentIndex);
             //  最终一直会执行 select * from  student where id >  currentIndex  语句的
-            LOG.info(execSql.toString()+ "=====");
+            LOG.info(execSql.toString() + "=====");
             return execSql.toString();
         } else {
             //  包含where的语句进行操作。这个根本没有使用到的。修改之后对应的会报错的。
             int length = execSql.toString().length();
-            LOG.info(execSql.toString()+ "=====");
+            LOG.info(execSql.toString() + "=====");
             //  select  * from  student where 1=1
             return execSql.toString().substring(0, length - String.valueOf(currentIndex).length()) + currentIndex;
         }
-    }
-    //获取JDBC连接
-    private static Connection InitConnection(String url, String user, String pw) {
-        try {
-            Connection conn = DriverManager.getConnection(url, user, pw);
-            if (conn == null)
-                throw new SQLException();
-            return conn;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     //执行查询

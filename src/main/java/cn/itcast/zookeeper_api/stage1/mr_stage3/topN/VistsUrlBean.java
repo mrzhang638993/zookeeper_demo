@@ -8,13 +8,13 @@ import java.io.IOException;
 
 public class VistsUrlBean implements WritableComparable<VistsUrlBean> {
 
-    private  String url;
-    private  Integer count;
-    private  String  user;
+    private String url;
+    private Integer count;
+    private String user;
 
     @Override
     public int compareTo(VistsUrlBean o) {
-        return this.count-o.getCount();
+        return this.count - o.getCount();
     }
 
     @Override
@@ -26,9 +26,9 @@ public class VistsUrlBean implements WritableComparable<VistsUrlBean> {
 
     @Override
     public void readFields(DataInput in) throws IOException {
-        this.url=in.readUTF();
-        this.count=in.readInt();
-        this.user=in.readUTF();
+        this.url = in.readUTF();
+        this.count = in.readInt();
+        this.user = in.readUTF();
     }
 
     public String getUrl() {
@@ -52,7 +52,7 @@ public class VistsUrlBean implements WritableComparable<VistsUrlBean> {
     public String toString() {
         return
                 url + '\001' +
-                 count+"\001";
+                        count + "\001";
     }
 
     public String getUser() {

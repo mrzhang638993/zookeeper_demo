@@ -14,9 +14,14 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class AccessMain extends Configured implements Tool {
 
+    public static void main(String[] args) throws Exception {
+        int run = ToolRunner.run(new Configuration(), new AccessMain(), args);
+        System.exit(run);
+    }
+
     @Override
     public int run(String[] args) throws Exception {
-       // 编写主要的业务逻辑
+        // 编写主要的业务逻辑
         Job orderJob = Job.getInstance(super.getConf(), "accessJob");
         orderJob.setJarByClass(AccessMain.class);
 
@@ -43,10 +48,5 @@ public class AccessMain extends Configured implements Tool {
         TextOutputFormat.setOutputPath(orderJob, new Path("file:///F:\\works\\hadoop1\\zookeeper-demo\\src\\main\\java\\cn\\itcast\\zookeeper_api\\stage1\\mr_stage2\\output"));
         boolean res = orderJob.waitForCompletion(true);
         return res ? 0 : 1;
-    }
-
-    public static void main(String[] args) throws Exception {
-        int run = ToolRunner.run(new Configuration(), new AccessMain(), args);
-        System.exit(run);
     }
 }

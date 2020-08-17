@@ -5,7 +5,6 @@ import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.*;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.hive.ql.plan.HashTableDummyDesc;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -292,18 +291,18 @@ public class HbaseOperate {
      */
     @Test
     public void deleteByRowKey() throws IOException {
-        Delete delete=new Delete("0001".getBytes());
+        Delete delete = new Delete("0001".getBytes());
         table = connection.getTable(TableName.valueOf("myuser"));
         table.delete(delete);
     }
 
     /**
      * 删除表的操作实现
-     * */
+     */
     @Test
-    public  void deleteTable() throws IOException {
+    public void deleteTable() throws IOException {
         Admin admin = connection.getAdmin();
-        TableName tableName=TableName.valueOf("myuser");
+        TableName tableName = TableName.valueOf("myuser");
         //  先禁用表
         admin.disableTable(tableName);
         //  然后执行删除操作
@@ -313,9 +312,9 @@ public class HbaseOperate {
     /**
      * 更新表的操作实现,更新操作和insert操作是一模一样的。
      * 如果rowkey不存在的话，执行新增操作。存在的话执行更新操作。
-     * */
+     */
     @Test
-    public  void  updateTable(){
+    public void updateTable() {
         //  执行更新表的操作逻辑
 
     }
@@ -331,17 +330,17 @@ public class HbaseOperate {
      * hbase的表没有做预分区操作的话，文件大小达到了10g的时候会执行split操作的，对应的一个region
      * 会变化为2个的，但是还是在一个节点上的。实际的hbase的使用过程中，还是需要使用到预分区操作的。
      * 预分区的操作效果参见前面的预分区的优点的。
-     * */
+     */
     @Test
     public void regionSplit() throws IOException {
         Admin admin = connection.getAdmin();
-        byte[][] splitkeys={{'1','2','3','4','5'},{'a','b','c','d','e'}};
-        HTableDescriptor tableDescriptor=new HTableDescriptor(TableName.valueOf("staff3"));
-        HColumnDescriptor f1=new HColumnDescriptor("f1");
-        HColumnDescriptor f2=new HColumnDescriptor("f2");
+        byte[][] splitkeys = {{'1', '2', '3', '4', '5'}, {'a', 'b', 'c', 'd', 'e'}};
+        HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("staff3"));
+        HColumnDescriptor f1 = new HColumnDescriptor("f1");
+        HColumnDescriptor f2 = new HColumnDescriptor("f2");
         tableDescriptor.addFamily(f1);
         tableDescriptor.addFamily(f2);
-        admin.createTable(tableDescriptor,splitkeys);
+        admin.createTable(tableDescriptor, splitkeys);
         // 分区间隔 12345，abcde
     }
 

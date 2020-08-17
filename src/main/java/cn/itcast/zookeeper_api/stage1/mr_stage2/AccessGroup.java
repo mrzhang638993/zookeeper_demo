@@ -1,17 +1,16 @@
 package cn.itcast.zookeeper_api.stage1.mr_stage2;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 
 /**
- *  实现分组逻辑必须要根据key实现分组操作的
- * */
+ * 实现分组逻辑必须要根据key实现分组操作的
+ */
 public class AccessGroup extends WritableComparator {
 
-    public  AccessGroup(){
-        super(Text.class,true);
+    public AccessGroup() {
+        super(Text.class, true);
     }
 
     /**

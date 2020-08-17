@@ -31,54 +31,54 @@ public class AccessReducer extends Reducer<AccessLogBean, Text, AccessLogBean, N
         //  对应的将相同的可以分配到一组这种进行处理操作。ip相同的分到一组的。根据url的顺序排列的
         String url = null;
         //  需要判断values的长度的。
-        List<AccessLogBean> accessLogBeanList=new ArrayList<>();
-        AccessLogBean accessLogBean=null;
+        List<AccessLogBean> accessLogBeanList = new ArrayList<>();
+        AccessLogBean accessLogBean = null;
         for (Text value : values
         ) {
             String content = value.toString();
             String[] split = content.split(",");
             if (url == null) {
-                url=split[2];
-                accessLogBean=new AccessLogBean();
+                url = split[2];
+                accessLogBean = new AccessLogBean();
                 accessLogBean.setIp(key.getIp());
                 accessLogBean.setUrl(url);
                 accessLogBean.setCount(1);
-            }else {
+            } else {
                 // 此时url不等于
-               if (url.equals(split[2])){
-                   accessLogBean.setCount(accessLogBean.getCount()+1);
-               }else {
-                   //  此时split的元素对应的不是原来的元素的。url发生改变了
-                   accessLogBeanList.add(accessLogBean);
-                   accessLogBean=new AccessLogBean();
-                   accessLogBean.setIp(key.getIp());
-                   accessLogBean.setUrl(split[2]);
-                   accessLogBean.setCount(1);
-                   url=split[2];
-               }
+                if (url.equals(split[2])) {
+                    accessLogBean.setCount(accessLogBean.getCount() + 1);
+                } else {
+                    //  此时split的元素对应的不是原来的元素的。url发生改变了
+                    accessLogBeanList.add(accessLogBean);
+                    accessLogBean = new AccessLogBean();
+                    accessLogBean.setIp(key.getIp());
+                    accessLogBean.setUrl(split[2]);
+                    accessLogBean.setCount(1);
+                    url = split[2];
+                }
             }
         }
-        if (accessLogBean.getCount()==1){
+        if (accessLogBean.getCount() == 1) {
             accessLogBeanList.add(accessLogBean);
         }
         //  进行key的排序操作
         Collections.sort(accessLogBeanList, new Comparator<AccessLogBean>() {
             @Override
             public int compare(AccessLogBean o1, AccessLogBean o2) {
-                return o2.getCount()-o1.getCount();
+                return o2.getCount() - o1.getCount();
             }
         });
         //进行topN的排序操作。
-        if (accessLogBeanList.size()>=3){
+        if (accessLogBeanList.size() >= 3) {
             //  进行top2的操作
             List<AccessLogBean> accessLogBeans = accessLogBeanList.subList(0, 3);
-            for(int i=0;i<accessLogBeans.size();i++){
-                context.write(accessLogBeans.get(i),NullWritable.get());
+            for (int i = 0; i < accessLogBeans.size(); i++) {
+                context.write(accessLogBeans.get(i), NullWritable.get());
             }
-        }else {
+        } else {
             // 执行全部输出操作
-            for (int i=0;i<accessLogBeanList.size();i++){
-                context.write(accessLogBeanList.get(i),NullWritable.get());
+            for (int i = 0; i < accessLogBeanList.size(); i++) {
+                context.write(accessLogBeanList.get(i), NullWritable.get());
             }
         }
     }

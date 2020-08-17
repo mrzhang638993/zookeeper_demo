@@ -13,21 +13,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.slf4j.LoggerFactory.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- *  主题的source的业务逻辑
- * */
-public class MysqlSource  extends AbstractSource implements Configurable, PollableSource {
+ * 主题的source的业务逻辑
+ */
+public class MysqlSource extends AbstractSource implements Configurable, PollableSource {
 
-    private  QueryMysql queryMysql;
     //打印日志
     private static final Logger LOG = getLogger(MysqlSource.class);
+    private QueryMysql queryMysql;
+
     /**
-     *  主要需要重写的业务逻辑
-     *  查询数据库记录写入到channel中
-     *  // 这个方法对应的会一直执行的，一直监控的。
-     * */
+     * 主要需要重写的业务逻辑
+     * 查询数据库记录写入到channel中
+     * // 这个方法对应的会一直执行的，一直监控的。
+     */
     @Override
     public Status process() throws EventDeliveryException {
         try {
@@ -38,7 +39,7 @@ public class MysqlSource  extends AbstractSource implements Configurable, Pollab
             //存放event头集合
             HashMap<String, String> header = new HashMap<>();
             //如果有返回数据，则将数据封装为event
-            if (result!=null&&!result.isEmpty()) {
+            if (result != null && !result.isEmpty()) {
                 List<String> allRows = queryMysql.getAllRows(result);
                 Event event = null;
                 for (String row : allRows) {
@@ -72,10 +73,10 @@ public class MysqlSource  extends AbstractSource implements Configurable, Pollab
     }
 
     /**
-     *  主要的业务逻辑，对应的是初始化的方法
-     * */
+     * 主要的业务逻辑，对应的是初始化的方法
+     */
     @Override
     public void configure(Context context) {
-       queryMysql=new QueryMysql(context);
+        queryMysql = new QueryMysql(context);
     }
 }

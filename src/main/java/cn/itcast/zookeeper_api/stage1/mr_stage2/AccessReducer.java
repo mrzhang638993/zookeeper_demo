@@ -1,11 +1,8 @@
 package cn.itcast.zookeeper_api.stage1.mr_stage2;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.hamcrest.core.IsInstanceOf;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +37,7 @@ public class AccessReducer extends Reducer<Text, AccessLogBean, AccessLogBean, N
         List<AccessLogBean> init = new ArrayList<>();
         AccessLogBean accessLogBean = null;
         // values的数值在转换成为value的时候，对应的内容已经被覆盖了，整个的逻辑存在问题的。
-        values.forEach(x->{
+        values.forEach(x -> {
             init.add(x);
         });
         //  根据url进行排序操作

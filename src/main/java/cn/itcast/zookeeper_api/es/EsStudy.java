@@ -3,23 +3,37 @@ package cn.itcast.zookeeper_api.es;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.lucene.queryparser.xml.QueryBuilderFactory;
+import org.apache.lucene.queryparser.xml.builders.BooleanQueryBuilder;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.After;
 import org.junit.Before;
@@ -29,7 +43,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 /**
  * 使用javaapi操作es集群
@@ -215,7 +233,7 @@ public class EsStudy {
                 addTransportAddress(node01)
                 .addTransportAddress(node02)
                 .addTransportAddress(node03);
-        XContentBuilder mapping = XContentFactory.jsonBuilder()
+        XContentBuilder mapping = jsonBuilder()
                 .startObject()
                 .startObject("properties")
                 //  这个id是数据id的内容，不是系统的id属性的
@@ -356,9 +374,279 @@ public class EsStudy {
 
     /**
      * 实现模糊查询
+     * 可以纠正输入错误，最大的纠正次数为2次的
      * */
     @Test
     public void fuzzyQuery(){
+        // 设置可以允许出现2次错误的操作的。
+        FuzzyQueryBuilder termQueryBuilder=new FuzzyQueryBuilder("say","heolo").fuzziness(Fuzziness.TWO);
+        SearchResponse searchResponse = client.prepareSearch("indexsearch").setTypes("mysearch")
+                .setQuery(termQueryBuilder).get();
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        for (SearchHit hit : hits) {
+            String id = hit.getId();
+            System.out.println("获取到系统id====" + id);
+            System.out.println(hit.getSourceAsString());
+        }
+    }
+
+    /**
+     * 通配符查询操作
+     * * 表示匹配任意多的字符
+     * ? 表示匹配单个的字符
+     * */
+    @Test
+    public  void  wildQuery(){
+        // QueryBuilders对应的工具类的，可以获取到很多的queryBuilder数据的。
+        WildcardQueryBuilder say = QueryBuilders.wildcardQuery("say", "hel*");
+        SearchResponse searchResponse = client.prepareSearch("indexsearch").setTypes("mysearch")
+                .setQuery(say).get();
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        for (SearchHit hit : hits) {
+            String id = hit.getId();
+            System.out.println("获取到系统id====" + id);
+            System.out.println(hit.getSourceAsString());
+        }
+    }
+
+    /**
+     * 多条件的组合查询  boolean query
+     * 条件1：查询年龄在18到28之间的男性
+     * 条件2：id范围在10~13之间的数据
+     * booleanQuery 组合多个条件实现查询操作。
+     * */
+    @Test
+    public void booleanQuery(){
+        // 第一个条件的部分
+        RangeQueryBuilder rangeQueryBuilder=new RangeQueryBuilder("age").gte(18).lte(28);
+        MatchQueryBuilder matchQueryBuilder=new MatchQueryBuilder("sex","1");
+        // 第二个查询条件
+        RangeQueryBuilder idRange=new RangeQueryBuilder("id").gte(10).lte(13);
+        //  组织条件实现查询操作
+        SearchResponse searchResponse = client.prepareSearch("indexsearch").setTypes("mysearch")
+                .setQuery(QueryBuilders.boolQuery().should(idRange).should(QueryBuilders.boolQuery().must(rangeQueryBuilder).must(matchQueryBuilder))).get();
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        for (SearchHit hit : hits) {
+            String id = hit.getId();
+            System.out.println("获取到系统id====" + id);
+            System.out.println(hit.getSourceAsString());
+        }
+    }
+
+    /**
+     * 分页查询
+     * 使用from +size的方式实现分页操作
+     * */
+    @Test
+    public void pageQuery(){
+         int  pageSize=5;
+         int pageNum=2;
+         // 计算初始的index数据
+         int startNum=(pageNum-1)*pageNum;
+         // 获取分页的数据
+        SearchResponse searchResponse = client.prepareSearch("indexsearch").setTypes("mysearch").
+                setQuery(QueryBuilders.matchAllQuery()).addSort("id", SortOrder.ASC)
+                .setFrom(startNum).setSize(pageSize).get();
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        for (SearchHit hit : hits) {
+            String id = hit.getId();
+            System.out.println("获取到系统id====" + id);
+            System.out.println(hit.getSourceAsString());
+        }
+    }
+
+
+    /**
+     * 高亮查询操作
+     * 对于查询出来的say字段对应的是hello的进行高亮的显示操作
+     * */
+    @Test
+    public void highNight(){
+        MatchQueryBuilder say = QueryBuilders.matchQuery("say", "hello");
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        //  定义对那个字段进行高亮的显示以及设置前缀和后缀字段
+        highlightBuilder.field("say").preTags("<font style='color:red'>").postTags("</font>");
+        SearchResponse searchResponse = client.prepareSearch("indexsearch").
+                setTypes("mysearch")
+                .setQuery(say)
+                .highlighter(highlightBuilder).get();
+        SearchHits hits = searchResponse.getHits();
+        for (SearchHit hit : hits) {
+            System.out.println("======"+hit.getSourceAsString());
+            // 显示的是高亮的数据内容的。
+            Text[] says = hit.getHighlightFields().get("say").getFragments();
+            for (Text text : says) {
+                System.out.println(text);
+            }
+        }
+    }
+
+    /**
+     * 批量添加数据
+     * @throws IOException
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    @Test
+    public void addIndexDatas() throws IOException, ExecutionException, InterruptedException {
+        //获取settings
+        //配置es集群的名字
+        Settings settings = Settings.builder().put("cluster.name", "myes").build();
+        //获取客户端
+        TransportAddress transportAddress = new TransportAddress(InetAddress.getByName("node01"), 9300);
+
+        TransportAddress transportAddress2 = new TransportAddress(InetAddress.getByName("node02"), 9300);
+
+        TransportAddress transportAddress3 = new TransportAddress(InetAddress.getByName("node03"), 9300);
+        //获取client客户端
+        TransportClient client = new PreBuiltTransportClient(settings).addTransportAddress(transportAddress).addTransportAddress(transportAddress2).addTransportAddress(transportAddress3);
+
+        /**
+         * 创建索引
+         * */
+        client.admin().indices().prepareCreate("player").get();
+        //构建json的数据格式，创建映射
+        XContentBuilder mappingBuilder = jsonBuilder()
+                .startObject()
+                .startObject("player")
+                .startObject("properties")
+                .startObject("name").field("type","text").field("index", "true").field("fielddata","true").endObject()
+                .startObject("age").field("type","integer").endObject()
+                .startObject("salary").field("type","integer").endObject()
+                .startObject("team").field("type","text").field("index", "true").field("fielddata","true").endObject()
+                .startObject("position").field("type","text").field("index", "true").field("fielddata","true").endObject()
+                .endObject()
+                .endObject()
+                .endObject();
+        PutMappingRequest request = Requests.putMappingRequest("player")
+                .type("player")
+                .source(mappingBuilder);
+        client.admin().indices().putMapping(request).get();
+
+
+        //批量添加数据开始
+
+        BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+// either use client#prepare, or use Requests# to directly build index/delete requests
+        bulkRequest.add(client.prepareIndex("player", "player", "1")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "郭德纲")
+                        .field("age", 33)
+                        .field("salary",3000)
+                        .field("team" , "cav")
+                        .field("position" , "sf")
+                        .endObject()
+                )
+        );
+        bulkRequest.add(client.prepareIndex("player", "player", "2")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "于谦")
+                        .field("age", 25)
+                        .field("salary",2000)
+                        .field("team" , "cav")
+                        .field("position" , "pg")
+                        .endObject()
+                )
+        );
+        bulkRequest.add(client.prepareIndex("player", "player", "3")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "岳云鹏")
+                        .field("age", 29)
+                        .field("salary",1000)
+                        .field("team" , "war")
+                        .field("position" , "pg")
+                        .endObject()
+                )
+        );
+
+        bulkRequest.add(client.prepareIndex("player", "player", "4")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "爱因斯坦")
+                        .field("age", 21)
+                        .field("salary",300)
+                        .field("team" , "tim")
+                        .field("position" , "sg")
+                        .endObject()
+                )
+        );
+
+        bulkRequest.add(client.prepareIndex("player", "player", "5")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "张云雷")
+                        .field("age", 26)
+                        .field("salary",2000)
+                        .field("team" , "war")
+                        .field("position" , "pf")
+                        .endObject()
+                )
+        );
+        bulkRequest.add(client.prepareIndex("player", "player", "6")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "爱迪生")
+                        .field("age", 40)
+                        .field("salary",1000)
+                        .field("team" , "tim")
+                        .field("position" , "pf")
+                        .endObject()
+                )
+        );
+        bulkRequest.add(client.prepareIndex("player", "player", "7")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "牛顿")
+                        .field("age", 21)
+                        .field("salary",500)
+                        .field("team" , "tim")
+                        .field("position" , "c")
+                        .endObject()
+                )
+        );
+
+        bulkRequest.add(client.prepareIndex("player", "player", "8")
+                .setSource(jsonBuilder()
+                        .startObject()
+                        .field("name", "特斯拉")
+                        .field("age", 20)
+                        .field("salary",500)
+                        .field("team" , "tim")
+                        .field("position" , "sf")
+                        .endObject()
+                )
+        );
+        BulkResponse bulkResponse = bulkRequest.get();
+    }
+
+    /**
+     * es中的聚合查询操作
+     * 统计每个球队中球员的数量
+     * */
+    @Test
+    public void testAggreate(){
+       // 实现聚合操作实现
+        SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
+        //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的
+        searchRequestBuilder.addAggregation(AggregationBuilders.terms("player_count").field("team"));
+        //  触发执行，达到执行的结果
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        // 获取聚合结果
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms terms= (StringTerms) aggregation;
+            //  获取到一个个的bucket的
+            List<StringTerms.Bucket> buckets = terms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println("======"+bucket.getKey());
+                System.out.println("球队中一共有多少球员"+bucket.getDocCount());
+            }
+
+        }
 
     }
 }

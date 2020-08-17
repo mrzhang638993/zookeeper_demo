@@ -7,16 +7,23 @@ import com.google.inject.internal.cglib.core.$ClassEmitter;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.get.GetRequestBuilder;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +45,7 @@ public class EsStudy {
     /**
      * 获取客户端对象
      * */
-    //@Before
+    @Before
     public void  getConnect() throws UnknownHostException {
         Settings settings = Settings.builder().put("cluster.name","myes").build();
         TransportAddress node01 = new TransportAddress(InetAddress.getByName("node01"), 9300);
@@ -198,7 +205,7 @@ public class EsStudy {
     /**
      *  给索引查询增加数据源
      * */
-    @Test
+    //@Test
     public void   queryIndex() throws IOException {
         Settings settings = Settings.builder().
                 put("cluster.name","myes")
@@ -280,6 +287,42 @@ public class EsStudy {
                 .setSource(JSONObject.toJSONString(wusong), XContentType.JSON)
         );
         bulkRequestBuilder.get();
+    }
+
+    /**
+     * es数据查询操作
+     * */
+    @Test
+    public void  getBySystemId(){
+        //  根据每条数据的系统id实现查询操作
+        GetResponse documentFields = client.prepareGet("indexsearch", "mysearch", "1").get();
+        String id = documentFields.getId();
+        System.out.println("系统id为======"+id);
+        String sourceAsString = documentFields.getSourceAsString();
+        System.out.println("获取到系统的content===="+sourceAsString);
+    }
+
+    /**
+     *   查询索引库中的所有的数据
+     * */
+    @Test
+    public  void  queryAll(){
+        MatchAllQueryBuilder matchAllQueryBuilder=new MatchAllQueryBuilder();
+        SearchResponse searchResponse = client.
+                //  指定需要查询的索引库
+                prepareSearch("indexsearch").
+                        // 指定需要查询的类型
+                setTypes("mysearch").
+                        // 指定查询的条件
+                        setQuery(matchAllQueryBuilder).
+                        // 执行查询操作
+                        get();
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        for (SearchHit hit : hits) {
+            String id = hit.getId();
+            System.out.println("获取到的系统id是====="+id);
+            System.out.println(hit.getSourceAsString());
+        }
     }
 
 }

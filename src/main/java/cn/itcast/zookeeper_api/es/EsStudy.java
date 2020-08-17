@@ -26,6 +26,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
@@ -823,6 +824,36 @@ public class EsStudy {
                 InternalAvg aggregations1 = bucket.getAggregations().get("avg_year");
                 System.out.println("=====" + aggregations1.getName() + "=====");
                 System.out.println("=====" + aggregations1.getValue() + "=====");
+                InternalSum aggregations2 = bucket.getAggregations().get("total_salary");
+                System.out.println("===总的年薪==" + aggregations2.getName() + "=====");
+                System.out.println("===总的年薪==" + aggregations2.getValue() + "=====");
+            }
+        }
+    }
+
+    /**
+     * 聚合排序
+     * 需求：计算每个球队的总的年薪，然后按照年薪进行倒序排序
+     * */
+    @Test
+    public   void totalSalarySort(){
+        SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
+        //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的.指定排序的字段。
+        TermsAggregationBuilder field = AggregationBuilders.terms("player_count").field("team").order(BucketOrder.count(true));
+        SumAggregationBuilder field2 = AggregationBuilders.sum("total_salary").field("salary");
+        field.subAggregation(field2);
+        searchRequestBuilder.addAggregation(field);
+        //  触发执行，达到执行的结果
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms terms = (StringTerms) aggregation;
+            //  获取到一个个的bucket的
+            List<StringTerms.Bucket> buckets = terms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println("======" + bucket.getKey());
+                System.out.println("球队中一共有多少球员" + bucket.getDocCount());
+                //  求解每个队伍中，每个位置有多少人的
                 InternalSum aggregations2 = bucket.getAggregations().get("total_salary");
                 System.out.println("===总的年薪==" + aggregations2.getName() + "=====");
                 System.out.println("===总的年薪==" + aggregations2.getValue() + "=====");

@@ -2,9 +2,12 @@ package cn.itcast.zookeeper_api.es;
 
 
 import com.alibaba.fastjson.JSON;
+import com.google.inject.internal.cglib.core.$ClassEmitter;
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -124,6 +127,69 @@ public class EsStudy {
     public void testBatchInsert(){
         // 获取预编译的bulkBuilder对象
         BulkRequestBuilder bulkRequestBuilder=client.prepareBulk();
-        
+
+        Person person=new Person();
+        person.setAddress("北京");
+        person.setAge(25);
+        person.setId(5);
+        String content = JSON.toJSONString(person);
+
+
+        Person person1=new Person();
+        person1.setAddress("北京");
+        person1.setAge(25);
+        person1.setId(6);
+        String content1 = JSON.toJSONString(person);
+
+
+        Person person2=new Person();
+        person2.setAddress("北京");
+        person2.setAge(25);
+        person2.setId(7);
+        String content2 = JSON.toJSONString(person);
+
+        Person person3=new Person();
+        person3.setAddress("北京");
+        person3.setAge(25);
+        person3.setId(8);
+        String content3 = JSON.toJSONString(person);
+
+
+        IndexRequestBuilder indexRequestBuilder = client.prepareIndex("myindex1", "article", "5").setSource(content, XContentType.JSON);
+        IndexRequestBuilder indexRequestBuilder1 = client.prepareIndex("myindex1", "article", "6").setSource(content1, XContentType.JSON);
+        IndexRequestBuilder indexRequestBuilder2 = client.prepareIndex("myindex1", "article", "7").setSource(content2, XContentType.JSON);
+        IndexRequestBuilder indexRequestBuilder3 = client.prepareIndex("myindex1", "article", "8").setSource(content3, XContentType.JSON);
+
+        bulkRequestBuilder.add(indexRequestBuilder)
+        .add(indexRequestBuilder1)
+        .add(indexRequestBuilder2)
+        .add(indexRequestBuilder3).get();
+
+    }
+
+    /**
+     * 更新索引
+     * */
+    @Test
+    public void  undateIndex(){
+        Map<String,String> map=new HashMap();
+        map.put("phone","19988880221");
+        client.prepareUpdate("myindex1", "article", "8").setDoc(map).get();
+    }
+
+    /**
+     * 删除索引
+     * */
+    @Test
+    public  void  deleteIndex(){
+        client.prepareDelete("myindex1","article","8").get();
+    }
+
+    /**
+     * 删除索引
+     * */
+    @Test
+    public void  deleteAllIndex(){
+        client.admin().indices().prepareDelete("myindex1").execute().actionGet();
     }
 }

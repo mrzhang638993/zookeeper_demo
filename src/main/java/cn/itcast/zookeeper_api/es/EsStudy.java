@@ -34,6 +34,8 @@ import org.elasticsearch.search.aggregations.metrics.max.InternalMax;
 import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.min.InternalMin;
 import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -795,6 +797,36 @@ public class EsStudy {
 
     /**
      * 计算每个球队球员的平均年龄，同时又要计算总年薪
-     * */
-
+     */
+    @Test
+    public void testTeamAvgYearAndTotalSalary() {
+        SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
+        //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的
+        TermsAggregationBuilder field = AggregationBuilders.terms("player_count").field("team");
+        AvgAggregationBuilder field1 = AggregationBuilders.avg("avg_year").field("age");
+        SumAggregationBuilder field2 = AggregationBuilders.sum("total_salary").field("salary");
+        field.subAggregation(field1);
+        field.subAggregation(field2);
+        searchRequestBuilder.addAggregation(field);
+        //  触发执行，达到执行的结果
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        // 获取聚合结果
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms terms = (StringTerms) aggregation;
+            //  获取到一个个的bucket的
+            List<StringTerms.Bucket> buckets = terms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println("======" + bucket.getKey());
+                System.out.println("球队中一共有多少球员" + bucket.getDocCount());
+                //  求解每个队伍中，每个位置有多少人的
+                InternalAvg aggregations1 = bucket.getAggregations().get("avg_year");
+                System.out.println("=====" + aggregations1.getName() + "=====");
+                System.out.println("=====" + aggregations1.getValue() + "=====");
+                InternalSum aggregations2 = bucket.getAggregations().get("total_salary");
+                System.out.println("===总的年薪==" + aggregations2.getName() + "=====");
+                System.out.println("===总的年薪==" + aggregations2.getValue() + "=====");
+            }
+        }
+    }
 }

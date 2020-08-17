@@ -31,6 +31,12 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.InternalAvg;
+import org.elasticsearch.search.aggregations.metrics.max.InternalMax;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.InternalMin;
+import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilder;
@@ -675,7 +681,7 @@ public class EsStudy {
                 System.out.println("======"+bucket.getKey());
                 System.out.println("球队中一共有多少球员"+bucket.getDocCount());
                 //  求解每个队伍中，每个位置有多少人的
-                Aggregations aggregations1 = bucket.getAggregations();
+                Aggregations aggregations1 = bucket.getAggregations().get("posititon_count");
                 for (Aggregation aggregation1 : aggregations1) {
                     StringTerms terms1= (StringTerms) aggregation1;
                     //  获取到一个个的bucket的
@@ -688,4 +694,112 @@ public class EsStudy {
             }
         }
     }
+
+
+    /**
+     * 求解分组的最大值，最小值，以及平均值
+     * 计算每个球队中年龄最大的值
+     * 1,球队进行分组
+     * 2.统计年龄最大的
+     * */
+    @Test
+    public  void  maxGroupValue(){
+        SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
+        //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的
+        TermsAggregationBuilder field = AggregationBuilders.terms("player_count").field("team");
+        MaxAggregationBuilder field1 = AggregationBuilders.max("max_year").field("age");
+        field.subAggregation(field1);
+        searchRequestBuilder.addAggregation(field);
+        //  触发执行，达到执行的结果
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        // 获取聚合结果
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms terms= (StringTerms) aggregation;
+            //  获取到一个个的bucket的
+            List<StringTerms.Bucket> buckets = terms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println("======"+bucket.getKey());
+                System.out.println("球队中一共有多少球员"+bucket.getDocCount());
+                //  求解每个队伍中，每个位置有多少人的
+                Aggregations aggregations1 = bucket.getAggregations();
+                for (Aggregation aggregation1 : aggregations1) {
+                    InternalMax internalMax= (InternalMax) aggregation1;
+                    System.out.println("====="+internalMax.getName()+"=====");
+                    System.out.println("====="+internalMax.getValue()+"=====");
+                }
+            }
+        }
+    }
+
+    /**
+     *  求解每一个球队中最小的年龄
+     * */
+    @Test
+    public  void minAge(){
+        SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
+        //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的
+        TermsAggregationBuilder field = AggregationBuilders.terms("player_count").field("team");
+        MinAggregationBuilder field1 = AggregationBuilders.min("min_year").field("age");
+        field.subAggregation(field1);
+        searchRequestBuilder.addAggregation(field);
+        //  触发执行，达到执行的结果
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        // 获取聚合结果
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms terms= (StringTerms) aggregation;
+            //  获取到一个个的bucket的
+            List<StringTerms.Bucket> buckets = terms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println("======"+bucket.getKey());
+                System.out.println("球队中一共有多少球员"+bucket.getDocCount());
+                //  求解每个队伍中，每个位置有多少人的
+                Aggregations aggregations1 = bucket.getAggregations();
+                for (Aggregation aggregation1 : aggregations1) {
+                    InternalMin internalMax= (InternalMin) aggregation1;
+                    System.out.println("====="+internalMax.getName()+"=====");
+                    System.out.println("====="+internalMax.getValue()+"=====");
+                }
+            }
+        }
+    }
+
+    /**
+     * 求解每一个球队中年龄的平均值
+     * */
+    @Test
+    public  void testAvgAge(){
+        SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
+        //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的
+        TermsAggregationBuilder field = AggregationBuilders.terms("player_count").field("team");
+        AvgAggregationBuilder field1 = AggregationBuilders.avg("avg_year").field("age");
+        field.subAggregation(field1);
+        searchRequestBuilder.addAggregation(field);
+        //  触发执行，达到执行的结果
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        // 获取聚合结果
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms terms= (StringTerms) aggregation;
+            //  获取到一个个的bucket的
+            List<StringTerms.Bucket> buckets = terms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println("======"+bucket.getKey());
+                System.out.println("球队中一共有多少球员"+bucket.getDocCount());
+                //  求解每个队伍中，每个位置有多少人的
+                Aggregations aggregations1 = bucket.getAggregations();
+                for (Aggregation aggregation1 : aggregations1) {
+                    InternalAvg internalMax= (InternalAvg) aggregation1;
+                    System.out.println("====="+internalMax.getName()+"=====");
+                    System.out.println("====="+internalMax.getValue()+"=====");
+                }
+            }
+        }
+    }
+
+    /**
+     * 计算每个球队球员的平均年龄，同时又要计算总年薪
+     * */
+    
 }

@@ -40,6 +40,7 @@ import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.xpack.sql.jdbc.EsDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,9 +48,14 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
@@ -859,5 +865,29 @@ public class EsStudy {
                 System.out.println("===总的年薪==" + aggregations2.getValue() + "=====");
             }
         }
+    }
+
+    /**
+     * elk的sql是收费功能的，需要破解的。或者是自己安装插件的。
+     * java.sql.SQLInvalidAuthorizationSpecException: current license is non-compliant for [jdbc]
+     * */
+    @Test
+    public void esJdbc() throws SQLException {
+        EsDataSource dataSource = new EsDataSource();
+        String address = "jdbc:es://http://node01:9200" ;
+        dataSource.setUrl(address);
+        Properties connectionProperties = new Properties();
+        dataSource.setProperties(connectionProperties);
+        Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select * from library");
+        while(resultSet.next()){
+            String string = resultSet.getString(0);
+            String string1 = resultSet.getString(1);
+            int anInt = resultSet.getInt(2);
+            String string2 = resultSet.getString(4);
+            System.out.println(string + "\t" +  string1 + "\t" +  anInt + "\t" + string2);
+        }
+        connection.close();
     }
 }

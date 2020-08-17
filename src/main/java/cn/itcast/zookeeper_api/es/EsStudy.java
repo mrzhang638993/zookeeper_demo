@@ -23,6 +23,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.After;
@@ -325,4 +326,20 @@ public class EsStudy {
         }
     }
 
+    /**
+     *  查询年龄在18~28之间的数据
+     * */
+    @Test
+    public void yearRange(){
+        RangeQueryBuilder queryBuilder=new RangeQueryBuilder("age");
+        queryBuilder.gte(18).lte(28);
+        SearchResponse searchResponse = client.prepareSearch("indexsearch").setTypes("mysearch")
+                .setQuery(queryBuilder).get();
+        SearchHit[] hits = searchResponse.getHits().getHits();
+        for (SearchHit hit : hits) {
+            String id = hit.getId();
+            System.out.println("获取到系统id===="+id);
+            System.out.println(hit.getSourceAsString());
+        }
+    }
 }

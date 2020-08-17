@@ -30,6 +30,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilder;
@@ -645,8 +646,46 @@ public class EsStudy {
                 System.out.println("======"+bucket.getKey());
                 System.out.println("球队中一共有多少球员"+bucket.getDocCount());
             }
-
         }
+    }
 
+    /**
+     * 统计球队中每个球队每个位置的人员
+     *
+     * */
+    @Test
+    public void  testTeamPosition(){
+        // 实现聚合操作实现
+        SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
+        //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的
+        TermsAggregationBuilder team = AggregationBuilders.terms("player_count").field("team");
+        TermsAggregationBuilder position = AggregationBuilders.terms("posititon_count").field("position");
+        //  增加子聚合条件查询操作
+        team.subAggregation(position);
+        searchRequestBuilder.addAggregation(team);
+        //  触发执行，达到执行的结果
+        SearchResponse searchResponse = searchRequestBuilder.get();
+        // 获取聚合结果
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms terms= (StringTerms) aggregation;
+            //  获取到一个个的bucket的
+            List<StringTerms.Bucket> buckets = terms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println("======"+bucket.getKey());
+                System.out.println("球队中一共有多少球员"+bucket.getDocCount());
+                //  求解每个队伍中，每个位置有多少人的
+                Aggregations aggregations1 = bucket.getAggregations();
+                for (Aggregation aggregation1 : aggregations1) {
+                    StringTerms terms1= (StringTerms) aggregation1;
+                    //  获取到一个个的bucket的
+                    List<StringTerms.Bucket> buckets1 = terms1.getBuckets();
+                    for (StringTerms.Bucket bucket1 : buckets1) {
+                        System.out.println("===位置=="+bucket1.getKey());
+                        System.out.println("球队中每个位置有多少人"+bucket1.getDocCount());
+                    }
+                }
+            }
+        }
     }
 }

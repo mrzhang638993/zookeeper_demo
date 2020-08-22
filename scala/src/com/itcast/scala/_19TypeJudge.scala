@@ -10,7 +10,7 @@ package com.itcast.scala
 object _19TypeJudge {
 
     /**
-     * isInstanceOf:判断对象是否是指定类型的对象
+     * isInstanceOf:判断对象是否是指定类型的对象。判断对象是某个类型或者是某个类型的子类对象。
      * asInstanceOf:将对象转化为指定类型
      *
      * scala中和类型相关的都是采用方括号进行类型判断的。

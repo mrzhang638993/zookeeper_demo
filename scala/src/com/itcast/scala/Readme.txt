@@ -3,3 +3,8 @@ scala中没有相关的static的关键字的。没有相关的static的
 
 scala中的object类似于java中的static对象的。
 object中定义的对象属性类似于static的成员变量的。
+
+java中的main方法对应的是静态的方法的。
+scala中的main必须要定义在object中才可以使用的。
+
+

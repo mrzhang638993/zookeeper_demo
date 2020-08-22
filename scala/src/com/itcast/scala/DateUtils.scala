@@ -15,7 +15,7 @@ object DateUtils {
    **/
   object DateUtil {
     /**
-     * 2.步骤二：定义格式化的日志
+     * 2.步骤二：定义格式化的格式
      **/
     val formatDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 

@@ -1,0 +1,5 @@
+scala中没有相关的static的关键字的。没有相关的static的
+可以在scala中定义单例对象的，表示的是全局仅有的对象的。
+
+scala中的object类似于java中的static对象的。
+object中定义的对象属性类似于static的成员变量的。

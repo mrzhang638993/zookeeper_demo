@@ -32,7 +32,7 @@ public class ConsumerPartition {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
         //  指定消费topic的中的数据
-        consumer.subscribe(Arrays.asList("mypartitioner"));
+        consumer.subscribe(Arrays.asList("my"));
         while (true) {
             //  主动拉取数据,1000毫秒的超时时间
             ConsumerRecords<String, String> records = consumer.poll(1000);

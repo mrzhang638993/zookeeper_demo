@@ -14,6 +14,7 @@ object  _07TurpleObject {
       // 匹配元素开头的，后面任意多个元祖的元祖。元祖匹配
       // case (("zhangsan",20),*)=>println("测试多个元素的匹配的")
       //case (x,y,("taiji",70))=>println(s"匹配三个元素，最后一个元素是taiji->70的元素的,${x}:${y}")
+      //case (("zhangsan",20),*)||(*,("zhangsan",20),*)=>println("匹配zhangsan-20开头,后面元素位置不固定的元素")
       case _x=>println("没有匹配到任意的操作的")
     }
   }

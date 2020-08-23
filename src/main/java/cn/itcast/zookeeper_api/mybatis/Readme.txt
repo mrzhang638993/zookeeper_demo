@@ -6,4 +6,4 @@ mybatis的很多的代码都是进行了重构支持optional组件的。
 
 
 #下面是测试泛型的使用和理解操作实现
-public class MyStudent<T,S,W> 
+public class MyStudent<T,S,W>

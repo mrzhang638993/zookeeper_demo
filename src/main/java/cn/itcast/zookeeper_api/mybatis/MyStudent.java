@@ -1,6 +1,6 @@
 package cn.itcast.zookeeper_api.mybatis;
 
-public class MyStudent<T,S,W> {
+public class MyStudent<T,S,W> extends Person {
     private  T  name;
     private  S age;
     private  W salary;
@@ -34,5 +34,14 @@ public class MyStudent<T,S,W> {
 
     public void setSalary(W salary) {
         this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "MyStudent{" +
+                "name=" + name +
+                ", age=" + age +
+                ", salary=" + salary +
+                '}';
     }
 }

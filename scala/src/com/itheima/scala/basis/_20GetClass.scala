@@ -1,5 +1,4 @@
-package com.itcast.scala
-
+package com.itheima.scala.basis
 
 /**
  * getClass以及classOf执行的操作

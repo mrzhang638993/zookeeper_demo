@@ -1,5 +1,4 @@
-package com.itcast.scala
-
+package com.itheima.scala.basis
 
 /**
  * 抽象类和抽象方法的定义

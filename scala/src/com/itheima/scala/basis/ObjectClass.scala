@@ -1,4 +1,4 @@
-package com.itcast.scala
+package com.itheima.scala.basis
 
 object ObjectClass {
 

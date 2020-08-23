@@ -7,7 +7,7 @@ object _06ClassObject {
    // 样例对象可以作为枚举对象来实现相关的机制的。
    val zhansan = new SexPerson("zhansan", Male)
    val lisi = new SexPerson("lisi", Female)
-   println(zhansan.name+"-----"+zhansan.sex)
-   println(lisi.name+"-----"+lisi.sex)
+    println(zhansan.name+"-----"+zhansan.sex)
+    println(lisi.name+"-----"+lisi.sex)
   }
 }

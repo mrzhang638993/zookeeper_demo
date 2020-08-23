@@ -1,4 +1,4 @@
-package com.itcast.scala
+package com.itheima.scala.basis
 
 /**
  * 使用main方法的话，必须使用单例模式

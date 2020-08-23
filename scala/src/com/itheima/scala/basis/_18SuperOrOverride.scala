@@ -1,5 +1,4 @@
-package com.itcast.scala
-
+package com.itheima.scala.basis
 
 /**
  * 查看super以及overide的类的继承操作

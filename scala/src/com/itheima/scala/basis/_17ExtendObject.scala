@@ -1,5 +1,4 @@
-package com.itcast.scala
-
+package com.itheima.scala.basis
 
 /**
  * scala的继承操作体系

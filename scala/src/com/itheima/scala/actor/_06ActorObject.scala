@@ -10,7 +10,7 @@ object  _06ActorObject {
           react{
             case  MsgBody(id,message)=>{
               println(s"${id}:${message}")
-              // ? 
+              // sender获取消息的发送对象
               sender ! MsgBody("2","接收到你的访问消息")
             }
           }
@@ -31,8 +31,5 @@ object  _06ActorObject {
   def main(args: Array[String]): Unit = {
     ActorSender.start()
     ActorReceivor.start()
-    while(true){
-
-    }
   }
 }

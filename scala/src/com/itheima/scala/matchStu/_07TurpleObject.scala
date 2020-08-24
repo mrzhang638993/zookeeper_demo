@@ -17,5 +17,17 @@ object  _07TurpleObject {
       //case (("zhangsan",20),*)||(*,("zhangsan",20),*)=>println("匹配zhangsan-20开头,后面元素位置不固定的元素")
       case _x=>println("没有匹配到任意的操作的")
     }
+    //  元祖的另外的一种匹配模式
+    /*for(m <- tuple.productIterator){
+      m match {
+        case ("zhangsan",20)=>println("找到符合要求的元祖")
+        case _=>println("没有找到")
+      }
+    }*/
+    val list = tuple.productIterator.filter {
+      case ("zhangsan", 20) => true
+      case _=>false
+    }.toList
+    println(list)
   }
 }

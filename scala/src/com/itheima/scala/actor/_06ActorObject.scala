@@ -21,13 +21,16 @@ object  _06ActorObject {
   object ActorSender extends  Actor {
     override def act(): Unit = {
       val body = MsgBody("1","helloWorld")
-      //  发送同步消息,进行消息的确认
-      val  response=ActorReceivor !? body
-      println(response.isInstanceOf[MsgBody])
+      //  发送同步消息,进行消息的确认.同步消息处于阻塞状态的
+      val  response:Any=ActorReceivor !? body
+      if(response.isInstanceOf[MsgBody]){
+        val body1 = response.asInstanceOf[MsgBody]
+        println(body1.id+"-----"+body1.message)
+      }
     }
   }
 
-  //  问题：为什么没有接受到返回的消息
+
   def main(args: Array[String]): Unit = {
     ActorSender.start()
     ActorReceivor.start()

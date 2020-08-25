@@ -23,6 +23,7 @@ object MainActor {
     val futures = tuples.map(x => {
       //  启动actor
       x._1.start()
+      //  对应的是mainActor发送信息，x._1对应的actor接收的。
       val value = x._1 !!  WordCountTask(x._2)
       //  发送消息到元祖中，发送的是异步有返回值的消息
       value

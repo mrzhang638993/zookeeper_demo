@@ -15,6 +15,7 @@ object _03ClassObject {
   }
 
   def main(args: Array[String]): Unit = {
-
+    val i = test(1)(2)
+    println(i)
   }
 }

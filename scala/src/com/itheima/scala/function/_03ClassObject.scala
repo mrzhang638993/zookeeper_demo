@@ -14,7 +14,16 @@ object _03ClassObject {
      b:Int=>a+b
   }
 
-  def main(args: Array[String]): Unit = {
+  //  函数柯理化的进一步操作.其中calc对应的是一个函数的名称的，calc(x,y)对应的是函数的调用的
+  def caculate(x:Int,y:Int)(calc:(Int,Int)=>Int)={
+    calc(x,y)
+  }
 
+  def main(args: Array[String]): Unit = {
+    println(test(1)(2))
+    println(caculate(1, 2)(_+ _))  // _ + _ 对应的是函数的占位符，代表的是单个元素。
+    println(caculate(1, 2)(_ * _))
+    println(caculate(1, 2)(_ / _))
+    println(caculate(1, 2)(_ - _))
   }
 }

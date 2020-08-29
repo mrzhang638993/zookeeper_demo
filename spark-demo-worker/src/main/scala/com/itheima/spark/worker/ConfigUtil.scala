@@ -8,5 +8,4 @@ import com.typesafe.config.{Config, ConfigFactory}
 object ConfigUtil {
   private val config: Config = ConfigFactory.load("application")
    val `worker.heartbeat.interval`=config.getInt("worker.heartbeat.interval")
-
 }

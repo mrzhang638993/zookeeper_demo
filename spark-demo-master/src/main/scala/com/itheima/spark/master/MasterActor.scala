@@ -33,13 +33,13 @@ object MasterActor extends  Actor{
       if(!outdateMap.isEmpty){
         // 表示根据key进行移除操作
         regWorkerMap --=outdateMap.map(_._1)
+        // 4.对于现有的worker按照内存降序排序
+        val workList: List[WorkInfo] = regWorkerMap.map(_._2).toList
+        // 按照内存降序排序后的worker列表，根据内存降序排列
+        val reverseList: List[WorkInfo] = workList.sortBy(_.mem).reverse
+        //  需要对应的根据key来实现排序操作的
+        println("心跳超时之后移除worker之后的list"+reverseList)
       }
-      // 4.对于现有的worker按照内存降序排序
-      val workList: List[WorkInfo] = regWorkerMap.map(_._2).toList
-      // 按照内存降序排序后的worker列表，根据内存降序排列
-      val reverseList: List[WorkInfo] = workList.sortBy(_.mem).reverse
-      //  需要对应的根据key来实现排序操作的
-      println("心跳超时之后移除worker之后的list"+reverseList)
     }
   }
 

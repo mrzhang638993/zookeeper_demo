@@ -9,6 +9,4 @@ object ConfigUtil {
   val `master.check.heartbeat.interval`: Int = config.getInt("master.check.heartbeat.interval")
   // 时间间隔多长时间认为是超时了
    val `master.check.heartbeat.timeout`: Int = config.getInt("master.check.heartbeat.timeout")
-
-
 }

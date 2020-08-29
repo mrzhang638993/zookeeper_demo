@@ -12,6 +12,9 @@
         <module>akka</module>
         <module>akka-worker</module>
         <module>akka-master</module>
+        <module>spark-demo-common</module>
+        <module>spark-demo-master</module>
+        <module>spark-demo-worker</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

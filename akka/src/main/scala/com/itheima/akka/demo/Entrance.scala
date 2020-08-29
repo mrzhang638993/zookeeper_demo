@@ -1,7 +1,6 @@
 package com.itheima.akka.demo
 
 import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.actor.setup.{ActorSystemSetup, Setup}
 import com.typesafe.config.ConfigFactory
 
 object Entrance {

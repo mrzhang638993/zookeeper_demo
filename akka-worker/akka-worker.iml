@@ -35,7 +35,15 @@
     <orderEntry type="library" name="Maven: xml-apis:xml-apis:1.0.b2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.poi:poi:3.8" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.5" level="project" />
-    <orderEntry type="library" name="Maven: org.elasticsearch.plugin:x-pack-sql-jdbc:6.7.0" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: org.elasticsearch.plugin:x-pack-sql-jdbc:6.7.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../software/lib/x-pack-sql-jdbc-6.7.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Maven: org.elasticsearch.client:transport:6.7.0" level="project" />
     <orderEntry type="library" name="Maven: org.elasticsearch:elasticsearch:6.7.0" level="project" />
     <orderEntry type="library" name="Maven: org.elasticsearch:elasticsearch-core:6.7.0" level="project" />

@@ -12,6 +12,6 @@ object Entrance {
          val actorSystemSystem: ActorSystem = ActorSystem("actorSystem", ConfigFactory.load("application"))
          //3.发送消息给actor
          val workActor: ActorRef = actorSystemSystem.actorOf(Props(WorkerActor), "workActor")
-         workActor  ! " setup "
+         workActor  ! "setup"
   }
 }

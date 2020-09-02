@@ -145,4 +145,15 @@ class WordCount{
     }).collect()
     context.stop()
   }
+
+  /**
+   * 数据清洗：清理掉数据中不合法的数据实现过滤操作的
+   * 过滤得到偶数数据
+   * */
+    @Test
+  def  filterTest(): Unit ={
+    val value: RDD[Int] = context.parallelize(Seq(1, 2, 3, 4, 5, 6,7,8,9,10))
+     value.filter(item=>item%2==0).collect().foreach(println(_))
+    context.stop()
+  }
 }

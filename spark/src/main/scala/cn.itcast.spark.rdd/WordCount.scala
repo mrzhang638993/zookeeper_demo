@@ -156,4 +156,19 @@ class WordCount{
      value.filter(item=>item%2==0).collect().foreach(println(_))
     context.stop()
   }
+
+  /**
+   * 数据抽样：将大数据集转化为小一点的数据集，
+   * 大数据集的规律在小数据集中需要得到体现的
+   * sample算子，从大数据集中抽取出来数据的，并且不保证数据的丢失操作的。
+   * */
+  @Test
+  def sampleTest(): Unit ={
+    val value: RDD[Int] = context.parallelize(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+    //withReplacement: Boolean,  数据是否有放回操作。false对应的是无放回操作。true对应的是放回操作的。下一次还可以抽取到的
+    //      fraction: Double,  采用比例
+    //      seed: Long = Utils.random.nextLong   随机数种子的，seed一般的不指定的
+    value.sample(false,0.6).collect().foreach(println(_))
+    context.stop()
+  }
 }

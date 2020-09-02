@@ -1,2 +1,6 @@
 spark比较适合的是迭代式的开发的，适合的是离线分析的
 实时分析需要使用到sparkstream，需要借助源mysql等完成实时分析操作
+######执行spark相关的算子操作实现
+map和mapreduce的算子是一致的。map算子传入的参数是单条数据，mapPartition传递处理的是整个分区的数据的。
+map返回的是单条数据的，mapPartitions对应的是返回的是iter的数据的。
+mapPartitionsWithIndex相对于mapPartitions多了一个参数是index索引数据的。对应的是原始分区的索引数据的。

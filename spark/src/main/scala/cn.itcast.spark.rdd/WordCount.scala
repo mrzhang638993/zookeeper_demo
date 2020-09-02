@@ -171,4 +171,15 @@ class WordCount{
     value.sample(false,0.6).collect().foreach(println(_))
     context.stop()
   }
+
+  /**
+   * mapValues：对应的只是操作nap的value数据。
+   * item对应的是map的value的
+   * */
+    @Test
+  def assembleMapValues(): Unit ={
+      val value: RDD[(String, Int)] = context.parallelize(Seq(("a", 1), ("b", 2), ("c", 3)))
+      value.mapValues(item=>item*10).collect().foreach(println(_))
+      context.stop()
+  }
 }

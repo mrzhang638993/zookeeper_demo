@@ -182,4 +182,14 @@ class WordCount{
       value.mapValues(item=>item*10).collect().foreach(println(_))
       context.stop()
   }
+
+  /**
+   * 下面对应的是spark的集合操作，对应的体现出来的是交集，差集以及并集的操作
+   * */
+  @Test
+  def testUnion(): Unit ={
+    val value: RDD[Int] = context.parallelize(Seq(1, 3, 5))
+    val value1: RDD[Int] = context.parallelize(Seq(3, 6, 8))
+    value.intersection(value1).collect().foreach(println(_))
+  }
 }

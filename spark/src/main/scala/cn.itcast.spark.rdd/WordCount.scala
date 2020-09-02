@@ -187,9 +187,34 @@ class WordCount{
    * 下面对应的是spark的集合操作，对应的体现出来的是交集，差集以及并集的操作
    * */
   @Test
-  def testUnion(): Unit ={
+  def testIntersection(): Unit ={
     val value: RDD[Int] = context.parallelize(Seq(1, 3, 5))
     val value1: RDD[Int] = context.parallelize(Seq(3, 6, 8))
     value.intersection(value1).collect().foreach(println(_))
+    context.stop()
+  }
+
+  /**
+   * 并集的操作实现
+   * */
+    @Test
+  def testUnion(): Unit ={
+      val value: RDD[Int] = context.parallelize(Seq(1, 3, 5))
+      val value1: RDD[Int] = context.parallelize(Seq(2, 3, 6))
+      // 并集操作结果 135236 对应的是所有的结果的
+      value.union(value1).collect().foreach(println(_))
+      context.stop()
+  }
+
+  /**
+   * 求解集合中的差集数据
+   * */
+    @Test
+  def testSubtract(): Unit ={
+      val value: RDD[Int] = context.parallelize(Seq(1, 3, 5, 7, 8))
+      val value1: RDD[Int] = context.parallelize(Seq(1, 2, 4, 6, 7, 8))
+      //  得到差集结构是3,5的数据集的
+      value.subtract(value1).collect().foreach(println(_))
+      context.stop()
   }
 }

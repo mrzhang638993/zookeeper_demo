@@ -5,3 +5,7 @@
 day02_zookeeper_api_demo.iml
 java.iml
 
+/${project.basedir}/
+/akka/${project.basedir}/
+/akka-master/${project.basedir}/
+/akka-worker/${project.basedir}/

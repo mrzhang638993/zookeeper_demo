@@ -217,4 +217,66 @@ class WordCount{
       value.subtract(value1).collect().foreach(println(_))
       context.stop()
   }
+
+
+  /**
+   * 聚合操作实现  reduceByKey
+   * groupByKey：根据key进行分组操作.本质是一个shuffle的过程的。
+   * groupByKey的运算结果是：
+   * (a,CompactBuffer(1, 1))
+   * (b,CompactBuffer(1))
+   *
+   * reduceByKey：是否可以在map端实现conbinder是否可以减少io。可以在map端减少io操作的
+   * groupByKey:没有减少io的次数的。
+   * reduceByKey以及groupBykey底层都是通过combineByKey实现的。
+   */
+  @Test
+  def groupByKey(): Unit ={
+      context.parallelize(Seq(("a",1),("a",1),("b",1)))
+        .groupByKey().collect().foreach(println(_))
+    context.stop()
+  }
+  /**
+   * 求解得到总分数和科目数
+   * */
+  @Test
+  def  testCombinedByKey(): Unit ={
+    val value: RDD[(String, Double)] = context.parallelize(Seq(("zhangsan", 99.0),
+      ("zhangsan", 96.0),
+      ("lisi", 97.0),
+      ("lisi", 98.0),
+      ("zhangsan", 97.0)))
+    //  createCombinder对应的转换数据
+    // createCombiner: V => C,  需要学会理解参数中的参数的含义信息的
+    //      mergeValue: (C, V) => C,  转换数据的函数。只作用于第一条数据的，用于开启计算
+    //      mergeCombiners: (C, C) => C,
+    //      numPartitions: Int
+    // (zhangsan,97.33333333333333)
+    //(lisi,97.5)
+    val value1: RDD[(String, (Double, Int))] = value.combineByKey(
+      //  item对应的是96.0的数据的 96.0=>(96.0,1) .nextValue对应的是97.0的
+      createCombiner = (item: Double) => (item, 1), mergeValue = (item: (Double, Int),
+                                                                  nextValue: Double) => (item._1 + nextValue, item._2 + 1),
+      mergeCombiners = (curr: (Double, Int), nextValue: (Double, Int)) => (curr._1 + nextValue._1, curr._2 + nextValue._2),
+      numPartitions = 2
+    )
+    value1.map(item=>(item._1,item._2._1/item._2._2)).collect().foreach(println(_))
+    //  mergeValue实现分区上的聚合操作
+    // mergeCombiners 把所有分区上的数据再次聚合，生成最终结果。
+   context.stop()
+  }
+
+  /**
+   * foldByKey:相比较于reduceByKey而言存在初始值，fold对应的是折叠的意思
+   * foldByKey和reduceByKey的区别在于foldByKey是可以指定初始值的。这个初始值作用于整个的数据的。
+   * */
+    @Test
+  def  testFoldByKey(): Unit ={
+      //(b,11)
+      //(a,22)
+    val value: RDD[(String, Int)] = context.parallelize(Seq(("a", 1), ("a", 1), ("b", 1)))
+    //  函数的柯理化参数操作实现。初始值会作用于每一个元素的。
+    value.foldByKey(10,numPartitions=2)((prev,next)=>prev+next).collect().foreach(println(_))
+    context.stop()
+  }
 }

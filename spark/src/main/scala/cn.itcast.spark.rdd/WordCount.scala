@@ -269,6 +269,7 @@ class WordCount{
   /**
    * foldByKey:相比较于reduceByKey而言存在初始值，fold对应的是折叠的意思
    * foldByKey和reduceByKey的区别在于foldByKey是可以指定初始值的。这个初始值作用于整个的数据的。
+   * foldByKey的底层对应的是aggregateByKey实现的。
    * */
     @Test
   def  testFoldByKey(): Unit ={
@@ -278,5 +279,39 @@ class WordCount{
     //  函数的柯理化参数操作实现。初始值会作用于每一个元素的。
     value.foldByKey(10,numPartitions=2)((prev,next)=>prev+next).collect().foreach(println(_))
     context.stop()
+  }
+
+  /**
+   * aggregateByKey的操作实现
+   * (zeroValue: U)(seqOp: (U, V) => U,
+   * combOp: (U, U) => U
+   * 对所有的商品打折，然后计算商品的总价
+   * zeroValue 代表的是初始值。seqOp作用于每一条数据，combOp实现元素的聚合操作。
+   * aggregateByKey(0.8)((zeroValue,item)=>zeroValue*item,(curr,agg)=>curr+agg)
+   * */
+    @Test
+  def testAggregateByKey(): Unit ={
+      val value: RDD[(String, Double)] = context.parallelize(Seq(("手机", 10.0), ("手机", 15.0), ("电脑", 20.0)))
+      // curr代表的是当前的数据的，agg代表的是聚合的数据的
+      // (手机,20.0)
+      //(电脑,16.0)
+      value.aggregateByKey(0.8)((zeroValue,item)=>zeroValue*item,(curr,agg)=>curr+agg).collect().foreach(println(_))
+      context.stop()
+  }
+
+  /**
+   * join算子操作。对两个数据集执行连接操作
+   * */
+    @Test
+  def testJoin(): Unit ={
+      val value: RDD[(String, Int)] = context.parallelize(Seq(("a", 1), ("a", 2), ("b", 1)))
+      val value1: RDD[(String, Int)] = context.parallelize(Seq(("a", 1), ("a", 10)))
+      //  根据key相同实现join操作的,join操作默认是根据key执行操作的。
+      // (a,(1,1))
+      //(a,(1,10))
+      //(a,(2,1))
+      //(a,(2,10))
+      value.join(value1).collect().foreach(println(_))
+      context.stop()
   }
 }

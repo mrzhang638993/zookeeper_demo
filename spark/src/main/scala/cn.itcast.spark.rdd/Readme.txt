@@ -37,6 +37,22 @@ RDD存在5个属性的：
 5.prefer Location：实现数据本地化的操作，体现的是转移数据不如转移计算的理念设计思想的。
 
 
+action操作：
+1.collect操作
+2.reduce操作
+3.foreach操作
+4.countByKey和count
+5.take和takeSample以及first操作。first的速度是相当快的。
+
+
+RDD中存放的数据类型：
+1.基本类型：String 以及对象类型
+2.kv类型：根据key对value执行操作。
+3.数字类型：求解均值和最大数等的。
+
+
+
+
 
 
 

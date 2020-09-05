@@ -314,4 +314,52 @@ class WordCount{
       value.join(value1).collect().foreach(println(_))
       context.stop()
   }
+
+  /*
+  *  sort算子
+  * sortBy可以根据指定的字段进行排序操作，sortByKey根据key进行排序操作
+  * */
+  @Test
+  def testSort(): Unit ={
+    val value: RDD[Int] = context.parallelize(Seq(2, 4, 1, 5, 1, 8))
+    val value1: RDD[(String, Int)] = context.parallelize(Seq(("a", 1), ("b", 3), ("c", 2)))
+    //1
+    //2
+    //4
+    //5
+    //8  默认是升序排列的
+    value.sortBy(item=>item).collect().foreach(println(_))
+    // 根据value进行排序 (a,1)
+    //(c,2)
+    //(b,3)   根据value的升序排列
+    value1.sortBy(item=>item._2).collect().foreach(println(_))
+    //(c,2)
+    //(b,3)
+    //(a,1) 根据key进行降序排列 ascending默认是true的
+    // ascending: Boolean = true
+    value1.sortByKey(ascending = false).collect().foreach(println(_))
+     context.stop()
+  }
+
+  /**
+   * 控制rdd的并行度，控制分区数，提高rdd的运行效率
+   * repartition  控制分区数
+   * collease   控制分区数
+   * */
+  @Test
+  def  testParralel(): Unit ={
+    val value: RDD[Int] = context.parallelize(Seq(1, 2, 3, 4, 5), numSlices = 2)
+    // 指定分区数信息
+    //val value1: RDD[Int] = value.repartition(numPartitions = 3)
+    //println(value1.getNumPartitions)
+
+    //  重新指定分区数
+    //numPartitions: Int, shuffle: Boolean = false,
+    //               partitionCoalescer: Option[PartitionCoalescer] = Option.empty
+    // coalesce 默认的情况是只能够分区数降低的，使用shuffle的话可以将原来的分区内容进行shuffle操作的，是可以重新更改分区的
+    val value1: RDD[Int] = value.coalesce(numPartitions = 4, shuffle = true)
+    //  答应结果为2
+    println("===="+value1.getNumPartitions)
+    context.stop()
+  }
 }

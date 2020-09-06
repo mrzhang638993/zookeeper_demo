@@ -8,3 +8,17 @@ RDD经常需要读取外部的数据创建RDD操作，外部存储的RDD往往�
 指定rdd的分区：1.在创建rdd的时候指定；
 # RDD的缓存
 # RDD的checkpoint操作
+
+
+
+shuffle过程涉及到的概念
+1.reducer的数据一般的是通过hdfs上面的文件的方式实现数据的获取操作的。
+shuffle处理的方式：
+1.hash的shuffle方式；描述的是如何存储文件和获取文件信息。hash  base  shuffle
+存在的问题，每一个mapper对应的针对于reducer而言需要产生多个reducer对用的文件的。这样会导致长生大量的文件的。极大的占用内存资源的。
+产生的中间文件过多的。占用很多的资源的。
+2.sort类型的shuffle方式； sort hash shuffle
+使用appendOnlyMap对应的shuffle方式的，可以减少中间文件的大量生成的。
+
+
+

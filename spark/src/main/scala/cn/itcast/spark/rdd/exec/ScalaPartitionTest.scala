@@ -40,5 +40,5 @@ class ScalaPartitionTest {
   /**
    * 一般情况下设计shuffle的算子都是会涉及到新的分区数的。如果没有指定新的分区数的。默认的是从父RDD中继承分区数信息
    * */
-  
+
 }

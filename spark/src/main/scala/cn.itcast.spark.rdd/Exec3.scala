@@ -6,7 +6,7 @@ import org.junit.Test
 
 class Exec3 {
 
-  private val exec: SparkConf = new SparkConf().setMaster("local").setAppName("exec2")
+  private val exec: SparkConf = new SparkConf().setMaster("local[2]").setAppName("exec3")
   private val context = new SparkContext(exec)
   context.setCheckpointDir("checkPoint")
   /**
@@ -31,6 +31,11 @@ class Exec3 {
 
   /**
    * 答案是错误的。需要识别和侦测一下。
+   * List((苹果,150.0), (华为,20.0))  local
+   * List((苹果,150.0), (华为,20.0)) local[1]
+   * List((苹果,150.0), (华为,20.0))
+   * List((苹果,150.0), (华为,20.0))  local[1] 
+   * List((华为,20.0), (苹果,25.0))  local[2]
    * */
 @Test
   def  testError(): Unit ={
@@ -38,7 +43,8 @@ class Exec3 {
     val result = rdd.aggregateByKey(1.0)(
       seqOp = (zero, price) => price * zero,
       combOp = (curr, agg) => curr + agg
-    ).collect().foreach(println(_))
-    println(result)
+    ).collect()
+    println(result.toList)
+    context.stop()
   }
 }

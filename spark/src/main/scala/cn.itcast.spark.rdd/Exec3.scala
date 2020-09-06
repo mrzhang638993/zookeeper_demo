@@ -34,7 +34,7 @@ class Exec3 {
    * List((苹果,150.0), (华为,20.0))  local
    * List((苹果,150.0), (华为,20.0)) local[1]
    * List((苹果,150.0), (华为,20.0))
-   * List((苹果,150.0), (华为,20.0))  local[1] 
+   * List((苹果,150.0), (华为,20.0))  local[1]
    * List((华为,20.0), (苹果,25.0))  local[2]
    * */
 @Test
@@ -44,7 +44,6 @@ class Exec3 {
       seqOp = (zero, price) => price * zero,
       combOp = (curr, agg) => curr + agg
     ).collect()
-    println(result.toList)
     context.stop()
   }
 }

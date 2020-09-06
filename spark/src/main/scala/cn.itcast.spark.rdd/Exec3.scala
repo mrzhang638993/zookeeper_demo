@@ -28,4 +28,17 @@ class Exec3 {
       .map(item=>(item._1,item._2._1/item._2._2)).collect().foreach(println(_))
     context.stop()
   }
+
+  /**
+   * 答案是错误的。需要识别和侦测一下。
+   * */
+@Test
+  def  testError(): Unit ={
+    val rdd = context.parallelize(Seq(("苹果", 10), ("苹果", 15), ("华为", 20)))
+    val result = rdd.aggregateByKey(1.0)(
+      seqOp = (zero, price) => price * zero,
+      combOp = (curr, agg) => curr + agg
+    ).collect().foreach(println(_))
+    println(result)
+  }
 }

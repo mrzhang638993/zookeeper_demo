@@ -13,11 +13,20 @@ class SourceAnalyse {
   private val context = new SparkContext(exec)
   /**
    * 理解源码操作实现
+   *
+   * (Hadop,1)
+   * (Flume,1)
+   * (Sqoop,1)
+   * (Spark,2)
+   * (Hadoop,1)
    * */
    @Test
   def  wordCount(): Unit ={
      val value: RDD[String] = context.parallelize(Seq("Hadoop Spark", "Hadop Flume", "Spark Sqoop"))
-     //value.flatMap(item=>)
+     value.flatMap(item=>{
+       val strings: Array[String] = item.split(" ")
+       strings.map(it=>(it,1))
+     }).reduceByKey((curr,agg)=>curr+agg).collect().foreach(println(_))
      context.stop()
    }
 }

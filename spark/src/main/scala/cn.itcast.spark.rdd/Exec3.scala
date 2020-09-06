@@ -6,7 +6,7 @@ import org.junit.Test
 
 class Exec3 {
 
-  private val exec: SparkConf = new SparkConf().setMaster("local[2]").setAppName("exec3")
+  private val exec: SparkConf = new SparkConf().setMaster("local").setAppName("exec3")
   private val context = new SparkContext(exec)
   context.setCheckpointDir("checkPoint")
   /**
@@ -31,19 +31,15 @@ class Exec3 {
 
   /**
    * 答案是错误的。需要识别和侦测一下。
-   * List((苹果,150.0), (华为,20.0))  local
-   * List((苹果,150.0), (华为,20.0)) local[1]
-   * List((苹果,150.0), (华为,20.0))
-   * List((苹果,150.0), (华为,20.0))  local[1]
-   * List((华为,20.0), (苹果,25.0))  local[2]
+   * aggregateByKey对应的计算结果是首先执行部分的计算的，然后执行的是全局的计算的。
    * */
 @Test
   def  testError(): Unit ={
     val rdd = context.parallelize(Seq(("苹果", 10), ("苹果", 15), ("华为", 20)))
-    val result = rdd.aggregateByKey(1.0)(
+     rdd.aggregateByKey(1.0)(
       seqOp = (zero, price) => price * zero,
       combOp = (curr, agg) => curr + agg
-    ).collect()
+    ).collect().foreach(println(_))
     context.stop()
   }
 }

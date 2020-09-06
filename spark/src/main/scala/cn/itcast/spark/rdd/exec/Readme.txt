@@ -20,5 +20,7 @@ shuffle处理的方式：
 2.sort类型的shuffle方式； sort hash shuffle
 使用appendOnlyMap对应的shuffle方式的，可以减少中间文件的大量生成的。
 
+shuffle执行的操作是需要在多个计算机之间进行数据拷贝操作的。存在大量的io的
+
 
 

@@ -42,7 +42,7 @@ class Exec3 {
 @Test
   def  testError(): Unit ={
     val rdd = context.parallelize(Seq(("苹果", 10), ("苹果", 15),("苹果", 11),("苹果", 12),("华为", 20)))
-     rdd.aggregateByKey(0)(
+  rdd.aggregateByKey(0)(
       // aggregateByKey中的seqOp以及combOp如果执行不同的操作的话，
        // 对应的输出的结果就不一样了。这样的话，最终的输出结果千差万别的。
        //  解决的办法：

@@ -8,7 +8,6 @@ RDD经常需要读取外部的数据创建RDD操作，外部存储的RDD往往�
 # RDD的缓存
 # RDD的checkpoint操作
 
-
 shuffle过程涉及到的概念
 1.reducer的数据一般的是通过hdfs上面的文件的方式实现数据的获取操作的。
 shuffle处理的方式：
@@ -19,13 +18,12 @@ shuffle处理的方式：
 使用appendOnlyMap对应的shuffle方式的，可以减少中间文件的大量生成的。
 
 shuffle执行的操作是需要在多个计算机之间进行数据拷贝操作的。存在大量的io的
-
 写代码的境界和操作实现:
 1.只是直到自己在写代码；
 2.直到代码在做什么的；
 
-
-aggregateByKey的使用需要重点注意一下的
+aggregate,aggregateByKey,treeAggregate等在一个算子中执行聚合然后在整个的算子中执行聚合操作的
+使用的时候需要重点注意一下的
 1.涉及到RDD单个分区的操作的，还涉及到RDD的多个分区的操作的。
 分区数的改变以及数据量的改变对应的都会导致结果的最终变化的。
 2.针对于这些问题，可以将seqOp以及combOp设置成为一样的算法的，

@@ -22,11 +22,31 @@ class SourceAnalyse {
    * */
    @Test
   def  wordCount(): Unit ={
-     val value: RDD[String] = context.parallelize(Seq("Hadoop Spark", "Hadop Flume", "Spark Sqoop"))
-     value.flatMap(item=>{
+     val strContent: RDD[String] = context.parallelize(Seq("Hadoop Spark", "Hadop Flume", "Spark Sqoop"))
+     //context.textFile("")  HadoopRDD
+     val wordTuple: RDD[(String, Int)] = strContent.flatMap(item => {
        val strings: Array[String] = item.split(" ")
-       strings.map(it=>(it,1))
-     }).reduceByKey((curr,agg)=>curr+agg).collect().foreach(println(_))
+       strings.map(it => (it, 1))
+     }).reduceByKey((curr, agg) => curr + agg)
+     println("打印逻辑执行图==="+wordTuple.toDebugString)
+     //打印逻辑执行图===(6) ShuffledRDD[2] at reduceByKey at SourceAnalyse.scala:29 [].对应的是29行的，执行的是reduceByKey得到的shuffle
+     // +-(6) MapPartitionsRDD[1] at flatMap at SourceAnalyse.scala:26 []  26行，执行map操作得到的是MapPartitionsRDD
+     //    |  ParallelCollectionRDD[0] at parallelize at SourceAnalyse.scala:25 []  25行，执行parallelize得到ParallelCollectionRDD
      context.stop()
    }
+
+
+ /**
+  * 测试RDD分区窄依赖关系
+  * 需求：求得两个RDD之间的迪卡尔集
+  * */
+  @Test
+  def narrowDependency(): Unit ={
+    val rdd1: RDD[Int] = context.parallelize(Seq(1, 2, 3, 4, 5, 6))
+    val rdd2: RDD[String] = context.parallelize(Seq("a", "b", "c"))
+    //  求解rdd1.rdd2的笛卡尔积.cartesian可以用于求解笛卡尔积数据
+    val rdd3: RDD[(Int, String)] = rdd1.cartesian(rdd2)
+    rdd3.collect().foreach(println(_))
+    context.stop()
+  }
 }

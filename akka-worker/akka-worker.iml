@@ -42,7 +42,7 @@
     <orderEntry type="module-library">
       <library name="Maven: org.elasticsearch.plugin:x-pack-sql-jdbc:6.7.0">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../software/lib/x-pack-sql-jdbc-6.7.0.jar!/" />
+          <root url="jar://F:/software/lib/x-pack-sql-jdbc-6.7.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -218,7 +218,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.cloudera.impala.jdbc:ImpalaJDBC41:2.5.41">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../software/lib/ImpalaJDBC41.jar!/" />
+          <root url="jar://F:/software/lib/ImpalaJDBC41.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

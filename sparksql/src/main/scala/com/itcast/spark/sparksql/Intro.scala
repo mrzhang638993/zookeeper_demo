@@ -1,7 +1,7 @@
 package com.itcast.spark.sparksql
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext, sql}
 import org.junit.Test
 
@@ -42,6 +42,24 @@ class Intro {
       .as[String]
     // 执行数据展示操作
     dataShow.show()
+  }
+
+  /**
+   * 使用声明式的api进行操作的.sql语句的
+   * */
+  @Test
+  def dfIntro(): Unit ={
+    //  获取sparkSession对象。
+    val sparkSql:SparkSession = new sql.SparkSession.Builder().master("local[6]").appName("intro").getOrCreate()
+    // 对应的导入的是sparkSql的对象信息的。导入隐式转换操作的内容
+    import sparkSql.implicits._
+    // 无法完成数据的转换操作实现
+    val rdd: RDD[Person] = sparkSql.sparkContext.parallelize(Seq(Person("zhangsan", 15), Person("lisi", 20), Person("wangwu", 30)))
+    val frame: DataFrame = rdd.toDF()
+    // 使用frame的话，需要创建临时表的
+    frame.createOrReplaceTempView("person")
+    val nameFrame: DataFrame = sparkSql.sql("select name from  person where age>10 and age<20")
+    nameFrame.show()
   }
 }
 

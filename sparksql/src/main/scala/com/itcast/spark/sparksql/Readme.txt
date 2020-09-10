@@ -1,0 +1,4 @@
+# sparksql中可以使用schema对应的操作对应的对应的字段的。dataset包含了schema信息的。
+RDD处理的时候对应的不知道是什么内容的。
+
+spark sql最精华的一部分是Catalyst 优化器的内容的

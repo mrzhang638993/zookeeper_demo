@@ -31,9 +31,7 @@ class Intro {
     val sparkSql:SparkSession = new sql.SparkSession.Builder().master("local[6]").appName("intro").getOrCreate()
     // 对应的导入的是sparkSql的对象信息的。导入隐式转换操作的内容
     import sparkSql.implicits._
-    // 无法完成数据的转换操作实现
     val rdd: RDD[Person] = sparkSql.sparkContext.parallelize(Seq(Person("zhangsan", 15), Person("lisi", 20), Person("wangwu", 30)))
-    //  创建dataset数据集的数据的
     val personDs: Dataset[Person] = rdd.toDS()
     // 执行一系列的操纵。直接根据对象的name进行查询操作的
     val dataShow: Dataset[String] = personDs.where("age>10")

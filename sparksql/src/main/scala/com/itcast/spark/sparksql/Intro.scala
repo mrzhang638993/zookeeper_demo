@@ -22,6 +22,8 @@ class Intro {
 
   /**
    * sparksession中包括常见的多种sparkContext的数据的。
+   * 原有的sparkContext只是支持textfile的数据集的，引入新的数据集需要更多的对象的。
+   * sparksql需要引入更多的数据源，加入更多的数据源的写入。创建一整套的读写的体系操作，需要兼容旧的内容的。
    * */
   @Test
   def  testSparkSql(): Unit ={

@@ -17,6 +17,7 @@
         <module>spark-demo-worker</module>
         <module>spark</module>
         <module>otp</module>
+        <module>sparksql</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,0 +1,24 @@
+case class Person(name:String,age:Int)
+import spark.implicits._
+val rdd = spark.sparkContext.parallelize(Seq(Person("zhangsan", 15), Person("lisi", 20), Person("wangwu", 30)))
+val personDs = rdd.toDS()
+###逻辑计划的查看
+personDs.queryExecution
+res0: org.apache.spark.sql.execution.QueryExecution =
+== Parsed Logical Plan ==
+SerializeFromObject [staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringType, fromString, assertnotnull(assertnotnull(input[0, Person, true])).name, true) AS name#3, assertnotnull(assertnotnull(input[0, Person, true])).age AS age#4]
++- ExternalRDD [obj#2]
+
+== Analyzed Logical Plan ==
+name: string, age: int
+SerializeFromObject [staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringType, fromString, assertnotnull(assertnotnull(input[0, Person, true])).name, true) AS name#3, assertnotnull(assertnotnull(input[0, Person, true])).age AS age#4]
++- ExternalRDD [obj#2]
+
+== Optimized Logical Plan ==
+SerializeFromObject [staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringTyp...
+#物理执行计划的查看
+scala> personDs.explain
+== Physical Plan ==
+*SerializeFromObject [staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringType, fromString, assertnotnull(input[0, $line17.$read$$iw$$iw$Person, true]).name, true) AS name#3, assertnotnull(input[0, $line17.$read$$iw$$iw$Person, true]).age AS age#4]
++- Scan ExternalRDDScan[obj#2]
+

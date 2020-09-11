@@ -115,11 +115,76 @@ class Intro {
   @Test
   def  testDataFrame(): Unit ={
     val spark: SparkSession = SparkSession.builder().master("local[6]").appName("testFramme").getOrCreate()
-     import spark.implicits._
+    //  导入了隐式转换的对象的rddToDatasetHolder方法的
+    import spark.implicits._
+    // toDF最终调用的是 sparkSession.createDataset(data)
+    // 调用隐式转换对象的DF方法的。
+    // new Dataset[Row](sparkSession, queryExecution, RowEncoder(schema))
+    // 根据类型匹配自动调用SQLImplicits的 implicit def rddToDatasetHolder[T : Encoder](rdd: RDD[T]): DatasetHolder[T] = {
+    //    DatasetHolder(_sqlContext.createDataset(rdd))
+    //  }
     val frame: DataFrame = Seq(Person("zhangsan", 20), Person("lisi", 25), Person("wangwu", 30)).toDF()
     frame.where("age>20")
       .select("name")
       .show()
+  }
+
+
+  @Test
+  def  testDataFrame2(): Unit ={
+    val spark: SparkSession = SparkSession.builder().master("local[6]").appName("testFramme").getOrCreate()
+    import spark.implicits._
+    val frame: DataFrame = Seq(Person("zhangsan", 20), Person("lisi", 25), Person("wangwu", 30)).toDF()
+    frame.where("age>20")
+      .select("name")
+      .show()
+  }
+
+
+  @Test
+  def  testDataFrame3(): Unit ={
+    val spark: SparkSession = SparkSession.builder().master("local[6]").appName("testFramme").getOrCreate()
+    import spark.implicits._
+    val persons = Seq(Person("zhangsan", 20), Person("lisi", 25), Person("wangwu", 30))
+    //  创建DF的方式之一
+    val frame: DataFrame = persons.toDF()
+    val frame1: DataFrame = spark.sparkContext.parallelize(persons).toDF()
+    // 创建DataFrame
+    val frame2: DataFrame = spark.createDataFrame(persons)
+    // 读取文件创建dataFrame数据结构
+    val frame3: DataFrame = spark.read.csv("F:\\works\\hadoop1\\zookeeper-demo\\sparksql\\src\\main\\scala\\com\\itcast\\spark\\sparksql\\BeijingPM20100101_20151231.csv")
+    frame3.show()
+  }
+
+
+  @Test
+  def  testDataFrame4(): Unit ={
+    val spark: SparkSession = SparkSession.builder().master("local[6]").appName("testFrame").getOrCreate()
+    import spark.implicits._
+    //  需要处理第一行的头信心
+    val frame3: DataFrame = spark.read
+      //  option 选项指定header是存在的
+      .option("header",value=true)
+      // 读取数据的时候是否可以读取部分的数据.csv文件的options对应的参考文件CSVOptions获取到诸多的options选项
+      // https://blog.csdn.net/OldDirverHelpMe/article/details/106120312?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~first_rank_v2~rank_v25-20-106120312.nonecase&utm_term=spark%E8%AF%BB%E5%8F%96%E6%8C%87%E5%AE%9A%E5%88%97 对应的也可以参考文档执行处理的
+      .csv("F:\\works\\hadoop1\\zookeeper-demo\\sparksql\\src\\main\\scala\\com\\itcast\\spark\\sparksql\\BeijingPM20100101_20151231.csv")
+    // 打印schema信息。dataFrame中是存在结构信息的
+    //frame3.printSchema()
+    //  下面使用命令式的操作的
+    /*frame3.select("year","month","PM_Dongsi")
+      // 不等于的符号 =!=
+      .where("PM_Dongsi !='NA'")
+      .groupBy("year","month")
+      // 求得每一组的个数的
+      .count()
+      // 执行action操作
+      .show()*/
+    // 下面直接使用sql语句执行操作的
+    frame3.createOrReplaceTempView("pm")
+    val frame: DataFrame = spark.sql("select year,month,count(PM_Dongsi) from pm where PM_Dongsi!='NA' group by year,month")
+    frame.show()
+    spark.stop()
+    //frame3.show()
   }
 }
 

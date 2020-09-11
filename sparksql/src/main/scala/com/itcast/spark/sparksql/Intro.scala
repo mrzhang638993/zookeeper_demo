@@ -2,6 +2,7 @@ package com.itcast.spark.sparksql
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext, sql}
 import org.junit.Test
@@ -184,7 +185,42 @@ class Intro {
     val frame: DataFrame = spark.sql("select year,month,count(PM_Dongsi) from pm where PM_Dongsi!='NA' group by year,month")
     frame.show()
     spark.stop()
+    // type DataFrame = Dataset[Row] 对应的dataFrame对应的是dataSet的别名的。
     //frame3.show()
+  }
+
+  /**
+   * 测试dataset以及dataFrame的差异性
+   * */
+  @Test
+  def  testDataFrame5(): Unit ={
+    val spark: SparkSession = SparkSession.builder().master("local[6]").appName("testFrame").getOrCreate()
+    import spark.implicits._
+    val persons = Seq(Person("zhangsan", 15), Person("lisi", 20))
+    // 操作，转化成为DataFrame对象。
+    val frame: DataFrame = persons.toDF()
+    // dataFrame操作的是row对象的
+    frame.map((row:Row)=>Row(row.get(0),row.getAs[Int](1)*2))(RowEncoder.apply(frame.schema)).show()
+    // 转化为dataset
+    val ds: Dataset[Person] = persons.toDS()
+    // 操作ds，ds中存放的是对象的内容的。
+    ds.map((person:Person)=>Person(person.name,person.age*2)).show()
+    spark.stop()
+  }
+  /**
+   * 测试使用dataframe的row对象的
+   * */
+  @Test
+  def  row(): Unit ={
+    val zhangsan: Person = Person("zhangsan", 15)
+    val person: Row = Row("lisi", 20)
+    //  获取到row对象的第一列和第二列
+    person.getString(0)
+    person.getInt(1)
+    //
+    person match {
+      case Row(name,age)=>println(name+"===="+age)
+    }
   }
 }
 

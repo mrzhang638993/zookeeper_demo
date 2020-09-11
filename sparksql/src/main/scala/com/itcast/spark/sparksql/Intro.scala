@@ -109,6 +109,8 @@ class Intro {
   /**
    * 测试dataFrame的操作的
    * dataframe借鉴的是pandas的datframe的数据结构的
+   *
+   * 创建dataFrame的方式:toDF() , createDataFrame,DataFrameReader方式创建。可以通过读取文件的方式实现
    * */
   @Test
   def  testDataFrame(): Unit ={
@@ -118,7 +120,6 @@ class Intro {
     frame.where("age>20")
       .select("name")
       .show()
-
   }
 }
 

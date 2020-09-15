@@ -1,5 +1,6 @@
 package com.itcast.spark.sparksql
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, DataFrameReader, SaveMode, SparkSession}
 import org.junit.Test
 
@@ -138,6 +139,8 @@ class ReadWrite {
    * 生成的不是标准格式的json文件的。每一个记录对应的是以恶json记录的。
    * 业务系统之中需要大量的使用json文件的，使用json解析操作的时候，对应的可以使用spark的json解析操作的。
    * gson，fastjson等的工具的，需要的是每一行的数据记录对应的是一个单个的json文件的。
+   * 书写json的时候没有指定schema的话，给定的数据都是字符串形式的数据的。
+   * 需要给定schema的约束的。
    * */
     @Test
   def  writeJson(): Unit ={
@@ -161,6 +164,39 @@ class ReadWrite {
       json.show(10)
       spark.stop()
   }
+
+  /**
+   * json文件读取的小技巧的
+   * toJson对应的可以转化为json形式的dataFrame数据的
+   * 可以直接从rdd读取json的dataFrame的数据的。
+   * 场景信息:消息发送到消息队列里面进行操作处理的。
+   * 从消息队列中读取json形式的数据，需要使用spark进行操作处理的。
+   * */
+    @Test
+  def   jsonTicks(): Unit ={
+      val spark: SparkSession = SparkSession.builder().master("local[6]").appName("readAndWrite")
+        .getOrCreate()
+      val df: DataFrame = spark.read
+        .option("header", true)
+        .format("csv")
+        .load("F:\\works\\hadoop1\\zookeeper-demo\\sparksql\\src\\main\\scala\\com\\itcast\\spark\\sparksql\\BeijingPM20100101_20151231.csv")
+      //将dataFrame中的数据转化为json对象给别的系统进行处理操作的。
+       //df.toJSON.show(10) toJson可以将DataSet[object]转化为DataSet[jsonString]执行操作的
+      //   对应的直接从rdd中读取json执行操作的
+       val rdd: RDD[String] = df.toJSON.rdd
+      // 直接从rdd中读取数据执行操作处理实现的。
+      val frame: DataFrame = spark.read.json(rdd)  //  RDD[jsonString]转化为RDD[Object]
+      frame.show()
+    }
+
+  /**
+   * spark sql访问hive操作的
+   * 一个系统访问另外的一个系统的
+   * spark sql整合hive操作的
+   * hive对应的是通过表的概念映射了一个或者是多个hdfs中的文件的。
+   * hive的sql语句对应的会翻译成为mr程序的，然后执行的。
+   * 需要整合的话，整合的是hive的metastore的数据的。
+   * */
 
 
 }

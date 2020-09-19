@@ -40,7 +40,7 @@
     <orderEntry type="module-library">
       <library name="Maven: org.elasticsearch.plugin:x-pack-sql-jdbc:6.7.0">
         <CLASSES>
-          <root url="jar://D:/lib/x-pack-sql-jdbc-6.7.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../lib/x-pack-sql-jdbc-6.7.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -176,15 +176,6 @@
     <orderEntry type="library" name="Maven: com.lmax:disruptor:3.3.6" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-distcp:2.7.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-annotations:2.7.4" level="project" />
-    <orderEntry type="module-library">
-      <library name="Maven: jdk.tools:jdk.tools:1.8">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../software/jdk/lib/tools.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="Maven: redis.clients:jedis:2.9.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-pool2:2.4.2" level="project" />
     <orderEntry type="library" name="Maven: eu.bitwalker:UserAgentUtils:1.21" level="project" />
@@ -216,7 +207,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.cloudera.impala.jdbc:ImpalaJDBC41:2.5.41">
         <CLASSES>
-          <root url="jar://D:/lib/ImpalaJDBC41.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../lib/ImpalaJDBC41.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

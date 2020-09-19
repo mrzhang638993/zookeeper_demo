@@ -75,7 +75,7 @@ public class ES2Hbase {
         List<Put> puts = new ArrayList<>();
         for (Article article : exceInfo) {
             Put put = new Put(article.getId().getBytes());
-            put.addColumn("f1".getBytes(), "title".getBytes(), article.getTitle().getBytes());
+            put.add("f1".getBytes(), "title".getBytes(), article.getTitle().getBytes());
             put.addColumn("f1".getBytes(), "from".getBytes(), article.getFrom().getBytes());
             put.addColumn("f1".getBytes(), "times".getBytes(), article.getTimes().getBytes());
             put.addColumn("f1".getBytes(), "readCounts".getBytes(), article.getReadCounts().getBytes());

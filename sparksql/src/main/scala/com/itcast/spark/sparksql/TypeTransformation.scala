@@ -175,6 +175,7 @@ class TypeTransformation {
   def testCreateColumn(): Unit = {
     //下面的是column的创建的函数以及操作实现
     val persons = Seq(Person("zhangsan", 15), Person("lisi", 10)).toDS()
+    val ds1 = Seq(Person("zhangsan", 15), Person("lisi", 10)).toDS()
     //创建df实现相关的代码的操作实现
     var df = Seq(("zhangsan", 15), ("lisi", 10)).toDF("name", "age")
     // 方式之一:‘创建操作的. symbol对象最终会转化为column对象的
@@ -198,5 +199,47 @@ class TypeTransformation {
     val column5 = persons.col("name")
     //确定column对应的是相等的操作实现的
     println(column4 == column5)
+    // column5绑定了persons操作的，是不能绑定ds1上面的。
+    ds1.where(column5).show()
+    //  下面的join操作实现了persons以及ds1的绑定操作实现,实现的是为了在dataset的join等的操作的时候进行区别操作的
+    persons.join(ds1,persons.col("name")===ds1.col("name"))
+    //  使用ds的apply方式创建对象的.调用apply方法和直接调用对象是一样的
+    val column6: Column = persons.apply("name")
+    // 对应的也是column对象的
+    val column7 = persons("name")
+  }
+
+
+  /**
+   * 别名和转换操作：使用的是As算子实现操作
+   * */
+  @Test
+  def  testTypeTransform(): Unit ={
+    val ds = Seq(Person("zhangsan", 15), Person("lisi", 10)).toDS()
+    import org.apache.spark.sql.functions._
+    // scala中的对象的引用可以使用空格进行操作的。
+    // ds.select('name as "new_name")
+    ds.select("name").as("name")
+    // 使用别名的机制实现别名操作实现
+    ds.select('age.as[Long]).show()
+  }
+
+  /**
+   *  常见的算子的操作实现和管理的
+   * */
+  @Test
+  def api(): Unit ={
+    // 需求1：增加双倍的年龄操作实现
+    val ds = Seq(Person("zhangsan", 15), Person("lisi", 10)).toDS()
+    //ds.map(person=>Person(person.name,person.age*2)).show()
+    import org.apache.spark.sql.functions._
+    ds.withColumn("double_age",'age*2).show()
+    // 需求2：模糊查询操作
+    ds.where('name like "zhang%")
+    // 需求3:排序，正反顺序排序
+    ds.sort('name.asc).show()
+    ds.sort('name.desc).show()
+    //  需求4：枚举判断
+    ds.where('name isin ("zhangsan","lisi","wangwu","zhaoliu")).show()
   }
 }

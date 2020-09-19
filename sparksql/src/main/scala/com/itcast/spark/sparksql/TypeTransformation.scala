@@ -140,10 +140,28 @@ class TypeTransformation {
     persons.withColumn("name_column",expr("name")).show()
     // 增加列的操作的，对应的判断每一列的数据是否是等于“”的数据的。增加新的列进行操作的。
     persons.withColumn("name_jok",new Column("name")==="").show()
-
     //重命名操作实现和管理实现
-    persons.withColumnRenamed("")
-
+    persons.withColumnRenamed("name_new","name")
   }
 
+  /**
+   *  drop 可以删除对应的数据的列的数据的
+   * */
+
+  /**
+   * 无类型的转换算子实现操作：测试groupBy执行操作语句
+   * */
+  @Test
+  def testGroupBy(): Unit ={
+    val persons = Seq(Person("zhangsan", 12), Person("lisi", 18), Person("zhangsan", 8)).toDS()
+    //  为什么groupByKey对应的是有类型的操作的。groupBy对应的是无类型的操作的
+    // groupByKey 生成的算子是有类型的。可以使用到Person对象的类型的
+   //persons.groupByKey(person=>person.age)
+    //  根据指定的列执行操作的.groupby对应的算子生成的是无类型的。
+    import org.apache.spark.sql.functions._
+    // 根据name进行聚合操作，执行sum统计求和操作
+    persons.groupBy("name").agg(mean("age")).show()
+    //  进行聚合求和统计操作实现
+    persons.groupBy("name").agg(sum("age")).show()
+  }
 }

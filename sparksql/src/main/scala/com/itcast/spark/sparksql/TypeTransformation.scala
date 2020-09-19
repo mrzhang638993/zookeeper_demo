@@ -164,4 +164,33 @@ class TypeTransformation {
     //  进行聚合求和统计操作实现
     persons.groupBy("name").agg(sum("age")).show()
   }
+
+  /**
+   * 在使用无类型的对象的使用，使用的是column对象的
+   * 下面是column对象的创建和使用操作的
+   * */
+  @Test
+  def testCreateColumn(): Unit ={
+      //下面的是column的创建的函数以及操作实现
+      val persons = Seq(Person("zhangsan", 15), Person("lisi", 10)).toDS()
+    //创建df实现相关的代码的操作实现
+     var df=Seq(("zhangsan", 15),("lisi", 10)).toDF("name","age")
+      // 方式之一:‘创建操作的. symbol对象最终会转化为column对象的
+    //  implicit def symbolToColumn(s: Symbol): ColumnName = new ColumnName(s.name)  对应的Symbol对象会转化成为Colume的对象的
+     var column ='name
+    //  创建方式之二: $创建对应的操作实现.必须导入spark的隐式转换操作
+    var column1=$"name"
+    // 创建方式之三：使用 col方式创建操作,需要导入隐世转换操作的实现
+    import org.apache.spark.sql.functions._
+    var   column2=col("name")
+    // 创建方式之四:隐式导入functions的函数的
+    import org.apache.spark.sql.functions._
+    var   column3=column("name")
+    //  ds可以使用column对象的
+    persons.select(column).show()
+    df.select(column1).show()
+
+    // 可以使用其他的算子执行算子操作实现的.实现条件过滤操作的
+    df.where(column==="zhangsan").show()
+  }
 }

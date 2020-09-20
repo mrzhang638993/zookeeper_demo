@@ -218,4 +218,69 @@ class AggrProcessor {
       .sort('source.desc_nulls_last,'year.desc_nulls_last)
       .show()
   }
+
+  /**
+   * rollup a,b 和 rollup b,a对应的是不一样的，不均衡的操作的
+   * 实现均衡的操作，可以使用cube的操作的。对应所以的类型都是会进行计算操作的
+   * */
+  @Test
+  def  testCube(): Unit ={
+     // testCube相关的分配操作实现
+     val  schema=StructType(
+       //name 和dataType类型的数据执行操作的
+       // source,year,month,day,hour,season,pm
+       List(
+         StructField("source",StringType),
+         StructField("year",IntegerType),
+         StructField("month",IntegerType),
+         StructField("day",IntegerType),
+         StructField("hour",IntegerType),
+         StructField("season",IntegerType),
+         // double下面存在NAN的，对应的不是字符串的。
+         StructField("pm",DoubleType)
+       )
+     )
+    val df = spark.read
+      .format("csv")
+      .option("header",value = true)
+      .schema(schema)
+      .csv("D:\\document\\works\\zookeeper-demo\\sparksql\\src\\main\\scala\\com\\itcast\\spark\\sparksql\\pm_final.csv")
+    //  聚合统计操作实现
+    //+-------+----+---------+
+    //| source|year|       pm|
+    //+-------+----+---------+
+    //| dongsi|2013| 735606.0|
+    //| dongsi|2014| 745808.0|
+    //| dongsi|2015| 752083.0|
+    //| dongsi|null|2233497.0|
+    //|us_post|2015| 714515.0|
+    //|us_post|2012| 750838.0|
+    //|us_post|2011| 796016.0|
+    //|us_post|2010| 841834.0|
+    //|us_post|2014| 846475.0|
+    //|us_post|2013| 882649.0|
+    //|us_post|null|4832327.0|
+    //|   null|2012| 750838.0|
+    //|   null|2011| 796016.0|
+    //|   null|2010| 841834.0|
+    //|   null|2015|1466598.0|
+    //|   null|2014|1592283.0|
+    //|   null|2013|1618255.0|
+    //|   null|null|7065824.0|
+    //+-------+----+---------+
+    import org.apache.spark.sql.functions._
+    df.cube("source","year")
+      .agg(sum("pm") as "pm")
+      .sort('source asc_nulls_last,'pm asc_nulls_last)
+      .show()
+  }
+
+
+  /**
+   * 下面是hive对应的cube以及其他的开发支持操作的
+   * */
+  @Test
+  def testHiveCube(): Unit ={
+     
+  }
 }

@@ -278,9 +278,38 @@ class AggrProcessor {
 
   /**
    * 下面是hive对应的cube以及其他的开发支持操作的
+   * 使用cubesql语句实现相关的sql语句操作实现
    * */
   @Test
-  def testHiveCube(): Unit ={
-     
+  def testCubeSql(): Unit ={
+    val  schema=StructType(
+      //name 和dataType类型的数据执行操作的
+      // source,year,month,day,hour,season,pm
+      List(
+        StructField("source",StringType),
+        StructField("year",IntegerType),
+        StructField("month",IntegerType),
+        StructField("day",IntegerType),
+        StructField("hour",IntegerType),
+        StructField("season",IntegerType),
+        // double下面存在NAN的，对应的不是字符串的。
+        StructField("pm",DoubleType)
+      )
+    )
+    val df = spark.read
+      .format("csv")
+      .option("header",value = true)
+      .schema(schema)
+      .csv("D:\\document\\works\\zookeeper-demo\\sparksql\\src\\main\\scala\\com\\itcast\\spark\\sparksql\\pm_final.csv")
+    //  聚合统计操作实现
+    df.createOrReplaceTempView("pm_final")
+    val resultFrame = spark.sql("select source,year,avg(pm) as pm  from  pm_final  " +
+      "group by source,year  grouping sets((source,year),(source),(year),())" +
+      "order by source asc nulls last ,year asc nulls last")
+    resultFrame.show()
   }
+
+  /**
+   * groupBy cube rollup对应的生成的是RelationalGroupedDataset
+   * */
 }

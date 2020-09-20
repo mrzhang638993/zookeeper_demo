@@ -61,6 +61,17 @@ class AggrProcessor {
        .select($"sum(pm)".as("pm_avg"))
        .orderBy("pm_avg")
        .show()
-
    }
+
+
+  /**
+   * 执行多维聚合操作实现
+   * 对应的执行相关的聚合操作实现
+   * groupby对应的是单个维度的聚合操作实现的
+   * 多维聚合：不是特别常见的操作实现的。多维聚合怎么使用普通的spark sql的代码完成多维聚合的操作的
+   * */
+  @Test
+  def testMultipuleAggr(): Unit ={
+     
+  }
 }

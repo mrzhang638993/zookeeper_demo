@@ -37,8 +37,55 @@ class JoinProcessor {
     //|  2|   Tim|Guangzhou|
     //|  3|Danial|  Beijing|
     //+---+------+---------+
-    person.join(cities,person.col("cityId")===cities.col("id"))
+    val df = person.join(cities, person.col("cityId") === cities.col("id"))
       .select(person.col("id"),
-       person.col("name"),cities.col("name")).show()
+        person.col("name"), cities.col("name") as "city")
+    val table = df.createTempView("person")
+    // 同一个时间访问了2张数据库的表进行联查操作的
+    // +---+------+-------+
+    //| id|  name|   city|
+    //+---+------+-------+
+    //|  0|  Lucy|Beijing|
+    //|  1|  Lily|Beijing|
+    //|  3|Danial|Beijing|
+    //+---+------+-------+
+    val dfResults = spark.sql("select id ,name,city  from person where city='Beijing'")
+    dfResults.show()
+  }
+  /**
+   * 连接查询操作实现
+   * 交叉连接：crossJoin操作
+   * crossjoin对应的是全连接的操作的。
+   * */
+  @Test
+  def  testCross(): Unit ={
+     // 测试cross操作实现
+    val person = Seq((0, "Lucy", 0), (1, "Lily", 0), (2, "Tim", 2), (3, "Danial", 0))
+       .toDF("id", "name", "cityId")
+    val cities = Seq((0, "Beijing"), (1, "Shanghai"), (2, "Guangzhou"))
+      .toDF("id", "name")
+    //+---+------+------+---+---------+
+    //| id|  name|cityId| id|     name|
+    //+---+------+------+---+---------+
+    //|  0|  Lucy|     0|  0|  Beijing|
+    //|  1|  Lily|     0|  0|  Beijing|
+    //|  2|   Tim|     2|  2|Guangzhou|
+    //|  3|Danial|     0|  0|  Beijing|
+    //+---+------+------+---+---------+
+    person.crossJoin(cities)
+      .where(person.col("cityId")===cities.col("id"))
+    // 对应的执行相关的技术操作实现
+    person.createTempView("person")
+    cities.createTempView("cities")
+    //+---+------+
+    //| id|  name|
+    //+---+------+
+    //|  0|  Lucy|
+    //|  1|  Lily|
+    //|  2|   Tim|
+    //|  3|Danial|
+    //+---+------+
+    spark.sql("select u.id,u.name from person u cross join cities c where  u.cityId=c.id")
+      .show()
   }
 }

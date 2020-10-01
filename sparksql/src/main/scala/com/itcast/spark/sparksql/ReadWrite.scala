@@ -196,7 +196,56 @@ class ReadWrite {
    * hive对应的是通过表的概念映射了一个或者是多个hdfs中的文件的。
    * hive的sql语句对应的会翻译成为mr程序的，然后执行的。
    * 需要整合的话，整合的是hive的metastore的数据的。
+<<<<<<< HEAD
+   * spark整合hive的实质是整合hive的metastore的。
+   * 下面是spark访问hive中的数据表的文件的
+   * hive的操作：上传文件和创建外部表的操作的
+   *
+   *
+   * 下面是hive的操作
+   * hdfs dfs  -mkdir  /dataset
+   * hdfs  dfs  -put  studenttab10k  /dataset
+   * 创建hive的数据库
+   * create  database  if not exists  spark01 ;
+   * use spark01
+   * create  external   table student (name String,age Int ,gpa Float) row format delimited  fields terminated by '\t'  lines terminated by '\n' stored as textfile location '/dataset/hive';
+   * load data inpath '/dataset/studenttab10k' overwrite  into  table  student;
+   * select *  from  student  limit 10;
+   *
+   * hive 的方式适用于spark集群以及对应的spark-shell执行的
+   * bin/spark-shell  --master  spark://node01:7077   --executor-memory 512M --total-executor-cores 2
+   * bin/spark-shell  --master  local[6]
+   *
+   * spark.sql("use spark01")
+   * spark.sql("select *  from  student limit 100");
+   *
+   * 下面是使用spark的sql创建hive的数据库表的数据的。避免了使用原来比较麻烦的数据表来创建操作的。
+   * val createTableStr =
+   * """
+   * |CREATE EXTERNAL TABLE student
+   * |(
+   * |  name  STRING,
+   * |  age   INT,
+   * |  gpa   string
+   * |)
+   * |ROW FORMAT DELIMITED
+   * |  FIELDS TERMINATED BY '\t'
+   * |  LINES TERMINATED BY '\n'
+   * |STORED AS TEXTFILE
+   * |LOCATION '/dataset/hive'
+   * """.stripMargin
+   *
+   * spark.sql("CREATE DATABASE IF NOT EXISTS spark03")
+   * spark.sql("USE spark03")
+   * spark.sql(createTableStr)
+   * spark.sql("LOAD DATA INPATH '/dataset/studenttab10k' OVERWRITE INTO TABLE student")
+   * spark.sql("select * from student limit").show()
    * */
-
-
+   @Test
+  def   testHiveSpark(): Unit ={
+      //测试hive整合spark执行操作实现和管理实现。
+     //  使用sparksql将数据导入到hive的数据表格中的。sparksql访问hive并且提交程序执行操作。
+     //  spark需要和hive整合之后才可以执行相关的技术操作的。
+     //  采用spark的独立的程序执行spark操作的。避免采用相关的sql语句编写执行的。
+   }
 }

@@ -2,7 +2,8 @@ package com.itcast.spark.sparksql
 
 import java.lang
 
-import org.apache.spark.sql.{Column, Dataset, KeyValueGroupedDataset, SparkSession}
+import org.apache.spark.sql.types.{FloatType, IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, KeyValueGroupedDataset, Row, SparkSession}
 import org.junit.Test
 
 class TypeTransformation {
@@ -12,9 +13,45 @@ class TypeTransformation {
     // 集群模式下面是不需要设置master的，集群里面是有自己的master的。
     .master("local[6]")
     .getOrCreate()
-
   import spark.implicits._
+  /**
+   * 类型转换的实质
+   * */
+  @Test
+  def  trans(): Unit ={
+    //  flatMap
+    val df: Dataset[String] = Seq("hello spark", "hello hadoop").toDS()
+    df.flatMap(item=>item.split(" ")).show();
 
+    //  下面测试使用map执行操作处理实现
+    val ds: Dataset[Person] = Seq(Person("zhangsan", 20), Person("lisi", 25), Person("wangwu", 25)).toDS()
+    ds.map(person=>Person(person.name,person.age*2)).show()
+
+    // mapPartitions 作用于每一个分区的每一个数据的。需要将数据保存到内存中的,iter不能达到每一个分区的内存放不下的。否则对应的是oom的操作的
+    ds.mapPartitions(iter=>iter.map(person=>Person(person.name,person.age*2))).show()
+  }
+
+  // 进行spark的强类型的转换操作和实现的
+  @Test
+  def  test(): Unit ={
+     var  schema=StructType(
+       Seq(
+          StructField("name",StringType),
+         StructField("age",IntegerType),
+         StructField("gpa",FloatType)
+       )
+     )
+
+    val df: Dataset[Row] = spark.read
+      .schema(schema)
+      .option("delimiter", "\t")
+      .load("F:\\works\\hadoop1\\zookeeper-demo\\sparksql\\src\\main\\scala\\com\\itcast\\spark\\sparksql\\studenttab10k")
+
+    // 弱类型转化成为强类型的数据的
+    // 本质上就是Dataset[Row].as[Student] 转化成为了Dataset[Student]
+    val ds = df.as[Student]
+    ds.show()
+  }
   /**
    * 执行filter操作实现
    **/
@@ -243,3 +280,5 @@ class TypeTransformation {
     ds.where('name isin ("zhangsan","lisi","wangwu","zhaoliu")).show()
   }
 }
+  case class Student(name:String,age:Int,gpa:Float)
+

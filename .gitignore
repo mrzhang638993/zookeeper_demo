@@ -44,3 +44,4 @@ java.iml
 /sparksql/dependency-reduced-pom.xml
 /target/
 /dependency-reduced-pom.xml
+/spark_streaming/target/

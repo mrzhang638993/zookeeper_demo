@@ -1,0 +1,16 @@
+scala中没有相关的static的关键字的。没有相关的static的
+可以在scala中定义单例对象的，表示的是全局仅有的对象的。
+
+scala中的object类似于java中的static对象的。
+object中定义的对象属性类似于static的成员变量的。
+
+java中的main方法对应的是静态的方法的。
+scala中的main必须要定义在object中才可以使用的。
+
+
+_赋值操作只能适用于var类型的变量的。
+
+
+匿名内部类:对应的是没有名称的内部类，在创建的时候就实例化了。再次使用的话，还需要再次创建的。
+
+scala中没有interface的概念的，对应的体现出来的可以称之为trail替代实现的。

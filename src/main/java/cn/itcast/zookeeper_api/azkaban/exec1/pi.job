@@ -1,0 +1,3 @@
+# 计算pi
+type=command
+command=/export/servers/hadoop-2.7.5/bin/hadoop jar  hadoop-mapreduce-examples-2.7.5.jar pi 4 8

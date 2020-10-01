@@ -1,0 +1,566 @@
+# 定义不可变的变量。
+val name:String="tom"
+println(name)
+# 定义一个可变的变量。
+var name:String="jom"
+println(name)
+name="zhangsan";
+println(name)
+# 使用类型推断变量,使用更加简洁的使用语法
+val name="tom" /**可以根据变量的值进行推断字段的类型*/
+# 惰性赋值操作，变量值很多的时候，只有在需要使用到的时候才会加载到内存中的。使用lazy的方式实现加载的操作的
+lazy val sql="""insert overwrite table adm.itcast_adm_personas select a.user_id, a.user_name, a.user_sex, a.user_birthday, a.user_age, a.constellation, a.province, a.city, a.city_level, a.hex_mail, a.op_mail, a.hex_phone, a.fore_phone, a.figure_model, a.stature_model, b.first_order_time, b.last_order_time, ... d.month1_hour025_cnt, d.month1_hour627_cnt, d.month1_hour829_cnt, d.month1_hour10212_cnt, d.month1_hour13214_cnt, d.month1_hour15217_cnt, d.month1_hour18219_cnt, d.month1_hour20221_cnt, d.month1_hour22223_cnt from gdm.itcast_gdm_user_basic a left join gdm.itcast_gdm_user_consume_order b on a.user_id=b.user_id left join gdm.itcast_gdm_user_buy_category c on a.user_id=c.user_id left join gdm.itcast_gdm_user_visit d on a.user_id=d.user_id;"""
+#  定义字符串的使用方式
+val name="hadoop"
+println(name)
+println(name+name.length)
+#  适应差值表达式，可以避免大量的字符串的拼接操作
+val name="zhangsan"
+val age=30
+val  sex="male"
+val info=s"name=${name},age=${age},sex=${sex}"
+println(info)
+###sql语句的执行格式，使用三个引号执行操作
+val sql="""
+    select  *  from  t_user where name="zhangsan"
+""";
+println(sql)
+###### 下面是数据类型和操作符号
+scala中的所有的类型是以答谢字母开头的。整形是使用的是Int而不是Integer的类型推断的。
+scala中的绝大多数的运算符和java中是一样的，scala中是不存在++，--等的操作的
+scala可以使用==来进行比较的，!=可以判断不等的，eq可以比较两个对象的引用是否相等。
+var  str1="abc";
+var  str2=str1+""
+println(str1.equls(str2))
+println(str1==str2)
+#  下面是scala的继承体系
+#  下面是三元表达式的语句讲解和体现
+var  sex="male"
+var  result=if(sex=="male") 1 else 0   # 表达式的值是1或者是0的
+# scala中的块表达式
+val a= {
+|println("1 + 1")
+|1+1
+|}   # 表达式的数值是最后一个语句的数值1+1=2的
+#  for循环。推荐使用for的表达式进行操作 使用for循环迭代一组数据
+val num=1.to(10)
+for (i<-num) println(i)
+# 对应的for循环的代码实现
+for(i<- 1 to 10 ) println(i)
+#嵌套循环.1个for循环对应的实现相关的嵌套迭代循环操作的。
+for(i <- 1 to 3 ; j <- 1 to 5 ) {print("*"); if(j==5) println()}
+#守卫语法
+for(i <- 1 to 10; if (i%3==0)) println(i)
+#  for的推导式，使用yield可以构建推导式的数据的。使用yield生成的推导式来生成集合操纵
+for( i <-  1 to 10 ) yield i*10
+#  while循环。对应的代码实践操作实现
+var i=1
+while(i<=10){
+println(i)
+i=i+1  
+}
+#  break 以及 continue语句
+import scala.util.control.Breaks._
+breakable{for(i <- 1 to 100 ) if(i<=50) break() else println(i)}
+#下面是continue的语句
+#  打印1到100之间，不能整除10的数字。
+for(i <- 1 to 100) {breakable{if(i%10==0) break() else println(i)}}
+scala中是不能使用break和continue的，使用break以及continue的话，需要导包引入相关的方法来操作的。
+#scala中定义方法操作符号
+ def add(a:Int,b:Int):Int={
+     | a+b
+     | }
+val sum=add(3,5)
+println(sum)
+scala中的返回值是可以执行返回值类型的自动推断的，所以可以进行简略编写的。
+def add(x:Int,y:Int)={x+y}  # 省略返回值类型，进行返回值类型的自动推断。
+定义递归方法的时候，是不能省略返回值类型的。
+def m1(num:Int):Int={
+     | if(num<=1) 1
+     | else m1(num-1)*num
+     | }
+# scala方法参数
+1.默认参数：定义参数的时候，可以给定默认的参数值进行参数的计算操作的
+def add(x:Int=0,y:Int=0)=x+y  #  使用函数的默认值进行操作
+add()  # 调用即可进行函数计算的
+2.带名参数：指定参数名称进行调用
+def add(x:Int=0,y:Int=0)=x+y
+add(x=1)   # 对应的执行add调用操作执行，指定x=1执行调用操作执行
+3.变长参数调用操作
+def add(num:Int*):Int=num.sum   # 变长参数的定义和执行逻辑操作
+add(1,3,5)
+
+# scala的方法调用方式
+1.后缀调用法：
+Math.abs(-1)   # 和java中的一样，对应的是后缀调用方法
+2.中缀调用法：
+Math  abs  -1   # 中缀法调用函数进行操作。
+3操作符即方法:
+1+1  + 对应的是方法的名称的，scala中的+，-，*，%等都是方法的，方法的名称是符号的。
+4.花括号调用法：
+ Math.abs{
+     | println("求解绝对值")
+     | -1
+     | }
+def add(x:Int):Int={
+     | println("开始计算求和")
+     | Math.abs(x)
+     | }
+add(3)
+花括号调用方法：对应的方法只能有一个参数才可以调用的。
+5.无括号调用法：
+def  printHello()=println("hello") 
+Unit：类似于java中的void，只用一个()来对应的执行的。
+
+#scala的函数式编程
+scala中所有的变量对应的都是函数的。
+函数对应的本身也是一个对象的。
+var addFunc=(x:Int,y:Int) => x+y
+addFunc(3,6)  # 函数调用操作。
+
+# 方法和函数的区别：
+方法是属于对象的，在运行的时候，它是加载到JVM的方法区中
+可以将函数对象赋值给一个变量，在运行的时候，它是加载到jvm的堆内存中的。
+函数是一个对象，继承自FunctionN，函数对象有apply,curried,toString,tupled这些方法的，方法则是没有的。
+方法是不能赋值给一个变量的。但是函数是可以赋值给变量的，函数是一个独立的个体的。
+总的秒数是：函数是对象的，拥有自己的堆内存和方法(方法区的）,方法则是从属于对象的，只是位于方法区的。
+
+# 方法转化为函数的操作
+def add(x:Int,y:Int):Int=x+y
+val a=add _  # 将方法转化成为函数给变量进行赋值操作实现
+
+# 数组：包含定长数组和变长数组
+java中的数组长度是不允许改变的。数组中的元素是可以修改的。
+##### 定长数组:定长数组的长度是不能变的。
+需求1：
+1. 定义一个长度为100的整型数组 
+2. 设置第1个元素为110 44
+3. 打印第1个元素
+val a=new Array[Int](100)
+a(0)=110    #  scala的数组取值对应的是采用()进行取值操作的。
+println(a(0))
+需求2：
+1.定义一个包含以下元素的数组 
+2.获取数组长度
+val a=Array("java","scala","python")
+println(a.length)
+##### 定义变长数组。使用ArrayBuffer创建变长数组执行操作管理
+需求1：定义一个长度为0的整型变长数组
+import scala.collection.mutable.ArrayBuffer
+val a=ArrayBuffer[Int]()  # 定义长度为0的变长数组
+需求2：定义一个包含以下元素的变长数组 "hadoop", "storm", "spark"
+val a=ArrayBuffer("hadoop","storm","spark")
+#####变长数组的相关操作修改
+使用 += 添加元素 
+使用 -= 删除元素 
+使用 ++= 追加一个数组到变长数组
+需求1：
+1. 定义一个变长数组，包含以下元素: "hadoop", "spark", "flink" 
+2. 往该变长数组添加一个"flume"元素 
+3. 从该变长数组删除"hadoop"元素 
+4. 再将一个数组，该数组包含"hive", "sqoop"追加到变长数组中
+val  a=ArrayBuffer("hadoop","spark","flink")  # 定义变长数组。
+a +="flume"  # 数组中增加元素
+a -="hadoop"    # 数组中减少元素
+a ++=Array("hive","sqoop")   # 数组中增加多个元素
+##################遍历数组
+1.使用 for表达式 直接遍历数组中的元素 
+2.使用 索引 遍历数组中的元素
+需求1：
+1. 定义一个数组，包含以下元素1,2,3,4,5 
+2. 使用for表达式直接遍历，并打印数组的元素
+val a=Array(1,2,3,4,5)
+for(i <- a) println(i)  # 直接遍历集合中的元素进行操作实践。
+需求2:
+1. 定义一个数组，包含以下元素1,2,3,4,5 
+2. 使用for表达式基于索引下标遍历，并打印数组的元素
+使用索引下标进行运算测试的
+val arr=Array(1,2,3,4,5)
+#  使用to的话，对应的是可以包含a.length-1的
+for(i <- 0 to a.length-1) println(a(i))
+#  使用until的话，是不会包含最后面的元素的.不会包含a.length的数据的
+for(i  <- 0  until a.length) println(i)
+
+
+###################### 数组的常用算法
+#  元祖对应的元素是从1开始的数组的。
+1.求和：数组中的sum求和算法，可以将所有的元素进行求和累加操作实现。然后得到结果
+val a=Array(1,2,4)
+println(a.sum)
+2.求最大值：
+val a=Array(4,1,2,4,10)
+println(a.max)
+3.求解最小值
+val a=Array(4,1,2,4,10)
+println(a.min);
+4.数组的排序操作
+# 需求
+1. 定义一个数组，包含以下几个元素（4,1,2,4,10） 
+2. 对数组进行升序排序、降序排序 
+val a=Array(4,1,2,4,10)
+a.sorted   # 升序排序算法
+a.sorted.reverse   # 降序排列算法
+
+
+######################元祖的元素，元祖的元素是不可变的。
+#  java 中数组的长度是不可变的，但是数据的元素是可变的。
+元组可以用来包含一组不同类型的值。例如：姓名，年龄，性别，出生年月。元组的元素是不可变 的。元祖对应的是不可变的数组的。元祖中的变量对应的是不可变的val元素的。
+定义元祖的方式是如下的：
+1.方式一：使用括号来定义元祖的元素
+val a=(1,"zhangsan",20,"beijing")
+2.方式二：使用箭头的方式定义元祖.包含箭头和元祖的方式实现定义元祖的操作的。
+val a=1->"zhangsan"
+val a=(1,"zhangsan")
+3.访问元祖的元素
+val a="zhangsan"->"male"
+a._1  # 访问元祖中的元素
+
+##########################列表的常见的数据结构
+列表包括了不可变列表和可变列表的。
+1.不可变列表：指的是数组中的元素以及列表的长度都是不可变的。
+需求一: 创建一个不可变列表，存放以下几个元素（1,2,3,4） 
+val a=List(1,2,3,4)   # 创建列表
+需求二: 创建空列表
+val b=Nil  #创建一个空的列表
+需求三：使用::的方式来创建列表进行操作
+val  a= -2 :: -1 ::  Nil  #  拼接操作创建列表进行操作
+#### 可变列表
+import scala.collection.mutable.ListBuffer
+val a=ListBuffer[Int]()  #  创建空的可变列表
+val b=ListBuffer(1,2,3,4)  # 创建可变列表元素
+#######  下面是可变列表元素的操作方式
+1.访问元素，采用的是()的方式实现访问的；
+2.追加元素 +=
+3.删除元素 -=
+4.追加元素列表 ++=
+5.更改元素：获取元素之后进行赋值操作
+6.转换成为List(toList)
+7.转换成为Array(toArray)
+需求:下面是可变元素列表的需求
+1. 定义一个可变列表包含以下元素：1,2,3 
+2. 获取第一个元素 
+3. 添加一个新的元素：4 
+4. 追加一个列表，该列表包含以下元素：5,6,7 
+5. 删除元素7 
+6. 将可变列表转换为不可变列表 
+7. 将可变列表转换为数组
+val b=ListBuffer(1,2,3)
+b(0)  ## 可变列表元素的访问操作
+b+=4
+b++=ListBuffer(5,6,7)
+b-=7
+b.toList;   # 转化为不可变列表
+b.toArray;  # 转换为数组对象
+
+# 列表的常见的操作：不可变列表以及可变列表对应的都是可以使用的。
+val  a=List(3,4,5,6)
+a.isEmpty    # 返回列表是否为空。
+# 使用++方法来拼接连接列表来形成一个新的列表
+val a=List(1,2,3)
+val b=List(4,5,6)
+a++b     # 拼接2个元素的列表进行操作。
+# 获取列表的首个元素和剩余的部分
+需求实现：
+1. 使用head方法，获取列表的首个元素 
+2. 使用tail方法，获取除第一个元素以外的元素，它也是一个列表
+val a=List(1,2,3)
+a.head    # 获取首个元素
+a.tail   # 获取剩余的元素。
+#  反转列表：将第一个元素转化为最后一个元素，将最后的一个元素转为第一个元素
+val a=List(1,2,3)
+a.reverse    # 反转列表元素
+### 获取列表的前缀和后缀元素
+val  a=List(1,2,3,4,5)
+a.take(3)   # 获取前3个元素
+a.drop(3)   # 获取前3个元素以外的元素，对应的称之为后缀的操作的
+### 列表的扁平化操作。将列表中的所有的元素全部放到一个列表中，对应的就是将原来的列表中的元素全部铺开。
+val a=List(List(1,2),List(3),List(4,5))
+a.flatten   # 对应的进行元素的扁平化的操作。
+### 拉链与拉开：
+拉链：使用zip将两个列表，组合成一个元素为元组的列表
+拉开：使用unzip将一个包含元组的列表，解开成两个列表的元组
+val a=List("张","李四","王五")
+val b=List(19,20,21)
+执行拉链操作，形成的元素如下：
+a.zip(b)
+res23: List[(String, Int)] = List((张,19), (李四,20), (王五,21))  #  形成元祖的信息
+res23.unzip  # 拉开，将元祖解析成为2个数组的操作的。
+res23.unzip._1  # 获取拉开之后的元素
+res23.unzip._2  # 获取剩余元素的内容
+
+
+#  转换成为字符串
+val a=List(1,2,3,4)
+a.toString  # 返回List中的所有的元素
+# 生成字符串:将元素以分隔符拼接起来，默认的是没有分隔符的。使用的方法mkstring
+val t=List(1,2,3,4)
+t.mkString(":")   # list采用：进行分隔，最终得到想要的字符串。String = 1:2:3:4
+
+
+# 并集，交集和差集操作
+需求1：
+1.定义第一个列表,包含以下的元素 1,2,3,4
+2.定义第二个列表,包含以下元素3,4,5,6
+3.使用union操作,获取这两个列表中的并集
+4.使用distinct操作,去除重复的元素.
+val a=List(1,2,3,4)
+val b=List(3,4,5,6)
+a.union(b) 
+res31: List[Int] = List(1, 2, 3, 4, 3, 4, 5, 6)  # 获取并集操作,最终并集之后的数据是没有去重的
+res31.distinct  # 可以删除重复的元素
+#执行list的交集操作
+需求:
+1.定义一个列表:包含以下元素,1,2,3,4
+2.定义第二个元素,包含以下元素 3,4,5,6
+3.使用intersect操作,截取这两个列表的交集
+val a=List(1,2,3,4)
+val b=List(3,4,5,6)
+a.intersect(b)
+# 差集的操作实现
+需求1:
+1.定义一个列表,包含以下的元素:1,2,3,4
+2.定义第二个列表,包含以下的元素:3,4,5,6
+3.使用diff获取列表的差集
+val a=List(1,2,3,4)
+val b=List(3,4,5,6)
+a.diff(b)
+res40: List[Int] = List(1, 2)
+# set集:代表的是没有重复元素的集合,set具备如下的性质
+1.元素不重复;
+2.不保证插入顺序;
+set包括可变集以及不可变集元素的.
+##### 下面是不可变集的操作实现
+1.创建空的不可变集
+val a=Set[Int]()
+2.创建不可变集.保存元素1,1,3,2,4,8
+var  b=Set[Int](1,1,3,2,4,8)   # 重复的元素会被自动移除的,set不会保证顺序的.
+######下面是set的常见的基本的操作.对于集合的任意的修改都会生成一个新的set集合的.
+1.获取集的大小
+2.遍历集
+3.添加一个元素,生成一个set
+4.拼接2个集,生成一个set(++)
+5.拼接集和列表,生成一个set(++)
+val  a=Set(1,1,2,3,4,5)
+a.size   #获取集的长度
+for(i  <- a ) println(i)   # 遍历集合的大小和范围
+a - 1  # 删除元素,对应的会形成一个新的集合的
+var b=Set(6,7,8) # 创建新的集合
+res45 ++ b    # 进行两个集合的合并操作.
+a + 1  # 集合中增加元素进行操作
+##### 可变集:对应的是元素的长度是可以变化的.
+需求如下:
+1.定义一个可变集,包含以下的元素:1,2,3,4
+2.添加元素5到可变的集合中.
+3.从可变集中移除元素1
+import scala.collection.mutable.Set
+val a=Set(1,2,3,4) # 定义可变集合进行操作
+a +=5   # 对应的元素可变,所以,可以使用 +=的操作符号的
+a -=5  #  对应的是可变集的，所以可以使用等到的。list不可变集合对应的也是一样的。
+
+##### scala的映射。类似于java的map的，存在key，value的键值对执行的操作的。map映射包括可变的映射和不可变映射
+#######################不可变的map的定义方式如下#####################
+需求1：定义一个映射，包含以下学生姓名和年龄数据
+# 定义不可变的map执行操作逻辑
+val a=Map("zhangsan"->30,"lisi"->40)
+val b=Map(("zhangsan",30),("lisi",40))
+a("zhangsan")   # 输入对应的key找到对应的value执行操作
+#######################可变的map的定义方式如下#####################
+#  可变的map和不可变的map对应的使用的映射的操作是
+import scala.collection.mutable.Map
+需求1：
+定义一个映射，
+1.包含以下学生姓名和年龄数据。"zhangsan", 30，"lisi", 40
+2.修改zhangsan的年龄为20
+val  a=Map(("zhangsan",30),("lisi",40))
+a("zhangsan")=20  
+
+############scala的迭代器操作#############
+scala的迭代器迭代遍历集合进行操作的。
+1.使用迭代器迭代集合进行操作。每一个迭代器对应的都是存在状态的。迭代完成之后，对应的迭代位置会保留在最后的一个元素的位置上面，再次使用进行迭代操作的话，会抛出迭代器异常。NoSuchElementExeption执行操作。
+val  a=List(1,2,3,4,5)
+val ite=a.iterator
+while(ite.hasNext){println(ite.next)}
+2.需求二：
+1）定义一个列表，包含以下的元素：1,2,3,4,5
+2）使用for表达式和迭代器，遍历打印该列表
+val ite=a.iterator
+for(i <- ite)println(i)  # 使用for循环进行迭代器的迭代开发
+
+############函数式编程:foreach#############
+下面是函数是编程的重点学习的内容：
+1.遍历（ foreach ） 
+2.映射（ map ） 
+3.映射扁平化（ flatmap ） 
+4.过滤（ filter ） 
+5.是否存在（ exists ） 
+6.排序（ sorted 、 sortBy 、 sortWith ）
+7.分组（ groupBy ） 
+8.聚合计算（ reduce ） 
+9.折叠（ fold ）
+#### 执行foreach的操作逻辑
+foreach(f: (A) ⇒ Unit): Unit  Unit对应的是函数的返回值是空的逻辑的。函数是和方法差不多的，也是会执行操作的。
+val a=List(1,2,3,4)
+a.foreach((x:Int)=>println(x))
+a.foreach((x)=>println(x))  #对应的执行foreach的推断方法，scala对应的编译器存在很强大的自动推断功能实现的。
+a.foreach(println(_))  # lamada表达式简化计算操作实现。可以简化函数的定义操作。只能在函数体中出现一次的，并且不能存在叫复杂的函数调用的。
+####  映射的操作，主要是针对于map进行管理的，编写spark以及flink的相关的代码实践指导的。
+map操作：将函数的一个类型转化成为另外的一个类型进行操作
+需求实现1：
+1. 创建一个列表，包含元素1,2,3,4
+2. 对List中的每一个元素加1
+val a=List(1,2,3,4)   # 定义列表list集合元素
+a.map((x)=>(x+1))     # 对于集合中的每一个元素执行增加元素的操作。还可以进行函数的类型的转换操作
+a.map(_+1)            #可以使用更加好的计算方式的。
+##### 函数式编程：flatMap操作。flat操作对应的执行的是扁平化的操作实现的。可以理解为首先进行map，然后执行flat操作实现。
+需求1：
+1.有一个包含了若干个文本行的列表："hadoop hive spark flink flume", "kudu hbase sqoop storm"
+2.获取到文本行中的每一个单词，并将每一个单词都放到列表中
+val a=List("hadoop hive spark flink flume","kudu hbase sqoop storm")  #定义list的string
+a.flatMap((x)=>x.split(" "))   # 执行map的flatten的扁平化的操作。首先执行map操作，然后执行flatten的操作的
+#####  下面是filter的操作逻辑和实现：将集合中符合一定条件的元素过滤出来。只会过滤出来满足条件的元素的，不满足条件的元素是会抛弃掉的。
+需求：
+1. 有一个数字列表，元素为：1,2,3,4,5,6,7,8,9
+2. 请过滤出所有的偶数
+val a=List(1,2,3,4,5,6,7,8,9)
+a.filter((x)=>x%2==0)  # 对应的执行相关的函数的过滤操作实现
+#### 函数式编程：排序操作实现
+1.sorted默认排序
+2.sortBy指定字段排序
+3.sortWith自定义排序
+需求：
+1. 有一个列表，分别包含几下文本行："01 hadoop", "02 flume", "03 hive", "04 spark" 
+2. 请按照单词字母进行排序
+val a=List("01 hadoop","02 flume","03 hive","04 spark")
+a.sortBy((x)=>x.split(" ")(1))  # 根据指定的字段进行排序操作实现  sortby对应的会根据函数的返回值进行排序。
+sortWith:根据指定的函数进行排序操作实现
+需求1:
+1.有一个列表，包含以下元素：2,3,1,6,4,5
+2.使用sortBy对列表进行降序排序
+val a=List(2,3,1,6,4,5)
+a.sortWith((x,y)=>if(x<y) true else false)  # 执行升序排序操作
+####  执行groupby分组排序操作的。groupby：根据函数将列表分成不同的组
+需求1：
+1.有一个列表，包含了学生的姓名和性别:
+"张三", "男" "李四", "女" "王五", "男"
+2.请按照性别进行分组，统计不同性别的学生人数
+val a=List(("zhangsan","male"),("lisi","female"),("wangwu","male"))
+a.groupBy((x)=>x._2)  #  根据性别进行分组操作
+# map怎么转化为groupBy的操作逻辑的
+res80.map(x=>x._1->x._2.length)  //  构建元祖x._1->x._2.length
+#####  执行reduce，fold聚合操作实现
+聚合操作：对应的将列表中的元素统计分析转化为一个，一般的主要的目标是用于实现代码的聚合操作实现的逻辑的。
+需求1:
+1. 定义一个列表，包含以下元素：1,2,3,4,5,6,7,8,9,10 
+2. 使用reduce计算所有元素的和
+val a=List(1,2,3,4,5,6,7,8,9,10)
+a.reduce((x,y)=>x+y)
+a.reduce(_ + _)   # 也是可以使用这样的算法执行操作的
+a.reduceLeft(_ + _)  # 执行reduceLeft操作实现的
+a.reduceRight(_ + _)   #  
+
+#### fold执行的操作
+1.fold与reduce很像，但是多了一个指定初始值参数
+需求1：
+1. 定义一个列表，包含以下元素：1,2,3,4,5,6,7,8,9,10 
+2. 使用fold方法计算所有元素的和
+val a=List(1,2,3,4,5,6,7,8,9,10) # 元素列表
+a.fold(0)(_ + _)  0代表的是聚合计算的初始值信息。fold相比较于reduce而言，多了一个初始化的赋值。
+
+
+# 下面是习题以及相关的习题答案
+1.有一个数字列表，元素为：1,2,3,4,5,6,7,8,9
+请过滤出所有的偶数
+val a=List(1,2,3,4,5,6,7,8)
+a.filter(_%2==0)
+2.有一个列表，包含以下元素1,2,3,4，请使用foreach方法遍历打印每个元素
+val a=List(1,2,3,4)
+a.foreach(x=>println(x))
+a.foreach(println(_))
+
+
+
+
+##### scala的类和对象的使用
+scala是支持面向类和对象的。
+1.创建类和对象
+需求1:
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+

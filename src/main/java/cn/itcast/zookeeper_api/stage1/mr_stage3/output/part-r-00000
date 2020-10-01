@@ -1,0 +1,14 @@
+192.168.1.11	2017-11-20 10:02	url1	1	tom	null	null
+192.168.1.11	2017-11-20 11:02	url1	1	lala	null	null
+192.168.1.11	2017-11-20 10:03	url2	1	tom	null	null
+192.168.1.12	2017-11-20 10:15	url3	1	sua	null	null
+192.168.1.12	2017-11-20 10:03	url2	1	sua	null	null
+192.168.1.12	2017-11-20 10:02	url1	1	sua	null	null
+192.168.1.14	2017-11-20 11:03	url2	1	tom	null	null
+192.168.1.14	2017-11-20 11:02	url1	1	tom	null	null
+192.168.1.15	2017-11-20 10:02	url1	1	jer	null	null
+192.168.1.15	2017-11-20 10:16	url3	1	jer	null	null
+192.168.1.15	2017-11-20 10:03	url2	1	jer	null	null
+192.168.1.16	2017-11-20 11:02	url3	1	sua	null	null
+192.168.1.16	2017-11-20 11:03	url2	1	sua	null	null
+192.168.1.16	2017-11-20 11:02	url1	1	sua	null	null

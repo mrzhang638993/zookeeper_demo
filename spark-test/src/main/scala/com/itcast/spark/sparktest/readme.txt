@@ -40,3 +40,24 @@ sparkStreaming是针对于spark core  api的处理的。是spark1.0的时代的�
 
 
 
+
+socket是java支持tcp/Udp协议的编程模型的。socket支持tcp以及udp的操作的。
+tcp保证连接的安全的。udp只是传递数据的，不保证数据的安全的。socket支持udp以及tcp的
+socket编程模型包含了server部分以及client部分的。
+socketserver被动接受client的链接操作的。比较常见的是tcp的。http底层也是基于tcp连接的。
+tcp的连接过程
+1.客户端发送请求到服务端，syn请求操作;
+2.服务端发送客户端连接确认信息ack请求，同时还发送连接客户端的syn请求
+3.客户端返回确认的ack连接请求。
+
+
+zookeeper中存在4字命令，对应的是管理端的命令的。
+netcat可以发送命令检测请求的。netcate的命令简称职位nc的操作的。
+
+
+nc  -lk 9999  #创建socketServer
+nc  localhost  9999  #连接端口对外提供服务操作。
+
+
+
+

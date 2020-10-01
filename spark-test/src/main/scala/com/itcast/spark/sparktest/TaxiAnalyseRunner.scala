@@ -92,6 +92,7 @@ object TaxiAnalyseRunner   {
     // 在搜索的行政区中，面积较大的行政区的放置到前面的话，更加的容易命中的，减少次数。
     // 根据面积降序排列
     val features: List[Feature] = featureCollection.features.sortBy(item => {
+      //  -代表的是降序排列数据
       (item.properties("boroughCode"), -item.getGeometry().calculateArea2D())
     })
     //  7.3  广播
@@ -109,10 +110,54 @@ object TaxiAnalyseRunner   {
        borough
      }
     //  7.5  统计信息。自定义的udf转化成为spark中使用的udf函数进行操作实现
-    val boroughUDF=udf(boroughLookUp)
+    //val boroughUDF=udf(boroughLookUp)
     // 看看在每个出租车在那个行政区停留
-    cleanValue.groupBy(boroughUDF('dropOffX,'dropOffY))
-      .count().show()
+    //cleanValue.groupBy(boroughUDF('dropOffX,'dropOffY))
+     // .count().show()
+    // 统计在每一个行政区的平均的待客时间
+    // 会话统计:统计每个会话的。spark中的分区对应的提供了可以在分区内部进行排序操作实现的。spark的分区概念很适合的。
+    //  分区操作对应的是shuffle的操作的。
+
+    // 8.1过滤没有经纬度的数据
+    val sessions=cleanValue.where("dropOffX !=0 and  dropOffY !=0 and pickUpX !=0 and pickUpY !=0" )
+    // 8.2会话分析操作。license相同的分发到同一个分区的
+      .repartition('license)
+      .sort('license,'pickUpTime)
+    //  求解时间差的操作的。分区内部使用窗口函数实现分区操作实现的。
+    var boroughDuration=(trip:Trip,trip1:Trip)=>{
+      // 获取行政区的名称
+       val borough=boroughLookUp(trip.dropOffX,trip.dropOffY)
+      //  得到会话的持续时间信息
+       val duration=(trip1.pickUpTime-trip.dropOffTime)/1000
+       (borough,duration)
+    }
+    import  spark.implicits._
+    val durations: DataFrame = sessions.mapPartitions(trips => {
+      // 对分区内的所有的数据创建窗口进行操作实现的
+      // 按照长度为2来进行数据的过滤操作实现的。
+      val viter = trips.sliding(2)
+        .filter(_.size == 2)
+        .filter(p => p.head.license == p.last.license)
+      // 求解第一条数据和第二条数据的结果（行政区名称,持续时间）
+      viter.map(item => boroughDuration(item.head, item.last))
+    }).toDF("borough", "seconds")
+    //+-------------+------------------+--------------------+
+    //|      borough|      avg(seconds)|stddev_samp(seconds)|
+    //+-------------+------------------+--------------------+
+    //|       Queens|13639.201863354037|   76465.12874681856|
+    //|           NA|           29715.0|  115552.49153523259|
+    //|     Brooklyn| 6818.044354838709|  14910.036834797847|
+    //|Staten Island|           11160.0|                 NaN|
+    //|    Manhattan| 5150.707868227607|   25685.10303870334|
+    //|        Bronx| 5512.941176470588|   4608.184766794815|
+    //+-------------+------------------+--------------------+
+    durations.where("seconds >0 ")
+      .groupBy("borough")
+      .agg(avg('seconds),stddev('seconds))
+      .show()
+
+
+
   }
 
 

@@ -15,13 +15,14 @@ object  StreamingWordCount {
     //  conf ，batchDuration对应的是按照时间点的批次数据进行处理的。下面指定的是每一批对应的是1秒
     //  创建了sparkContext之后继续创建StreamingContext的数据的
     val streaming = new StreamingContext(conf, Seconds(5))
+    streaming.sparkContext.setLogLevel("WARN")
     // DStream  可以处理为RDD操作的。
     val lines: ReceiverInputDStream[String] = streaming.socketTextStream("192.168.1.201", 9999, storageLevel=StorageLevel.MEMORY_AND_DISK_SER)
        // 数据的处理
       //  1.数据的转换，句子拆分为单词
       val words: DStream[String] = lines.flatMap(_.split(" "))
-    words.map((_,1)).reduceByKey((priv,next)=>priv+next)
-    words.print()
+    val value: DStream[(String, Int)] = words.map((_, 1)).reduceByKey((priv, next) => priv + next)
+    value.print()
     // 程序执行操作
     streaming.start();
     streaming.awaitTermination()

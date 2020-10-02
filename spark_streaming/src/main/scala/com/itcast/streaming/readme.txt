@@ -99,6 +99,6 @@ Dataset以及DataFrame使用的是独立的序列化器的，使用的是堆外�
 所有的操作都是基于sparksql执行操作的。
 spark  streaming是基于spark core的，是基于rdd的。后续的代码编写不需要使用这些代码的
 structure streaming 后续的相关的代码的编写对应的需要采用的是这个的，是基于spark sql基础构建的。
-
+另外还有一点, Structured Streaming 已经支持了连续流模型, 也就是类似于 Flink 那样的实时流, 而不是小批量, 但在使用的时候仍然有限制, 大部分情况还是应该采用小批量模式
 
 

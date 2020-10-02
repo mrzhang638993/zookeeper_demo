@@ -46,3 +46,4 @@ java.iml
 /dependency-reduced-pom.xml
 /spark_streaming/target/
 /spark_streaming/src/main/scala/checkpoint/
+/structure_streaming/target/

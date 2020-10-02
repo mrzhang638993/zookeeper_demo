@@ -76,6 +76,9 @@ rdd算子使用外部的对象的话，是需要进行序列化操作的。
 5.spark streaming的receivor，需要缓存kafka的数据
 6.算子引入外部的对象
 
+
+DataFrame以及Dataset对应的底层存储的是RDD[internalRow]存储的。
+
 RDD的序列化只能使用java序列化操作或者是Kryo的序列化操作的。通常会使用Kryo的序列化操作的。
 val conf = new SparkConf()
   .setMaster("local[2]")
@@ -84,4 +87,18 @@ conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 conf.registerKryoClasses(Array(classOf[Person]))
 val sc = new SparkContext(conf)
 rdd.map(arr => Person(arr(0), arr(1), arr(2)))
+
+序列化的优化点：
+1.源信息和数据独立存储。
+2.不在直接使用堆内内存存储数据的，不推荐一般的程序员使用堆外内存的。降低GC的开销的。
+Dataset以及DataFrame使用的是独立的序列化器的，使用的是堆外的内存实现操作的。效率是使用堆内内存的20倍以上的。
+不在使用java的序列化器以及Kryo的序列化器的。
+
+
+后期的代码操作不需要使用spark的rdd操作了，所有的操作都是基于spark sql的基础之上执行操作的。
+所有的操作都是基于sparksql执行操作的。
+spark  streaming是基于spark core的，是基于rdd的。后续的代码编写不需要使用这些代码的
+structure streaming 后续的相关的代码的编写对应的需要采用的是这个的，是基于spark sql基础构建的。
+
+
 

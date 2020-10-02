@@ -7,8 +7,13 @@ dataset就可以在语义的层面上执行流式逻辑数据的处理的。
 read 对应的创建的是不可扩展的表的。
 readStream对应的创建的是无限可以扩展的表的。
 所以在流式处理和批处理的时候完全可以使用dataset的同样的一套的api来实现的。
+StreamExecution:主体操作的实现类实现操作管理实现。
+使用stateStore保存增量数据。
+structured streaming是在dataset的基础上执行的操作的。
 
+python小工具：python当做shell来执行的。生成大量的小文件的。生成本地的小文件是很好使用的。
 
+structured streaming：虽然模拟了一张无限扩展的表的，但是对应的底层的还是对应的是增量处理的。
 性能调优的操作：
 1.无限扩展的表格：
 

@@ -28,6 +28,9 @@ structured streaming：虽然模拟了一张无限扩展的表的，但是对应
 
 需求：设计一个智能物联网的数据统计和设计
 kafka的消息对应的是一个key-value的形式的数据集的操作的。
+structured streaming 官方只提供了数据落地到kafka以及hdfs中的，
+需要落地到其他的地方需要使用foreach  writer操作实现的。
+
 
 
 

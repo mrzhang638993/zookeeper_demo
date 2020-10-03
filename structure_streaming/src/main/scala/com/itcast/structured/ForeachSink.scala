@@ -66,7 +66,13 @@ class MySqlWriter extends ForeachWriter[Row] {
   }
 
   override def process(value: Row): Unit = {
-    stateMent.executeUpdate(s"insert into movies(id,name,category) values(${value.getAs[Int](0)},${value.getAs[String](1).replaceAll("\\(","\\\\(").replaceAll("\\)","\\\\)")},${value.getAs[String](2).replaceAll("\\(","\\\\(").replaceAll("\\)","\\\\)")})")
+    var  sql="insert into movies(id,name,category) values(";
+    sql+=value.getAs[Int](0)+","
+    sql+="'"+value.getString(1).replaceAll("\\(","").replaceAll("\\)","").replaceAll("'","’")+"'"+","
+    sql+="'"+value.getString(2).replaceAll("'","’")+"'"
+    sql+=")"
+    println(sql)
+    stateMent.executeUpdate(sql)
   }
 
   override def close(errorOrNull: Throwable): Unit = {

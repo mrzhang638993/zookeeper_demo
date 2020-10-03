@@ -12,6 +12,7 @@ StreamExecution:主体操作的实现类实现操作管理实现。
 structured streaming是在dataset的基础上执行的操作的。
 
 python小工具：python当做shell来执行的。生成大量的小文件的。生成本地的小文件是很好使用的。
+大数据中对应的还是可以使用python实现操作的。python对于创建操作还是存在很友好的意义的。
 
 structured streaming：虽然模拟了一张无限扩展的表的，但是对应的底层的还是对应的是增量处理的。
 性能调优的操作：

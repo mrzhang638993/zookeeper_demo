@@ -20,6 +20,7 @@
         <module>sparksql</module>
         <module>spark-test</module>
         <module>spark_streaming</module>
+        <module>structure_streaming</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

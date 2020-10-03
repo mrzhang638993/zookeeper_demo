@@ -1,6 +1,7 @@
 package com.itcast.structured
 
 import org.apache.spark.sql.streaming.OutputMode
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 
@@ -20,40 +21,32 @@ object Exec1 {
       .master("local[6]")
       .getOrCreate()
     // 从kafka中读取消息写入到hdfs中的
-    import spark.implicits._
-    val ds: Dataset[String] = spark.readStream
-      .format("kafka")
-      .option("kafka.bootstrap.servers", "node01:9092,node02:9092,node03:9092")
+    val  schema=StructType(
+      Seq(
+         StructField("name",StringType),
+        StructField("sex",StringType),
+        StructField("time",IntegerType)
+      )
+    )
+    val ds = spark.readStream
+      .format("csv")
+      .option("delimiter",",")
+      //.option("kafka.bootstrap.servers", "node01:9092,node02:9092,node03:9092")
       // 对应的这个地方，还可以配置通配符进行操作的。streaming-test*
-      .option("subscribe", "internet")
-      .option("startingOffsets", "earliest")
-      .load()
-      .selectExpr("CAST(value as STRING)")
-      .as[String]
+      //.option("subscribe", "internet")
+      //.option("startingOffsets", "earliest")
+      .schema(schema)
+      .load("D:\\document\\works\\zookeeper-demo\\structure_streaming\\src\\main\\scala\\com\\itcast\\structured\\exec")
+      .toDF("name", "sex", "time")
     // 数据过滤操作.根据key进行分组操作实现
-    val value = ds.filter(item => {
-      val arr: Array[String] = item.split(",")
-      if (arr(0).equals("female")) {
-        true
-      } else {
-        false
-      }
-      // 筛选超过30分钟的网购时间信息
-    }).filter(item => {
-      val arr: Array[String] = item.split(",")
-      if (arr(2).toInt > 30) {
-        true
-      } else {
-        false
-      }
-    })
-      .map(item => {
-        val arr: Array[String] = item.split(",")
-        (arr(0).toString, arr(1).toString, arr(2).toInt)
-      }).groupByKey(_._1)
-      .count()
-      .filter(item => item._2 > 120)
-    value.writeStream
+    val value = ds.filter(item => item.getAs[String](1) == "female").filter(item => item.getInt(2) > 30)
+    import  org.apache.spark.sql.functions._
+    import  spark.implicits._
+    val value1 = value
+      .groupBy('name)
+        .agg(sum('time))
+
+    value1.writeStream
       .outputMode(OutputMode.Complete())
       .format("console")
       .start()

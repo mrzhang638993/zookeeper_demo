@@ -47,15 +47,17 @@ object ForeachSink {
 
 class MySqlWriter extends ForeachWriter[Row] {
   private val driver = "com.mysql.jdbc.Driver"
-  private val url = "jdbc::mysql://node01:3306/streaming-movies-result"
+  private val url = "jdbc:mysql://192.168.1.203:3306/streaming-movies-result"
   private var collection: Connection = _
   private var stateMent: Statement = _
+  private  val user="root"
+  private val password="123456"
 
   override def open(partitionId: Long, version: Long): Boolean = {
     //  创建mysql的数据库连接
     try {
       Class.forName(driver)
-      collection = DriverManager.getConnection(url)
+      collection = DriverManager.getConnection(url,user,password)
       stateMent = collection.createStatement()
       true
     } catch {
@@ -64,7 +66,7 @@ class MySqlWriter extends ForeachWriter[Row] {
   }
 
   override def process(value: Row): Unit = {
-    stateMent.executeUpdate(s"insert into movies values(${value.getAs[Int](0)},${value.getAs[String](0)},${value.getAs[String](1)})")
+    stateMent.executeUpdate(s"insert into movies(id,name,category) values(${value.getAs[Int](0)},${value.getAs[String](1).replaceAll("\\(","\\\\(").replaceAll("\\)","\\\\)")},${value.getAs[String](2).replaceAll("\\(","\\\\(").replaceAll("\\)","\\\\)")})")
   }
 
   override def close(errorOrNull: Throwable): Unit = {

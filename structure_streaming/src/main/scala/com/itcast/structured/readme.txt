@@ -31,6 +31,18 @@ structured streaming 官方只提供了数据落地到kafka以及hdfs中的，
 structured streaming 设置时间使用的api对应的是Trigger进行操作的。
 
 
+微批次处理以及连续流处理操作:
+1.微批次处理操作:对应的处理的是一批次的数据的。structured  streaming可以做到1秒的级别的
+2.spark可以执行到微批次的数据的。可以做到准实时的操作的。flink可以实现到了实时的处理的。
+spark的2.3版本提供了连续流处理操作的api。
+
+容错语义：
+1.at most once：消息最多发送一条，消息不会重复消费的。
+2.at least once：数据至少被处理一次。
+3.exactly once：数据只有一条数据的。
+
+
+
 
 
 

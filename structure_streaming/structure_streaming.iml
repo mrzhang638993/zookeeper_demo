@@ -2,7 +2,7 @@
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Python" name="Python">
-      <configuration sdkName="Python 3.7 (zookeeper-demo)" />
+      <configuration sdkName="" />
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
@@ -149,7 +149,7 @@
     <orderEntry type="module-library">
       <library name="Maven: org.elasticsearch.plugin:x-pack-sql-jdbc:6.7.0">
         <CLASSES>
-          <root url="jar://D:/lib/x-pack-sql-jdbc-6.7.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../lib/x-pack-sql-jdbc-6.7.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -287,7 +287,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.cloudera.impala.jdbc:ImpalaJDBC41:2.5.41">
         <CLASSES>
-          <root url="jar://D:/lib/ImpalaJDBC41.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../lib/ImpalaJDBC41.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -390,6 +390,5 @@
     <orderEntry type="library" name="Maven: org.apache.curator:curator-framework:2.12.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.curator:curator-recipes:2.12.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.collections:google-collections:1.0" level="project" />
-    <orderEntry type="library" name="Python 3.7 (zookeeper-demo) interpreter library" level="application" />
   </component>
 </module>

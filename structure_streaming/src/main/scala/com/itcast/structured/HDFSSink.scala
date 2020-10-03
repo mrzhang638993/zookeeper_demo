@@ -30,7 +30,8 @@ object HDFSSink {
     }).as[(Int, String, String)].toDF("id", "name", "category")
     df.writeStream
       .format("parquet")
-      .option("path", "F:\\works\\hadoop1\\zookeeper-demo\\structure_streaming\\src\\main\\scala\\com\\itcast\\structured\\movies")
+      .option("path", "D:\\document\\works\\zookeeper-demo\\structure_streaming\\src\\main\\scala\\com\\itcast\\structured\\movies")
+      .option("checkpointLocation","checkpoint")
       .start()
       .awaitTermination()
   }

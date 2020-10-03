@@ -7,6 +7,8 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 object HDFSSource {
 
   def main(args: Array[String]): Unit = {
+       // 设置系统的环境变量
+      System.setProperty("hadoop.home.dir","D:\\software\\hadoop-2.7.5")
        //  创建sparkContext，对应的是sparkSession
        // 线程数不能低于2的
        val spark: SparkSession = SparkSession.builder().appName("hdfs_source")

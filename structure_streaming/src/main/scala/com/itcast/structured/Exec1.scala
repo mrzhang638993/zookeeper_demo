@@ -1,5 +1,6 @@
 package com.itcast.structured
 
+import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 
@@ -30,7 +31,7 @@ object Exec1 {
       .selectExpr("CAST(value as STRING)")
       .as[String]
     // 数据过滤操作.根据key进行分组操作实现
-    ds.filter(item => {
+    val value = ds.filter(item => {
       val arr: Array[String] = item.split(",")
       if (arr(0).equals("female")) {
         true
@@ -52,6 +53,10 @@ object Exec1 {
       }).groupByKey(_._1)
       .count()
       .filter(item => item._2 > 120)
-      .show()
+    value.writeStream
+      .outputMode(OutputMode.Complete())
+      .format("console")
+      .start()
+      .awaitTermination()
   }
 }

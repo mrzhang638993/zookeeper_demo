@@ -41,6 +41,10 @@ spark的2.3版本提供了连续流处理操作的api。
 2.at least once：数据至少被处理一次。
 3.exactly once：数据只有一条数据的。
 
+checkpoint的出现对应的是为了容错操作的。
+dataset会占据主要的地位的。需要重点学习的。
+
+
 
 
 

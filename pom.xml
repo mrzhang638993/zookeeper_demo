@@ -21,6 +21,7 @@
         <module>spark-test</module>
         <module>spark_streaming</module>
         <module>structure_streaming</module>
+        <module>spark_project</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -30,6 +30,11 @@ kudu的数据首先存储在的是内存中的，当内存中的数据满了的�
 impala强依赖于hive的metastore的。hive依赖于hdfs的。hive的版本是cdh的版本的。
 安装cdh版本的hadoop以及cdh版本的hive等的版本的数据的。所有的版本对应的需要安装的是cdh版本的操作的。
 
+所有的分布式服务的，在一次io的时间内是同步的。
+主机名称称之为FQDN，cdh01.itcast.cn  称之为主机名称的。其中cdh01称之为主机名称的简写操作的。
+
+
+
 
 
 

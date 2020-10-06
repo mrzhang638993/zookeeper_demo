@@ -67,4 +67,28 @@ class KuduApi {
   /**
    * 菲关系型的数据库，查询称之为扫描器的。
    **/
+  @Test
+  def testSearch(): Unit = {
+    // masterAddresses: String
+    val masterAddress = "192.168.1.205:7051";
+    // 连接到kube的时候对应的是返回的是一个集群的cluster的。根据master连接到对应的server进行数据处理操作的
+    val kuduClient: KuduClient = new KuduClientBuilder(masterAddress).build()
+    val table: KuduTable = kuduClient.openTable("simple")
+    val columns = List("key", "value")
+    import scala.collection.JavaConverters._
+    val scanner: KuduScanner = kuduClient.newScannerBuilder(table).
+      // 可以设置多个列的形式的。
+      setProjectedColumnNames(columns.asJava)
+      .build()
+    // 开始设置扫描的条件执行扫描观察操作实现的
+    while (scanner.hasMoreRows) {
+      // 一次获取的是一整个的tablet中的数据的
+      val tabletIter: RowResultIterator = scanner.nextRows()
+      //  针对于获取到的整个的tablet的数据的
+      while (tabletIter.hasNext) {
+        val result: RowResult = tabletIter.next()
+        println(result.getString(0), result.getString(1))
+      }
+    }
+  }
 }

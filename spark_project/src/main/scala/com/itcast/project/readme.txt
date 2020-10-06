@@ -43,6 +43,13 @@ rpm -qa | grep java   其中rpm  -qa  可以列举出来所有的安装的rpm的
 yum安装不好的地方：无法联网的话，服务器不能访问外网执行操作的。可以配置本地的yum仓库执行操作的。
 yum对应的是python书写的客户端软件，可以管理系统各种各种的安装包。下载使用http协议下载操作。
 
+linux的alternatives的功能实现很关键的。
+cdh版本提供的是服务形式的启动方式的。
+impala书写sql语句生成执行计划，最终kudu执行安装计划执行操作。
+hue:对应的是一个可视化的平台的。
+scala是基于jvm上的语言的，可以和java语言混用的。scala操作kudu使用的是kudu的java的api进行操作的。
+
+
 
 
 

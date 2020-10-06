@@ -29,6 +29,7 @@ class KuduApi {
     val schema = new Schema(columnsList.asJava)
     // 指定分区.指定分区操作操作.默认的分区数是3的。这里只要一个key的
     val options: CreateTableOptions = new CreateTableOptions().
+    //  kudu不需要指定分区方式进行操作的。
       setRangePartitionColumns(List("key").asJava)
       .setNumReplicas(1)
     //  创建表

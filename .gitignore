@@ -47,3 +47,4 @@ java.iml
 /spark_streaming/target/
 /spark_streaming/src/main/scala/checkpoint/
 /structure_streaming/target/
+/dmp/target/

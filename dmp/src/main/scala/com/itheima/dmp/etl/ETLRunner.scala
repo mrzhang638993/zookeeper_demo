@@ -1,6 +1,6 @@
 package com.itheima.dmp.etl
 
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
 /**
  * ETL的处理操作实现
@@ -20,9 +20,8 @@ object ETLRunner {
     // 2.读取数据集
     val source: DataFrame = spark.read
       .json("F:\\works\\hadoop1\\zookeeper-demo\\dmp\\src\\main\\scala\\com\\itheima\\dmp\\utils\\pmt.json")
-    source.show()
-    //  3.执行数据操作
-    // 对于不同的数据操作的话，需要将数据的操作放置在这个位置的?
+    //  3.执行数据操作,返回的是包含了经纬度的数据的。
+    val ipClean: Dataset[Row] = IpProcessor.process(source)
     //  4.数据落地
   }
 }

@@ -6,10 +6,14 @@ import org.apache.kudu.client.CreateTableOptions
 import org.apache.kudu.spark.kudu.KuduContext
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
+/**
+ * 将KuduHelper的相关的功能给SparkSession以及Dataset。增加SparkSession以及Dataset对应的功能实现的。
+ **/
 class KuduHelper {
   private val config = ConfigFactory.load("kudu")
   private var kuduContext: KuduContext = _
   private var sparkSession: SparkSession = _
+  private var dataset: Dataset[Any] = _
 
   def this(sparkSession: SparkSession) = {
     // 实现相关的方法的功能和实现操作
@@ -22,6 +26,7 @@ class KuduHelper {
 
   def this(df: Dataset[Any]) = {
     this(df.sparkSession)
+    this.dataset = df
   }
 
   /**
@@ -62,9 +67,20 @@ class KuduHelper {
   }
 
   /**
-   *
+   * 数据保存到dataset中
    **/
-  //def
+  def saveToKudu(tableName: String): Unit = {
+    // 判断本方式是从dataset上调用的。
+    //  保存数据
+    if (dataset == null) {
+      throw new RuntimeException("请从dataset上面开始")
+    }
+    import org.apache.kudu.spark.kudu._
+    dataset.write
+      .option("kudu.master", kuduContext.kuduMaster)
+      .option("kudu.table", tableName)
+      .kudu
+  }
 }
 
 object KuduHelper {

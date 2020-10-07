@@ -45,16 +45,6 @@ object SparkConfigHelper {
   implicit def sparkToConfig(builder: SparkSession.Builder): SparkConfigHelper = {
     new SparkConfigHelper(builder)
   }
-
-  //  为sparkSession 添加一个方法
-  //  使用隐式转换操作,将sparksession--->sparkConfigHelper
-  def main(args: Array[String]): Unit = {
-    val spark: SparkSession = SparkSession.builder()
-      .appName("test")
-      .master("local[6]")
-      .loadConfig()
-      .getOrCreate()
-  }
 }
 
 

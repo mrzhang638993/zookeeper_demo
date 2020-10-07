@@ -9,6 +9,7 @@ import org.apache.spark.sql._
  * ETL的处理操作实现
  **/
 object ETLRunner {
+  import scala.collection.JavaConverters._
   /**
    * ETL操作表示每天执行一次,需要时间分隔操作
    **/
@@ -107,7 +108,6 @@ object ETLRunner {
     new ColumnSchemaBuilder("sex", Type.STRING).nullable(true).key(false).build
   ).asJava)
 
-  import scala.collection.JavaConverters._
 
   private val keys = List("uuid")
 

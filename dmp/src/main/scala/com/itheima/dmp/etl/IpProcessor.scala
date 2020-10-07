@@ -2,7 +2,7 @@ package com.itheima.dmp.etl
 
 import com.maxmind.geoip.{Location, LookupService}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.types.{DoubleType, StringType, StructType}
+import org.apache.spark.sql.types.{FloatType, StringType, StructType}
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.lionsoul.ip2region.{DbConfig, DbSearcher}
 
@@ -25,8 +25,8 @@ object IpProcessor extends Processor {
     val schema: StructType = dataset.schema
       .add("region", StringType)
       .add("city", StringType)
-      .add("longitude", DoubleType)
-      .add("latitude", DoubleType)
+      .add("longitude", FloatType)
+      .add("latitude", FloatType)
     // 创建一个新的dataset的
     val dataSetWithIp: DataFrame = dataset.sparkSession.createDataFrame(converted, schema)
     dataSetWithIp

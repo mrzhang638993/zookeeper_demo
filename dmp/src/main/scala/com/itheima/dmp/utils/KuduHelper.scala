@@ -1,10 +1,13 @@
 package com.itheima.dmp.utils
 
+import java.util.Date
+
 import com.typesafe.config.ConfigFactory
+import org.apache.commons.lang3.time.FastDateFormat
 import org.apache.kudu.Schema
 import org.apache.kudu.client.CreateTableOptions
 import org.apache.kudu.spark.kudu.KuduContext
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, SaveMode, SparkSession}
 
 /**
  * 将KuduHelper的相关的功能给SparkSession以及Dataset。增加SparkSession以及Dataset对应的功能实现的。
@@ -13,7 +16,7 @@ class KuduHelper {
   private val config = ConfigFactory.load("kudu")
   private var kuduContext: KuduContext = _
   private var sparkSession: SparkSession = _
-  private var dataset: Dataset[Any] = _
+  private var dataset: Dataset[_] = _
 
   def this(sparkSession: SparkSession) = {
     // 实现相关的方法的功能和实现操作
@@ -24,7 +27,7 @@ class KuduHelper {
     this.kuduContext = new KuduContext(MASTER, sparkSession.sparkContext, Some(900000))
   }
 
-  def this(df: Dataset[Any]) = {
+  def this(df: Dataset[_]) = {
     this(df.sparkSession)
     this.dataset = df
   }
@@ -34,19 +37,18 @@ class KuduHelper {
    * 1.通过隐式转换将spark转换成为KuduHelper，
    * 2.调用KuduHelper的createKuduTable创建表的。
    **/
-  def createKuduTable(tableName: String, schema: Schema, keys: List[String], options: CreateTableOptions) = {
+  def createKuduTable(tableName: String, schema: Schema, keys: List[String]) = {
     //  需要调用kuduContext创建对象的。创建的时候需要kudu的master的地址的，需要超时时间的
     if (kuduContext.tableExists(tableName)) {
       kuduContext.deleteTable(tableName)
-    } else {
-      // tableName : scala.Predef.String, schema : org.apache.kudu.Schema, options : org.apache.kudu.client.CreateTableOptions
-      // 创建表执行操作实现
-      val options = new CreateTableOptions()
-      import scala.collection.JavaConverters._
-      options.setNumReplicas(config.getInt("kudu.table.factor"))
-        .addHashPartitions(keys.asJava, 2)
-      kuduContext.createTable(tableName, schema, options)
     }
+    // tableName : scala.Predef.String, schema : org.apache.kudu.Schema, options : org.apache.kudu.client.CreateTableOptions
+    // 创建表执行操作实现
+    val options = new CreateTableOptions()
+    import scala.collection.JavaConverters._
+    options.setNumReplicas(config.getInt("kudu.table.factor"))
+      .addHashPartitions(keys.asJava, 2)
+      kuduContext.createTable(tableName, schema, options)
   }
 
   /**
@@ -79,6 +81,8 @@ class KuduHelper {
     dataset.write
       .option("kudu.master", kuduContext.kuduMaster)
       .option("kudu.table", tableName)
+      // 设置写的模式为追加模式
+      .mode(SaveMode.Append)
       .kudu
   }
 }
@@ -96,7 +100,16 @@ object KuduHelper {
   /**
    * DataFrame 转化成为KuduHelper
    **/
-  implicit def DataFrameToKuduHelper(df: Dataset[Any]): KuduHelper = {
+  implicit def DataFrameToKuduHelper(df: Dataset[_]): KuduHelper = {
     new KuduHelper(df)
+  }
+
+  /**
+   * 获取格式化之后的字符串信息
+   * 将当前的时间格式化操作的
+   * SimpleDateFomat
+   **/
+  implicit def getParseDateString(): String = {
+    FastDateFormat.getInstance("yyyyMMdd").format(new Date())
   }
 }

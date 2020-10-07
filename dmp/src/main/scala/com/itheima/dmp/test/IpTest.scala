@@ -24,5 +24,6 @@ class IpTest {
     //  设置数据的内存缓存操作实现
     val location: Location = service.getLocation("47.114.186.104")
     println(location.city)
+    println(location.latitude, location.longitude)
   }
 }

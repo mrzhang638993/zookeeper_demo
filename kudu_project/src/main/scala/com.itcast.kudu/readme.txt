@@ -1,3 +1,12 @@
 1.kudu更多的使用的情况是和spark进行整合操作的。所以kudu需要和spark进行整合操作实现的。
 可以将kudu的操作融入到spark中进行操作的。
 大数据中删除表的话，都是可以回溯的。
+2.
+sparksql最重要的数据结构是dataframe的数据结构的.dataFrame和kudu的结合进行操作实现的。
+dataframe操作kudu的优势：
+
+rdd的分区和kudu的tablet的对应关系:
+kuduclient读取数据的时候只能读取leader的数据的，写数据的时候对应的也是书写leader的数据的。
+kudu的默认情况下，数据的读写只能发生在leader上面的。
+spark的读取操作可以发生在follower上面的。对应的读取的时候并发的性能会更加的好的。
+spark的分区机制和kudu的tablet的机制的优势的？

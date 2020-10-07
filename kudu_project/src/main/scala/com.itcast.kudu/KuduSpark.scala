@@ -3,7 +3,7 @@ package com.itcast.kudu
 import org.apache.kudu.client.CreateTableOptions
 import org.apache.kudu.spark.kudu.KuduContext
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.junit.Test
 
 /**
@@ -68,6 +68,62 @@ class KuduSpark {
     kuduContext.upsertRows(df, TABLE_NAME)
     // 改
     kuduContext.updateRows(df, TABLE_NAME)
+  }
+
+  /**
+   * dataframe如何写入到kudu中的
+   **/
+  @Test
+  def dfWrite(): Unit = {
+    //  需要指定schema的信息。否则会进行类型推断的，对应的和kudu的类型不匹配的。
+    val spark: SparkSession = SparkSession.builder().master("local[6]")
+      .appName("kudu").getOrCreate()
+    val masterAddress = "192.168.1.205:7051,192.168.1.206:7051,192.168.1.207:7051";
+    // 读取数据到df中
+    val schema = StructType(
+      StructField("name", StringType, nullable = false) ::
+        StructField("age", IntegerType, nullable = false) ::
+        StructField("gpa", DoubleType, nullable = false) :: Nil
+    )
+    val source: DataFrame = spark.read
+      .format("csv")
+      .option("header", false)
+      .option("delimiter", "\t")
+      .schema(schema)
+      .load("F:\\works\\hadoop1\\zookeeper-demo\\kudu_project\\src\\main\\scala\\com.itcast.kudu\\studenttab10k")
+      .toDF("name", "age", "gpa")
+    source.show(2)
+    // 写入数据到kudu表中
+    val TABLE_NAME = "student"
+    import org.apache.kudu.spark.kudu._
+    source.write
+      .option("kudu.table", TABLE_NAME)
+      .option("kudu.master", masterAddress)
+      // 当前的版本只支持append操作的
+      .mode(SaveMode.Append)
+      .kudu
+  }
+
+  /**
+   * 从kudu中读取数据
+   **/
+  @Test
+  def dfRead(): Unit = {
+    val spark: SparkSession = SparkSession.builder().master("local[6]")
+      .appName("kudu").getOrCreate()
+    val masterAddress = "192.168.1.205:7051,192.168.1.206:7051,192.168.1.207:7051";
+    val TABLE_NAME = "student"
+    import org.apache.kudu.spark.kudu._
+    // 读取数据
+    val kuduDf: DataFrame = spark.read
+      .option("kudu.table", TABLE_NAME)
+      .option("kudu.master", masterAddress)
+      .kudu
+    kuduDf.createOrReplaceTempView("kudu_students")
+    val projectDf: DataFrame = spark.sql("" +
+      "select name from kudu_students  where gpa>2")
+    // action操作的话，才会真正的执行的
+    projectDf.show()
   }
 }
 

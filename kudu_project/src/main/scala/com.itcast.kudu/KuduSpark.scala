@@ -2,8 +2,8 @@ package com.itcast.kudu
 
 import org.apache.kudu.client.CreateTableOptions
 import org.apache.kudu.spark.kudu.KuduContext
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.junit.Test
 
 /**
@@ -40,4 +40,35 @@ class KuduSpark {
       println(table)
     }
   }
+
+  /**
+   * 对数据的增删改查询操作
+   **/
+  @Test
+  def crud(): Unit = {
+    val spark: SparkSession = SparkSession.builder().master("local[6]")
+      .appName("kudu").getOrCreate()
+    // val kuduMaster : scala.Predef.String, sc : org.apache.spark.SparkContext, val socketReadTimeoutMs : scala.Option[scala.Long]
+    val masterAddress = "192.168.1.205:7051,192.168.1.206:7051,192.168.1.207:7051";
+    val kuduContext = new KuduContext(masterAddress, spark.sparkContext)
+    // 增
+    val TABLE_NAME = "student"
+    // data : org.apache.spark.sql.DataFrame, tableName : scala.Predef.String
+    // 隐式转换，可以快速的转换获取到df的
+    import spark.implicits._
+    val df: DataFrame = Seq(
+      Student("zhangsan", 15, 60.1),
+      Student("lisi", 10, 50.6)
+    ).toDF()
+    kuduContext.insertRows(df, TABLE_NAME)
+    // 删
+    // kudu中是不允许key重复的。kudu对应的key是唯一的
+    kuduContext.deleteRows(df.select("name"), TABLE_NAME)
+    //  增改，增改查询操作实现
+    kuduContext.upsertRows(df, TABLE_NAME)
+    // 改
+    kuduContext.updateRows(df, TABLE_NAME)
+  }
 }
+
+case class Student(name: String, age: Int, gpa: Double)

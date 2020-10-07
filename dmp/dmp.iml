@@ -141,7 +141,15 @@
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-api:2.6.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.6.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-annotations:2.6.1" level="project" />
-    <orderEntry type="library" name="Maven: graphframes:graphframes:0.7.0-spark2.4-s_2.11" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: graphframes:graphframes:0.7.0-spark2.4-s_2.11">
+        <CLASSES>
+          <root url="jar://D:/lib/graphframes-0.7.0-spark2.4-s_2.11.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Maven: org.apache.spark:spark-graphx_2.11:2.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-mllib-local_2.11:2.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.scalanlp:breeze_2.11:0.13.1" level="project" />

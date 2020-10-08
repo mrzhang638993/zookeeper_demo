@@ -13,7 +13,7 @@ object ETLRunner {
   /**
    * ETL操作表示每天执行一次,需要时间分隔操作
    **/
-  private val TARGET_TABLE_NAME = "ods_" + KuduHelper.getParseDateString()
+  val ODS_TABLE_NAME = "ods_" + KuduHelper.getParseDateString()
   private val schema: Schema = new Schema(List(
     new ColumnSchemaBuilder("uuid", Type.STRING).nullable(false).key(true).build,
     new ColumnSchemaBuilder("sessionid", Type.STRING).nullable(true).key(false).build(),
@@ -149,8 +149,8 @@ object ETLRunner {
     val result: DataFrame = ipClean.select(selectRows: _*)
     //  4.数据落地到kudu中的
     // 创建表
-    result.createKuduTable(TARGET_TABLE_NAME, schema, keys)
+    result.createKuduTable(ODS_TABLE_NAME, schema, keys)
     // 数据保存到表中
-    result.saveToKudu(TARGET_TABLE_NAME)
+    result.saveToKudu(ODS_TABLE_NAME)
   }
 }

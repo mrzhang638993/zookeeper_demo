@@ -10,5 +10,8 @@
 根据地域进行广告的投放统计操作实现。
 
 广告投放情况，在地区上的投放情况。统计广告的指标，从省市维度进行指标的统一操作实现。
+需要根据地理位置或者说是商圈位置进行广告的投放操作和实现的。
 
-
+#高德地图统计数据
+https://restapi.amap.com/v3/geocode/regeo?key=f169a20c512862060b2c545548ed235c&location=116.481488,39.990464
+https://restapi.amap.com/v3/geocode/geo?key=f169a20c512862060b2c545548ed235c&address=北京市朝阳区阜通东大街6号

@@ -20,7 +20,8 @@ object DailyReportRunner {
       .getOrCreate()
     //   创建容器,放置所有的Processor数据
     val processors = List[ReportProcessor](
-      NewRegionReportProcessor
+      //NewRegionReportProcessor,
+      AdsRegionReportProcessor
     )
     //   循环容器，拿到每一个的processor,执行每一个processor,
     //   每一个processor对应的都代表了一个报表的处理过程。

@@ -1,6 +1,5 @@
 package com.itheima.dmp.etl
 
-import com.itheima.dmp.utils.KuduHelper
 import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder
 import org.apache.kudu.{Schema, Type}
 import org.apache.spark.sql._
@@ -13,7 +12,8 @@ object ETLRunner {
   /**
    * ETL操作表示每天执行一次,需要时间分隔操作
    **/
-  val ODS_TABLE_NAME = "ods_" + KuduHelper.getParseDateString()
+  //val ODS_TABLE_NAME = "ods_" + KuduHelper.getParseDateString()
+  val ODS_TABLE_NAME = "ods_20201007"
   private val schema: Schema = new Schema(List(
     new ColumnSchemaBuilder("uuid", Type.STRING).nullable(false).key(true).build,
     new ColumnSchemaBuilder("sessionid", Type.STRING).nullable(true).key(false).build(),

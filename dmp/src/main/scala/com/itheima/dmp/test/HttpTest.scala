@@ -1,6 +1,8 @@
 package com.itheima.dmp.test
 
 import okhttp3.{OkHttpClient, Request, Response, ResponseBody}
+import org.json4s.NoTypeHints
+import org.json4s.jackson.Serialization
 import org.junit.Test
 
 
@@ -32,4 +34,50 @@ class HttpTest {
       case e: Exception => e.printStackTrace()
     }
   }
+
+
+  @Test
+  def testJson(): Unit = {
+    val json =
+      """
+        |{
+        |  "info": "OK",
+        |  "infocode": "10000",
+        |  "status": "1",
+        |  "regeocode": {
+        |      "country": "中国",
+        |      "township": "燕园街道",
+        |      "businessAreas": [
+        |        {
+        |          "location": "116.303364,39.97641",
+        |          "name": "万泉河",
+        |          "id": "110108"
+        |        },
+        |        {
+        |          "location": "116.314222,39.98249",
+        |          "name": "中关村",
+        |          "id": "110108"
+        |        },
+        |        {
+        |          "location": "116.294214,39.99685",
+        |          "name": "西苑",
+        |          "id": "110108"
+        |        }
+        |      ]
+        |  }
+        |}
+  """.stripMargin
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val gaode: Gaode = Serialization.read[Gaode](json)
+    println(gaode)
+  }
 }
+
+case class Gaode(info: String, infocode: String, status: String, regeocode: Option[Regeocode])
+
+/**
+ * 可以避免对应的出现元素为空的时候无法解析的操作的
+ **/
+case class Regeocode(country: String, township: String, businessAreas: Option[List[BusinessArea]])
+
+case class BusinessArea(location: String, name: String, id: String)

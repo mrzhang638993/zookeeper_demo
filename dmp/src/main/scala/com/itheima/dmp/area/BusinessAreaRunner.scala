@@ -2,6 +2,8 @@ package com.itheima.dmp.area
 
 
 import ch.hsr.geohash.GeoHash
+import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder
+import org.apache.kudu.{Schema, Type}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
@@ -11,7 +13,16 @@ object BusinessAreaRunner {
   import com.itheima.dmp.utils.SparkConfigHelper._
   import org.apache.spark.sql.functions._
 
-  private val AREA_TABLE_NAME = "BUSINESS_AREA"
+  import scala.collection.JavaConverters._
+
+  private val AREA_TABLE_NAME = "BUSINESS_AREA_1"
+  private val keys = List("geoHash")
+  private val schema = new Schema(
+    List(
+      new ColumnSchemaBuilder("geoHash", Type.STRING).nullable(false).key(true).build(),
+      new ColumnSchemaBuilder("area", Type.STRING).nullable(false).key(false).build()
+    ).asJava
+  )
   private var result: DataFrame = _
 
   /**
@@ -40,23 +51,25 @@ object BusinessAreaRunner {
     if (source.isDefined && areaDf.isEmpty) {
       // 商圈信息不存在的话，查询高德的api创建数据的。
       result = cleanValue.select("longitude", "latitude")
-        .selectExpr("geoHash(longitude,latitude) as geoHash", "fetchArea(longitude,latitude) as area")
-      result.show(3)
+        .selectExpr("geoHash(longitude,latitude) as geoHash1", "fetchArea(longitude,latitude) as area")
+      spark.createKuduTable(AREA_TABLE_NAME, schema, keys)
     }
     if (source.isDefined && areaDf.isDefined) {
       // 两个数据都存在的话。商圈表的数据也是存在的。
       // 先进行差集操作，去掉已经有的高德的数据，然后查询对应的高德的api数据的
       val areaInfo: DataFrame = areaDf.get
-      result = cleanValue.selectExpr("geoHash(longitude,latitude) as geoHash", "fetchArea(longitude,latitude) as area", "longitude", "latitude")
-        // lit中配置的是默认值
-        .withColumn("area", lit(null))
-        .join(areaInfo, cleanValue.col("geoHash") === areaInfo.col("geoHash"), joinType = "left_join")
-        // 去掉原来就存在的数据，执行差集操作。
-        .where(areaInfo.col("area") isNull)
-        //  请求高德地图数据
-        .selectExpr("geoHash", "fetchArea(longitude,latitude) as area")
-      result.show(3)
+      val frame: DataFrame = cleanValue.selectExpr("geoHash(longitude,latitude) as geoHash1", "longitude", "latitude")
+      // lit中配置的是默认值.增加一列数据执行操作
+      result = frame.withColumn("area", lit(null))
+        .join(areaInfo, frame.col("geoHash1") === areaInfo.col("geoHash"), joinType = "left")
+        //.where(areaInfo.col("area") isNull)
+        .selectExpr("geoHash1 as geoHash", "fetchArea(longitude, latitude) as area")
+      // 去掉原来就存在的数据，执行差集操作。
+      //.where(areaInfo.col("area") isNull)
+      //  请求高德地图数据
     }
+    //result.show(3)
+    result.saveToKudu(AREA_TABLE_NAME)
   }
 
   /**
@@ -71,9 +84,16 @@ object BusinessAreaRunner {
     //  获取到json string
     val gaoDeInfo: Option[String] = HttpUtils.getLocationInfo(longitude, latitude)
     // option上面执行map操作是很安全的
-    gaoDeInfo.map(json => HttpUtils.parseJson(json)).map(location => {
-      val areas2: List[BusinessArea] = location.regeocode.get.addressComponent.get.businessAreas.get
-      areas2.map(_.name).mkString(",")
-    }).getOrElse("")
+    val regionCode: Option[Regeocode] = gaoDeInfo.map(json => HttpUtils.parseJson(json)).map(item => item.regeocode).getOrElse(None)
+    if (regionCode != None) {
+      val addressComponent: Option[AddressComponent] = regionCode.map(item => item.addressComponent).getOrElse(None)
+      val businessArea: Option[Option[List[BusinessArea]]] = addressComponent.map(item => item.businessAreas)
+      val maybeAreas: Option[List[BusinessArea]] = businessArea.getOrElse(None)
+      if (maybeAreas != null && maybeAreas != None) {
+        val value: List[BusinessArea] = maybeAreas.get
+        return value.map(_.name).mkString(",")
+      }
+    }
+    ""
   }
 }

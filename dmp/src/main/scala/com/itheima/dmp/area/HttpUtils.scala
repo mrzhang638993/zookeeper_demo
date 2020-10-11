@@ -36,7 +36,6 @@ object HttpUtils {
 
   def parseJson(json: String): AMapLocation = {
     implicit val format = Serialization.formats(NoTypeHints)
-    println(json)
     Serialization.read[AMapLocation](json)
   }
 }

@@ -62,14 +62,16 @@ object BusinessAreaRunner {
       // lit中配置的是默认值.增加一列数据执行操作
       result = frame.withColumn("area", lit(null))
         .join(areaInfo, frame.col("geoHash1") === areaInfo.col("geoHash"), joinType = "left")
-        //.where(areaInfo.col("area") isNull)
+        .where(areaInfo.col("area") isNull)
         .selectExpr("geoHash1 as geoHash", "fetchArea(longitude, latitude) as area")
       // 去掉原来就存在的数据，执行差集操作。
       //.where(areaInfo.col("area") isNull)
       //  请求高德地图数据
     }
-    //result.show(3)
-    result.saveToKudu(AREA_TABLE_NAME)
+    result.show(3)
+    if (result != null) {
+      result.saveToKudu(AREA_TABLE_NAME)
+    }
   }
 
   /**

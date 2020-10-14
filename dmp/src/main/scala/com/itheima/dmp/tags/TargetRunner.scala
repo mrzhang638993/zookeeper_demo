@@ -48,7 +48,7 @@ object TargetRunner {
     //  tags->Gmail:1,A20:1
     // 步骤如下：进行图计算，需要将数据集转换成为Vertex,以及Edge的数据的。
     //  vertex对应的是定点信息，edges对应的是点和点的边连接关系。
-    val vertex: Dataset[Vertex] = idsAndTags.map(item => Vertex(item.mainId, item.ids, item.tags)).toDF()
+    val vertex: Dataset[Vertex] = idsAndTags.map(item => Vertex(item.mainId, item.ids, item.tags))
     val edges: Dataset[Edge] = idsAndTags.flatMap(item => {
       //  id的key和对应的id的数值(id,value)
       //  需要注意点和边的生成是一对多的。

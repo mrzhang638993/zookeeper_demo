@@ -4,6 +4,7 @@ import ch.hsr.geohash.GeoHash
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.graphframes.GraphFrame
 //  创建可变集合，直接创建的是不可变的集合的
 import scala.collection.mutable
 
@@ -40,9 +41,49 @@ object TargetRunner {
     val df: DataFrame = odsOption.get.withColumn("geoHash", geoHash('longitude, 'latitude))
     val areaOds: DataFrame = df.join(areaOption.get, df.col("geoHash") === areaOption.get.col("geoHash"), joinType = "left")
     //下面是执行打标签的操作实现的。打标签的操作是对应的给数据增加标签操作实现的。
-    val tagValues: Dataset[IdsWithTags] = areaOds.map(createTags(_))
-    // 保存数据
-    tagValues.show(3)
+    val idsAndTags: Dataset[IdsWithTags] = areaOds.map(createTags(_))
+    // 统一用户识别操作。数据中有一部分有uuid，mac地址等。
+    // 格式:mainId,tags,
+    //  mainId 是一个具体的id,是一个主id，顺序获取到第一个非空的id称之为主id数据的
+    //  tags->Gmail:1,A20:1
+    // 步骤如下：进行图计算，需要将数据集转换成为Vertex,以及Edge的数据的。
+    //  vertex对应的是定点信息，edges对应的是点和点的边连接关系。
+    val vertex: Dataset[Vertex] = idsAndTags.map(item => Vertex(item.mainId, item.ids, item.tags)).toDF()
+    val edges: Dataset[Edge] = idsAndTags.flatMap(item => {
+      //  id的key和对应的id的数值(id,value)
+      //  需要注意点和边的生成是一对多的。
+      val ids: Map[String, String] = item.ids
+      val edge = for (id <- ids; otherId <- ids if otherId != id) yield Edge(id._2, otherId._2)
+      edge
+    })
+    val components: Dataset[VertexComponent] = GraphFrame(vertex.toDF(), edges.toDF()).connectedComponents.run().as[VertexComponent]
+    //根据component进行聚合操作实现，根据componentId相同的是同样的一个component的。
+    val agg: Dataset[(Long, VertexComponent)] = components.groupByKey(component => component.component).reduceGroups((curr, mid) => reduceVertexGroups(curr, mid))
+    //
+    val result: Dataset[Tags] = agg.map(mapTags _)
+    result.show()
+  }
+
+  def mapTags(vertexComponent: (Long, VertexComponent)): Tags = {
+    val mainId: String = getMainId(vertexComponent._2.ids)
+    val tags: String = vertexComponent._2.tags.map(item => item._1 + ":" + item._2).mkString(",")
+    Tags(mainId, tags)
+  }
+
+  def reduceVertexGroups(curr: VertexComponent, mid: VertexComponent): VertexComponent = {
+    val id = curr.id
+    val ids = curr.ids ++ mid.ids
+    val tags = {
+      val temp = curr.tags.map {
+        case (k, v) => if (mid.tags.contains(k)) {
+          (k, v + mid.tags.get(k).get)
+        } else {
+          (k, v)
+        }
+      }
+      mid.tags ++ temp
+    }
+    VertexComponent(id, ids, tags, curr.component)
   }
 
   def getGeoHash(longitude: Double, latitude: Double): String = {
@@ -106,3 +147,15 @@ object TargetRunner {
 }
 
 case class IdsWithTags(mainId: String, ids: Map[String, String], tags: Map[String, Int])
+
+//  定义顶点数据
+case class Vertex(id: String, ids: Map[String, String], tags: Map[String, Int])
+
+// 定义边的数据
+case class Edge(src: String, dst: String)
+
+//
+case class VertexComponent(id: String, ids: Map[String, String], tags: Map[String, Int], component: Long)
+
+//
+case class Tags(mainId: String, tags: String)

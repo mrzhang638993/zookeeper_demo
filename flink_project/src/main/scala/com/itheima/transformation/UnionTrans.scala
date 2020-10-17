@@ -19,6 +19,10 @@ object UnionTrans {
     val valueDataset: DataSet[String] = env.fromCollection(List("hadoop", "hive", "flume"))
     val valueDataset1: DataSet[String] = env.fromCollection(List("hadoop", "hive", "spark"))
     val unionValue: DataSet[String] = valueDataset.union(valueDataset1)
-    unionValue.print()
+    // 去重操作实现
+    //unionValue.print()
+    //根据元素属性的位置进行去重操作实现的话，只适用于元组进行操作的。
+    val distinctValue: DataSet[String] = unionValue.distinct()
+    distinctValue.print()
   }
 }

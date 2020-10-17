@@ -12,8 +12,10 @@ object DistinctTrans {
     // 创建批处理运行环境
     val env: ExecutionEnvironment = ExecutionEnvironment.getExecutionEnvironment
     val destValue: DataSet[(String, Int)] = env.fromCollection(List(("java", 1), ("java", 1), ("scala", 1)))
-    //根据指定的字段进行去重操作实现和管理操作。
-    val distinctValue: DataSet[(String, Int)] = destValue.distinct(0)
+    //根据指定的字段进行去重操作实现和管理操作。葛奴第一个字段进行去重操作实现
+    //val distinctValue: DataSet[(String, Int)] = destValue.distinct(0)
+    //  可以根据多个字段进行去重操作实现
+    val distinctValue: DataSet[(String, Int)] = destValue.distinct(0, 1)
     distinctValue.print()
   }
 }

@@ -24,6 +24,7 @@
         <module>spark_project</module>
         <module>kudu_project</module>
         <module>dmp</module>
+        <module>flink_project</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

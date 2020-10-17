@@ -14,7 +14,7 @@ object ReduceGroupTrans {
     val env: ExecutionEnvironment = ExecutionEnvironment.getExecutionEnvironment
     // 执行reduceGroup操作实现
     val sourceDataset: DataSet[(String, Int)] = env.fromCollection(List(("java", 1), ("java", 1), ("java", 1)))
-    // 执行数据操作实现
+    // 执行数据操作实现。擦做的对象是组的迭代器的。
     val sinkDataset: DataSet[(String, Int)] = sourceDataset.reduceGroup(itertable => {
       // 对应的是对于组内的数据进行聚合操作实现的。
       itertable.reduce((priv, next) => (priv._1, priv._2 + next._2))

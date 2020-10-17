@@ -14,7 +14,7 @@ object AggregateTrans {
     //  读取数据执行操作
     val sourceData: DataSet[(String, Int)] = env.fromCollection(List(("java", 1), ("java", 1), ("scala", 1)))
     //  使用如下的语句是报错的？要使用aggregate，只能使用字段索引名或索引名称来进行分组groupBy(0)，否则会报一下错误:
-    //val value: GroupedDataSet[(String, Int)] = sourceData.groupBy(it=>it._1)
+    //val value: GroupedDataSet[(String, Int)] = sourceData.groupBy(it=>it._1) 是会报错的。
     val value: GroupedDataSet[(String, Int)] = sourceData.groupBy(0)
     val destValue: AggregateDataSet[(String, Int)] = value.aggregate(Aggregations.SUM, 1)
     destValue.print()

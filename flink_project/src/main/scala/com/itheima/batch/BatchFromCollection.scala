@@ -1,3 +1,5 @@
+package com.itheima.batch
+
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
 
 object BatchFromCollection {

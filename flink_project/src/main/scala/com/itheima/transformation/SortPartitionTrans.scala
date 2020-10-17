@@ -6,6 +6,7 @@ import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 /**
  * sortPartition分区操作实现
  * 将分区的数据进行排序操作之后输出到文件中
+ * 这个的使用是很关键的，后续的很多的输出的操作都是可以输出到对应的文件中进行操作实现的。
  **/
 object SortPartitionTrans {
   def main(args: Array[String]): Unit = {

@@ -14,5 +14,8 @@ object BatchFromCollection {
     // 创建dataset数据集
     val dataset: DataSet[String] = env.fromCollection(List[String]("flink", "spark", "hadoop"))
     dataset.print()
+    // 加载生成序列
+    val seq: DataSet[Long] = env.generateSequence(1, 9)
+    seq.print()
   }
 }

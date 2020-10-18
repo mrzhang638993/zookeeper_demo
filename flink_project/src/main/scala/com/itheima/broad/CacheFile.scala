@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.core.fs.FileSystem
 
 /**
  * 使用分布式缓存进行操作实现
@@ -34,7 +35,7 @@ object CacheFile {
         println(fileContent)
       }
     })
-    sinkValue.writeAsText("./dataset/distributeCache")
+    sinkValue.writeAsText("./dataset/distributeCache", FileSystem.WriteMode.OVERWRITE)
     // 文件执行操作实现
     env.execute("fileContent")
   }

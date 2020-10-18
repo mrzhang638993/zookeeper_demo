@@ -23,6 +23,7 @@ object Datasource_Kafka {
     val kafkaConsumer = new FlinkKafkaConsumer010[String](kafkaTopic, new SimpleStringSchema(), prop)
     // 设置数据源
     import org.apache.flink.api.scala._
+    // 增加数据源进行获取数据
     val kafkaDataStr: DataStream[String] = env.addSource(kafkaConsumer)
     kafkaDataStr.print()
     env.execute("kafka_consumer")

@@ -147,7 +147,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.itheima.env.BatchRemoteEven</mainClass>
+                            <mainClass>com.itheima.env.BatchRemoteEnv</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

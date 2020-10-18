@@ -48,3 +48,13 @@ java.iml
 /spark_streaming/src/main/scala/checkpoint/
 /structure_streaming/target/
 /dmp/target/
+/target/
+/akka/target/
+/akka-master/target/
+/akka-worker/target/
+/flink_project/target/
+/kudu_project/target/
+/spark-demo-common/target/
+/spark-demo-master/target/
+/spark-demo-worker/target/
+/spark_project/target/

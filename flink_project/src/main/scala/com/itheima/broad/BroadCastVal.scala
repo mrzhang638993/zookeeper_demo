@@ -30,6 +30,7 @@ object BroadCastVal {
        * 重写open方法，对应的open方法会在map方式执行之前执行的，并且只会执行一次。
        **/
       override def open(parameters: Configuration): Unit = {
+        //  Java集合转换到scala的集合转换操作类型的。
         import scala.collection.JavaConverters._
         list = getRuntimeContext.getBroadcastVariable[(Int, String)]("stuDataset").asScala.toList
         // 下面需要对数据进行处理操作，将Nothing类型的转换成为真实的业务数据的类型

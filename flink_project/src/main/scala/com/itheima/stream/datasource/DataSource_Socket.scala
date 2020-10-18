@@ -18,6 +18,7 @@ object DataSource_Socket {
     val mapDataStream: DataStream[String] = sourceStream.flatMap { line => line.split(" ") }
     // 数据打印操作
     mapDataStream.print()
+    // 任务执行。
     env.execute("socket_job")
   }
 }

@@ -18,7 +18,7 @@ object CacheFile {
     val env: ExecutionEnvironment = ExecutionEnvironment.createLocalEnvironment(2)
     // 加载集合数据执行操作实现
     val sourceData: DataSet[String] = env.fromCollection(List("a", "b", "c", "d"))
-    // 注册分布式缓存文件
+    // 注册分布式缓存文件.数据存储到对应的分布式节点的磁盘进行操作的。
     env.registerCachedFile("F:\\works\\hadoop1\\zookeeper-demo\\flink_project\\src\\main\\scala\\dataset\\data.txt", "data.txt")
     // 下面显示使用分布式缓存操作技术实现
     val sinkValue: DataSet[String] = sourceData.map(new RichMapFunction[String, String] {

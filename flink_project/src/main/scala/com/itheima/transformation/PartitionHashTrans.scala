@@ -3,7 +3,7 @@ package com.itheima.transformation
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 
 /**
- * 执行hashPartition分区操作实现
+ * 执行hashPartition分区操作实现。根据指定的字段进行分区操作
  **/
 object PartitionHashTrans {
 

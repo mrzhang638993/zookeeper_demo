@@ -22,6 +22,9 @@ object Datasource_Mysql {
   }
 }
 
+/**
+ * 自定义的数据源，一定需要实现RichSourceFunction类信息的，后面的是返回的数据信息的
+ **/
 class MysqlSource extends RichSourceFunction[(Int, String, String, String)] {
   // 连接mysql数据库驱动
   override def run(ctx: SourceFunction.SourceContext[(Int, String, String, String)]): Unit = {
@@ -36,7 +39,7 @@ class MysqlSource extends RichSourceFunction[(Int, String, String, String)] {
       val username: String = set.getString(2)
       val password: String = set.getString(3)
       val name: String = set.getString(4)
-      // 收集数据
+      // 收集数据。整个很关键的。
       ctx.collect((id, username, password, name))
     }
   }

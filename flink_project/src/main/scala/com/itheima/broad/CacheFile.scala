@@ -23,12 +23,10 @@ object CacheFile {
     // 下面显示使用分布式缓存操作技术实现
     val sinkValue: DataSet[String] = sourceData.map(new RichMapFunction[String, String] {
       var file: File = null;
-
       //  注册和获取分布式缓存数据
       override def map(value: String): String = {
         value
       }
-
       override def open(parameters: Configuration): Unit = {
         file = getRuntimeContext.getDistributedCache.getFile("data.txt")
         val fileContent: String = FileUtils.readFileToString(file)

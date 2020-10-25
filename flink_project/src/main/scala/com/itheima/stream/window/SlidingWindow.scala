@@ -25,8 +25,8 @@ object SlidingWindow {
     }
     //  根据红路灯进行分组操作
     val keyValue: KeyedStream[CountCar, Int] = countCars.keyBy(_.sen)
-    // 划分时间窗口数据
-    val windowValue: DataStream[CountCar] = keyValue.timeWindow(Time.seconds(5), Time.seconds(3)).sum(1)
+    // 划分时间窗口数据,在时间窗口下面进行设置滑动窗口数据。
+    val windowValue: DataStream[CountCar] = keyValue.timeWindow(Time.seconds(4), Time.seconds(8)).sum(1)
     //  划分相关的数据
     windowValue.print()
     env.execute()

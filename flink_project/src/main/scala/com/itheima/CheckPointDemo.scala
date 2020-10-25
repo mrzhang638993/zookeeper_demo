@@ -4,20 +4,62 @@ import java.util
 import java.util.concurrent.TimeUnit
 
 import org.apache.flink.api.java.tuple.Tuple
+import org.apache.flink.runtime.state.filesystem.FsStateBackend
+import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed
 import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
+import org.apache.flink.streaming.api.scala.{DataStream, KeyedStream, StreamExecutionEnvironment, WindowedStream}
 import org.apache.flink.streaming.api.scala.function.WindowFunction
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.util.Collector
-import org.apache.hadoop.hive.ql.exec.vector.TimestampUtils
-
-
+import org.apache.flink.api.scala._
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
+import org.apache.flink.streaming.api.watermark.Watermark
+import org.apache.flink.streaming.api.windowing.time.Time
 /**
  * flink checkpoint操作实现
  * */
+//1. 流处理环境
+//2. 开启checkpoint,间隔时间为6s
+//3. 设置checkpoint位置
+//4. 设置处理时间为事件时间
+//5. 添加数据源
+//6. 添加水印支持
+//7. keyby分组
+//8. 设置滑动窗口,窗口时间为4s
+//9. 指定自定义窗口
+//10. 打印结果
+//11. 执行任务
 object CheckPointDemo {
   def main(args: Array[String]): Unit = {
-
+    //  创建流式运行环境
+    val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
+    // 设置6秒钟进行一次checkpoint检查操作实现
+    env.enableCheckpointing(6000)
+    // 设置checkpoit的位置
+    env.setStateBackend(new FsStateBackend("file:///E:\\idea_works\\java\\zookeeper_demo\\flink_project\\src\\main\\scala\\com\\itheima\\checkpoint"))
+    // 设置处理时间
+    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+    // 增加数据源操作
+    val sourceValue: DataStream[Msg] = env.addSource(new MySourceFunction)
+    //  增加水印操作
+    val waterValue: DataStream[Msg] = sourceValue.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[Msg] {
+      override def getCurrentWatermark: Watermark = {
+        new Watermark(System.currentTimeMillis())
+      }
+      override def extractTimestamp(element: Msg, previousElementTimestamp: Long): Long = {
+        System.currentTimeMillis()
+      }
+    })
+    // 执行分组操作实现
+    val tupleValue: KeyedStream[Msg, Tuple] = waterValue.keyBy(0)
+    // 窗口时间为4秒，滑动时间为1秒。
+    val windowValue: WindowedStream[Msg, Tuple, TimeWindow] = tupleValue.timeWindow(Time.seconds(4), Time.seconds(1))
+    //  执行window的复杂小左
+    val applyValue: DataStream[Long] = windowValue.apply(new MyWindowAndCheckPoint)
+    // 执行打印输出
+    applyValue.print()
+    env.execute()
   }
 }
 // 1. 自定义样例类(id: Long, name: String, info: String, count: Int)
@@ -70,7 +112,7 @@ class MyWindowAndCheckPoint extends  WindowFunction[Msg,Long,Tuple,TimeWindow]  
     }
     total+=count
     // 收集数据
-    out.collect(total)
+    out.collect(count)
   }
   //自定义快照数据
   override def snapshotState(checkpointId: Long, timestamp: Long): util.List[UdfState] = {

@@ -33,8 +33,3 @@ object TumblingTimeWindow {
   }
 }
 
-/**
- * @param sen     传感器编号
- * @param carNum  车辆的数量
- * */
-case class CountCar(sen:Int,carNum:Int)

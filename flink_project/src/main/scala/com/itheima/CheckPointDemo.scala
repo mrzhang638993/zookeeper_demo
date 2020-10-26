@@ -85,6 +85,7 @@ class MySourceFunction extends  RichSourceFunction[Msg]{
 // 1. 继承Serializable
 //2. 为总数count提供set和get方法
 // 自定义状态。
+//  定义状态类，体现的是维护的状态数据的
 class UdfState extends  Serializable{
   private var count=0L
    def setState(s:Long){
@@ -102,6 +103,7 @@ class UdfState extends  Serializable{
 //5. 重写restoreState,恢复自定义快照
 // 自定义window he检查点数据
 // IN, OUT, KEY, W <: Window
+//  使用ListCheckpointed 来维护状态数据操作的.
 class MyWindowAndCheckPoint extends  WindowFunction[Msg,Long,Tuple,TimeWindow]  with ListCheckpointed[UdfState]{
   //  制定求和总数操作
   var total:Long=0L
@@ -110,6 +112,7 @@ class MyWindowAndCheckPoint extends  WindowFunction[Msg,Long,Tuple,TimeWindow]  
     for(msg<-input){
        count+=1
     }
+    //  维护状态数据，定期将状态数据写入到snapshotState中实现的。
     total+=count
     // 收集数据
     out.collect(count)

@@ -7,6 +7,7 @@ import org.apache.flink.api.scala._
 
 /**
  * 执行flink的相关的操作实现
+ * 注册的表名称不要使用order这种关键字命名操作实现的。
  * */
 object BatchFlinkSqlDemo {
 
@@ -35,7 +36,7 @@ object BatchFlinkSqlDemo {
     //val table: Table = tableEnv.sqlQuery("select *  from order1")
     //table.printSchema()
     // 统计用户消费的订单的总金额，最大金额，最小金额，订单总数
-    val sql="select sum(money),max(money),min(money),count(1) from order1"
+    val sql="select userName,sum(money),max(money),min(money),count(1) from order1  group by userName"
     val table1: Table = tableEnv.sqlQuery(sql)
     val sqlValue: DataSet[(Double,Double,Double,Long)] = tableEnv.toDataSet[(Double,Double,Double,Long)](table1)
     sqlValue.print()

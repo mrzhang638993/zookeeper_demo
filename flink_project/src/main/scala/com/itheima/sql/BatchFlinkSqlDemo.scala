@@ -32,9 +32,13 @@ object BatchFlinkSqlDemo {
     // 注册操作
     tableEnv.registerDataSet("order1",dataset)
     // 执行sql查询操作
-    val table: Table = tableEnv.sqlQuery("select *  from order1")
-    table.printSchema()
-
+    //val table: Table = tableEnv.sqlQuery("select *  from order1")
+    //table.printSchema()
+    // 统计用户消费的订单的总金额，最大金额，最小金额，订单总数
+    val sql="select sum(money),max(money),min(money),count(1) from order1"
+    val table1: Table = tableEnv.sqlQuery(sql)
+    val sqlValue: DataSet[(Double,Double,Double,Long)] = tableEnv.toDataSet[(Double,Double,Double,Long)](table1)
+    sqlValue.print()
   }
 }
 /**

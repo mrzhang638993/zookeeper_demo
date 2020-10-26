@@ -28,7 +28,7 @@ object Dataset_DataStreamToTable {
     // 5.执行sql语句
     val table: Table = tableEnv.sqlQuery("select * from order1  where user=1")
     // 6.写入csv文件
-    // 打印表结构进行输出操作实现
+    // 打印表结构进行输出操作实现。打印表的输出结构数据和操作实现
     table.printSchema()
     // /**
     //  * A simple [[TableSink]] to emit data as CSV files.

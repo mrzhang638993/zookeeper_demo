@@ -5,10 +5,12 @@ import java.util.UUID
 
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.source.SourceFunction
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.api.scala._
+import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks}
+import org.apache.flink.streaming.api.watermark.Watermark
 
 import scala.util.Random
 
@@ -44,7 +46,18 @@ object StreamFlinkSqlDemo {
     //  设置水印时间进行操作,便于后续的sql查询操作
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     //  增加数据源进行操作实现
-    env.addSource(new MySelfSource)
+    val sourceValue: DataStream[Order12] = env.addSource(new MySelfSource)
+    // 增加水印操作实现
+    val waterValue: DataStream[Order12] = sourceValue.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[Order12] {
+      //  解决网络延时，增加水印操作实现
+      override def getCurrentWatermark: Watermark = {
+
+      }
+      override def extractTimestamp(element: Order12, previousElementTimestamp: Long): Long = {
+
+      }
+    })
+    //  最终形成最终的数据操作实现和管理实现
 
   }
 }

@@ -51,3 +51,10 @@ flink实现批处理和流处理层的代码统一层面实现操作的，可以
 
 
 
+flnk流处理操作也是支持sql语句的，但是需要注意如下的操作的：
+流处理中也可以支持SQL。但是需要注意以下几点：
+1. 要使用流处理的SQL，必须要添加水印时间
+2. 使用registerDataStream 注册表的时候，使用' 来指定字段
+3. 注册表的时候，必须要指定一个rowtime，否则无法在SQL中使用窗口
+4. 必须要导入import org.apache.flink.table.api.scala._ 隐式参数
+5. SQL中使用tumble(时间列名, interval '时间' sencond) 来进行定义窗口

@@ -4,13 +4,14 @@ import java.util.concurrent.TimeUnit
 import java.util.UUID
 
 import org.apache.flink.streaming.api.TimeCharacteristic
-import org.apache.flink.streaming.api.functions.source.SourceFunction
+import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.TableEnvironment
+import org.apache.flink.table.api.{Table, TableEnvironment}
 import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.api.scala._
-import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks}
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
 import org.apache.flink.streaming.api.watermark.Watermark
+import org.apache.flink.types.Row
 
 import scala.util.Random
 
@@ -48,25 +49,47 @@ object StreamFlinkSqlDemo {
     //  增加数据源进行操作实现
     val sourceValue: DataStream[Order12] = env.addSource(new MySelfSource)
     // 增加水印操作实现
-    val waterValue: DataStream[Order12] = sourceValue.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[Order12] {
+    val waterDataStream: DataStream[Order12] = sourceValue.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[Order12] {
       //  解决网络延时，增加水印操作实现
+      var currentTimestamp: Long = 0L;
+
+      //  允许延迟2秒钟设置水印时间。
       override def getCurrentWatermark: Watermark = {
-
+        new Watermark(currentTimestamp - 2000)
       }
-      override def extractTimestamp(element: Order12, previousElementTimestamp: Long): Long = {
 
+      override def extractTimestamp(element: Order12, previousElementTimestamp: Long): Long = {
+        currentTimestamp = Math.max(element.createTime, System.currentTimeMillis())
+        currentTimestamp
       }
     })
     //  最终形成最终的数据操作实现和管理实现
-
+    import org.apache.flink.table.api.scala._
+    tableEnv.registerDataStream("t_order",waterDataStream,'id, 'userId, 'money, 'createTime.rowtime)
+    //  编写sql语句进行统计操作实现
+   // 编写SQL语句统计用户订单总数、最大金额、最小金额
+    val sql=
+   """
+     |select userId,max(money),min(money),count(1) from t_order   group by userId,tumble(createTime, interval '5' second)
+     |""".stripMargin
+    val table: Table = tableEnv.sqlQuery(sql)
+    table.printSchema()
+    //  使用toAppendStream  需要制定table是只读的。
+   //val value: DataStream[Row] = tableEnv.toAppendStream[Row](table)
+    // 下面的语句存在问题的，需要进行关注的。
+    // Exception in thread "main" org.apache.flink.table.api.TableException: Result field does not match requested type. Requested: String; Actual: Integer
+    // val value: DataStream[Order12] = tableEnv.toAppendStream[Order12](table)
+   val value: DataStream[(Boolean, (Int,Int,Int,Long ))] = tableEnv.toRetractStream[(Int,Int,Int,Long)](table)
+    value.print()
+    env.execute()
   }
 }
 
-case class Order12(id:String,userId:Int,money:Int,timestamp:Long)
+case class Order12(id:String,userId:Int,money:Int,createTime:Long)
 /**
  * 自定义数据源，不断的生成Order12的数据对象进行操作实现
  * */
-class  MySelfSource  extends  SourceFunction[Order12]{
+class  MySelfSource  extends  RichSourceFunction[Order12]{
   var isRunning=true
   override def run(ctx: SourceFunction.SourceContext[Order12]): Unit = {
      while(isRunning){

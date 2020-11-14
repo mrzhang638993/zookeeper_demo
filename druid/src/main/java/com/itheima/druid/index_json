@@ -1,0 +1,58 @@
+{
+    "type": "index",
+    "spec": {
+        "ioConfig": {
+            "type": "index",
+            "firehose": {
+                "type": "local",
+                "baseDir": "/data/",
+                "filter": "platform.json"
+            }
+        },
+        "dataSchema": {
+            "dataSource": "platform",
+            "granularitySpec": {
+                "type": "uniform",
+                "segmentGranularity": "day",
+                "queryGranularity": "hour",
+                "intervals": [
+                    "2018-12-01/2018-12-02"
+                ]
+            },
+            "parser": {
+                "type": "String",
+                "parseSpec": {
+                    "format": "json",
+                    "dimensionsSpec": {
+                        "dimensions": [
+                            "city",
+                            "platform"
+                        ]
+                    },
+                    "timestampSpec": {
+                        "format": "auto",
+                        "column": "timestamp"
+                    }
+                }
+            },
+            "metricsSpec": [
+                {
+                    "name": "count",
+                    "type": "count"
+                },
+                {
+                    "name": "click",
+                    "type": "longSum",
+                    "fieldName": "click"
+                }
+            ]
+        },
+        "tuningConfig": {
+            "type": "index",
+            "partitionsSpec": {
+                "type": "hashed",
+                "targetPartitionSize": 5000000
+            }
+        }
+    }
+}

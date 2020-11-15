@@ -1,0 +1,28 @@
+// 排序靠前的前面的几位数据。单个维度的查询推荐使用topN查询的，多个字段的查询推荐使用group by查询操作的。
+{
+  "queryType":"topN",
+  "dataSource":"adclicklog",
+  "dimension":"city",
+  "threshold":2,
+  "metric":"click_cnt", // 只能指定单一的维度数据
+  "granularity":"day",
+  "filter":{
+    "type":"selector",
+    "dimension":"device_type",
+    "value":"pc"
+  },
+  "aggregations":[
+    {
+      "type":"longSum",
+      "name":"pv_cnt",
+      "fieldName":"count"
+    },
+    {
+      "type":"longSum",
+      "name":"click_cnt",
+      "fieldName":"click_cnt"
+    }
+  ],
+  "intervals":["2019-05-30/2019-05-31"]
+}
+//topN:只能对于单一的维度进行groupby查询操作实现。

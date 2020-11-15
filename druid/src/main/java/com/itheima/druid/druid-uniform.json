@@ -1,0 +1,74 @@
+{
+  "type": "kafka",
+  "dataSchema": {
+    "dataSource": "adclicklog",
+    "parser": {
+      "type": "string",
+      "parseSpec": {
+        "format": "json",
+        "timestampSpec": {
+          "column": "timestamp",
+          "format": "auto"
+        },
+        "dimensionsSpec": {
+          "dimensions": [],
+          "dimensionExclusions": [
+            "timestamp",
+            "is_new",
+            "pv_cnt",
+            "click_cnt"
+          ]
+        }
+      }
+    },
+    "metricsSpec": [
+      {
+        "name": "count",
+        "type": "count"
+      },
+      {
+        "name": "click_cnt",
+        "fieldName": "click_cnt",
+        "type": "longSum"
+      },
+      {
+        "name": "new_cnt",
+        "fieldName": "is_new",
+        "type": "longSum"
+      },
+      {
+        "name": "uv",
+        "fieldName": "user_id",
+        "type": "thetaSketch",
+        "isInputThetaSketch":"false",
+        "size":"16384"
+      },
+      {
+        "name": "click_uv",
+        "fieldName": "click_user_id",
+        "type": "thetaSketch",
+        "isInputThetaSketch":"false",
+        "size":"16384"
+      }
+    ],
+    "granularitySpec": {
+      "type": "uniform",
+      "segmentGranularity": "HOUR",
+      "queryGranularity": "NONE"
+    }
+  },
+  "tuningConfig": {
+    "type": "kafka",
+    "maxRowsPerSegment": 5000000
+  },
+  "ioConfig": {
+    "topic": "process_ad_click",
+    "consumerProperties": {
+      "bootstrap.servers": "hp101:9092,hp102:9092",
+      "group.id":"kafka-index-service"
+    },
+    "taskCount": 1,
+    "replicas": 1,
+    "taskDuration": "PT5m"
+  }
+}

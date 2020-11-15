@@ -1,0 +1,16 @@
+{
+  "queryType":"timeseries",
+  "dataSource":"adclicklog",
+  "granularity":{
+    "type":"period",
+    "period":"P1D"
+  },
+  "aggregations":[
+    {
+      "type":"longMin",
+      "name":"min",
+      "fieldName":"is_new"
+    }
+  ],
+  "intervals":["2019-05-30/2019-05-31"]
+}

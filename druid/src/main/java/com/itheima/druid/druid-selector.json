@@ -1,0 +1,18 @@
+{
+  "queryType":"timeseries",//查询的类型，druid中有timeseries,groupby ,select,search
+  "dataSource":"adclicklog",//指定你要查询的数据源
+  "granularity":"day",//指定时间聚合的区间，按照每天的时间维度聚合数据
+  "aggregations":[//聚合器，
+    {
+      "type":"longSum",//数值类型的累加
+      "name":"click",//聚合后的输出字段，select sum(price) as totalPrice
+      "fieldName":"click_cnt" //按照哪个原始字段聚合，
+    },{
+      "type":"longSum",
+      "name":"pv",
+      "fieldName":"count"//求pv,其实就是求出原始数据的条数，
+    }
+  ],
+  "filter":{"type":"selector","dimension":"device_type","value":"pc"},//selectorfilter过滤出pc
+  "intervals":["2019-05-30/2019-05-31"] //指定查询的时间范围，前闭后开
+}

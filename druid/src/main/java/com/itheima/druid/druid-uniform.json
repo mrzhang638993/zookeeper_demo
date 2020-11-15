@@ -64,7 +64,7 @@
   "ioConfig": {
     "topic": "process_ad_click",
     "consumerProperties": {
-      "bootstrap.servers": "hp101:9092,hp102:9092",
+      "bootstrap.servers": "node01:9092,node02:9092",
       "group.id":"kafka-index-service"
     },
     "taskCount": 1,
@@ -72,3 +72,4 @@
     "taskDuration": "PT5m"
   }
 }
+//  去重操作实现。

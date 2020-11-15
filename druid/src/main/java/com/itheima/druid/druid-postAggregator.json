@@ -1,0 +1,54 @@
+{
+  "queryType": "timeseries",
+  "dataSource": "adclicklog",
+  "granularity":{
+    "type":"period",
+    "period":"PT1H"
+  },
+  "intervals": [
+    "2019-05-30/2019-05-31"
+  ],
+  "aggregations": [
+    {
+      "type": "longSum",
+      "name": "pv_cnt",
+      "fieldName": "count"
+    },
+    {
+      "type": "longSum",
+      "name": "click_cnt",
+      "fieldName": "click_cnt"
+    }
+  ],
+  "postAggregations": [
+    {
+      "type": "arithmetic",
+      "name": "click_rate",
+      "fn": "*",  // 指定对应的是乘法运算操作实现,click_cnt/pv_cnt*100得到的百分比数据
+      "fields": [
+        {
+          "type": "arithmetic",
+          "name": "div",
+          "fn": "/", // 算数运算时除法运算操作，click_cnt/pv_cnt
+          "fields": [
+            {
+              "type": "fieldAccess", //访问的是上面的aggregations的变量数据的
+              "name": "click_cnt", // 获取的是上面的aggregations里面的click_cnt的计算结果数据
+              "fieldName": "click_cnt"
+            },
+            {
+              "type": "fieldAccess",//访问的是上面的aggregations的变量数据的
+              "name": "pv_cnt", // 获取到的是上面的pv_cnt的计算数据的。
+              "fieldName": "pv_cnt"
+            }
+          ]
+        },
+        {
+          "type": "constant",
+          "name": "const",
+          "value": 100
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "queryType":"timeseries",
+  "dataSource":"adclicklog",
+  "granularity":"day",
+  "aggregations":[
+    {
+      "type":"longSum",
+      "name":"click",
+      "fieldName":"click_cnt"
+    },{
+      "type":"longSum",
+      "name":"pv",
+      "fieldName":"count"
+    }
+  ],
+  "filter":{
+    "type":"in",
+    "dimension":"device_type",
+    "values":["pc","mobile"]
+  },
+
+  "intervals":["2019-05-30/2019-05-31"]
+}

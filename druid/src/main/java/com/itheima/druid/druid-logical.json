@@ -1,0 +1,25 @@
+{
+  "queryType":"timeseries",
+  "dataSource":"adclicklog",
+  "granularity":"day",
+  "aggregations":[
+    {
+      "type":"longSum",
+      "name":"click",
+      "fieldName":"click_cnt"
+    },{
+      "type":"longSum",
+      "name":"pv",
+      "fieldName":"count"
+    }
+  ],
+  "filter":{
+    "type":"and", // 支持and,or,not的过滤器操作实现
+    "fields":[
+      {"type":"selector","dimension":"device_type","value":"pc"},
+      {"type":"selector","dimension":"host","value":"baidu.com"}
+    ]
+  },
+
+  "intervals":["2019-05-30/2019-05-31"]
+}

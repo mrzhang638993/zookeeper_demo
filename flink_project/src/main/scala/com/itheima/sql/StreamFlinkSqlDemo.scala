@@ -1,18 +1,16 @@
 package com.itheima.sql
 
-import java.util.concurrent.TimeUnit
-import java.util.UUID
-
+import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.TimeCharacteristic
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
 import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.{Table, TableEnvironment}
-import org.apache.flink.table.api.scala.StreamTableEnvironment
-import org.apache.flink.api.scala._
-import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
 import org.apache.flink.streaming.api.watermark.Watermark
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.scala.StreamTableEnvironment
+import org.apache.flink.table.api.{Table, TableEnvironment}
 
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 import scala.util.Random
 
 
@@ -65,9 +63,10 @@ object StreamFlinkSqlDemo {
     })
     //  最终形成最终的数据操作实现和管理实现
     import org.apache.flink.table.api.scala._
+    // 注册使用rowTime实现相关的代码的操作和实现机制的。
     tableEnv.registerDataStream("t_order",waterDataStream,'id, 'userId, 'money, 'createTime.rowtime)
     //  编写sql语句进行统计操作实现
-   // 编写SQL语句统计用户订单总数、最大金额、最小金额
+   // 编写SQL语句统计用户订单总数、最大金额、最小金额。分组操作必须要使用到tumble函数才可以操作的。
     val sql=
    """
      |select userId,max(money),min(money),count(1) from t_order   group by userId,tumble(createTime, interval '5' second)

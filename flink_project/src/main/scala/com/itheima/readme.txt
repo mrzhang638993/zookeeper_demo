@@ -1,0 +1,4 @@
+1.使用connect连接的两个dataStream的话,需要注意的是连接的两个DataStream对应的都是需要保持运行
+状态的，当有一个不处于运行状态的话，整个的checkpoint都是无法运行的。
+2.timestamp是flink sql中的关键字的，不要使用的。可以使用createTime完成相关的操作的。
+定义字段需要避开sql中的关键字信息的。

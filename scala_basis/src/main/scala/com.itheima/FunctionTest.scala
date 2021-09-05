@@ -3,7 +3,7 @@ package com.itheima
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * 函数操作和实现
+ * 函数操作和实现,变长数组实现操作和管理的。
  * */
 object FunctionTest{
 
@@ -27,27 +27,37 @@ object FunctionTest{
     println(strings.length)*/
     //  使用变长数组执行操作实现和管理
     //  变长数组 ArrayBuffer 变长数组信息。创建变长数组信息
-    val changeArray: ArrayBuffer[String] = scala.collection.mutable.ArrayBuffer[String]()
+    /*val changeArray: ArrayBuffer[String] = scala.collection.mutable.ArrayBuffer[String]()
     changeArray.append("hello")
     changeArray.append("scala")
     changeArray.append("java")
-    changeArray.toSeq.foreach(println(_))
+    changeArray.toSeq.foreach(println(_))*/
     //或者是使用如下的方式来使用变长数组信息
     /*val strings: ArrayBuffer[String] = ArrayBuffer[String]("test","good")
     strings.toSeq.foreach(println(_))*/
     //  变长数组增加，删除和修改元素操作
-    changeArray.append("many")
+    //changeArray.append("many")
     //  返回删除的元素
-    val str: String = changeArray.remove(0)
-    println(str)
-    changeArray.toSeq.foreach(println(_))
+    //val str: String = changeArray.remove(0)
+    //println(str)
+    //changeArray.toSeq.foreach(println(_))
     //  使更加简洁的方式实现数据增加，删除以及修改操作，或者是增加元素的操作的。
-    changeArray +="flume"
-    changeArray -="many"
-    changeArray.toSeq.foreach(println(_))
+    //changeArray +="flume"
+    //changeArray -="many"
+    //changeArray.toSeq.foreach(println(_))
     // 将数组追加到变长数组之中的
-    val strings: Array[String] = Array("hive", "sqoop")
-    changeArray ++=strings
+    //val strings: Array[String] = Array("hive", "sqoop")
+    //changeArray ++=strings
+    //  修改操作
+    //changeArray(0)="test"
+    // 实现数组的遍历操作和实现机制的
+    //  使用for来遍历数组执行操作的。
+     val ints: ArrayBuffer[Int] = ArrayBuffer(1, 2, 3, 4, 5)
+    //for(i<- ints) println(i)
+    //或者是如下的.to方法是会包含开始和结束的值的
+    //for(i <- 0 to ints.length-1 ) println(ints(i))
+    //  使用until操作可以实现不包含相关的代码的操作实现机制的
+    for(i <- 0 until  ints.length) println(ints(i))
   }
 
   def add(x:Int,y:Int)=x+y

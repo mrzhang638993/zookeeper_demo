@@ -25,6 +25,7 @@
         <module>kudu_project</module>
         <module>dmp</module>
         <module>flink_project</module>
+        <module>scala_basis</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

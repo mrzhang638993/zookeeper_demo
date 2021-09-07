@@ -32,7 +32,7 @@ object FunctionProgramming {
     //  使用默认的排序操作实现机制
     //ints.sorted.foreach(println(_))
     // 使用sorted进行排序操作实现
-    val test = List("01 hadoop", "02 flume", "03 hive", "04 spark")
+    //val test = List("01 hadoop", "02 flume", "03 hive", "04 spark")
     // 根据指定的字段进行数据排序操作实现。sortBy实现操作对应的使用的字段进行排序操作实现的
     //test.sortBy(_.split(" ")(1)).foreach(println(_))  // 根据元素的某一个属性进行排序操作实现
     //sort with 根据指定的字段进行排序操作实现
@@ -42,6 +42,11 @@ object FunctionProgramming {
     // 排序的本质是根据位置实现相关的排序操作的。
     //test.sortWith(_<_)     //实现降序排序操作实现
     //  分组操作实现 group by 实现分组操作实现
+    /*val tuples = List("zhangsan" -> "男", "lisi" -> "女", "王五" -> "男")
+    // 对应的使用相关的map操作实现逻辑的。map可以对分组之后的数据进行过滤操作实现的。
+    val stringToTuples: Map[String, List[(String, String)]] = tuples.groupBy(_._2)
+    stringToTuples.map(x=>x._1->x._2.size).foreach(println(_))*/
+    // 聚合操作实现
 
   }
 }

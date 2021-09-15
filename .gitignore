@@ -66,3 +66,7 @@ java.iml
 /spark-demo-common/target/
 /spark-demo-master/target/
 /spark-demo-worker/target/
+/akka-master/target/
+/akka-worker/target/
+/akka-worker/target/
+/spark-demo-worker/target/

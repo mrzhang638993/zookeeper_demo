@@ -61,3 +61,8 @@ java.iml
 /scala_basis/target/
 /${project.basedir}/
 /.idea/
+/akka-master/target/
+/akka-worker/target/
+/spark-demo-common/target/
+/spark-demo-master/target/
+/spark-demo-worker/target/

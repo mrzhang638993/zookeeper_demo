@@ -8,6 +8,9 @@ import org.apache.flink.util.Collector
 
 /**
  * flink流式处理操作实现
+ * flink的outputTag必须是在主要的流之后进行的处理的。
+ * 不要在生成流的时候就处理了相关的内容的，那样的话，会看不到对应的stream的信息的。
+ *
  **/
 object Datasource_Collection {
   def main(args: Array[String]): Unit = {

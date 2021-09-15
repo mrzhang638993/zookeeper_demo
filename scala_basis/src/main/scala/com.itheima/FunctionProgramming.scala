@@ -47,6 +47,11 @@ object FunctionProgramming {
     val stringToTuples: Map[String, List[(String, String)]] = tuples.groupBy(_._2)
     stringToTuples.map(x=>x._1->x._2.size).foreach(println(_))*/
     // 聚合操作实现
+    /*val nums = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    //val result: Int = nums.reduce((x, y) => x + y)
+    val result: Int = nums.reduce(_ + _) // 参数只是出现一次，并且只是执行简单的操作实现的。
+    println(result)*/
+    //fold折叠操作。对应的和reduce的操作是相类似的，对个元素合成为一个元素实现和管理操作的
 
   }
 }

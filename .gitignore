@@ -58,3 +58,6 @@ java.iml
 /spark-demo-master/target/
 /spark-demo-worker/target/
 /spark_project/target/
+/scala_basis/target/
+/${project.basedir}/
+/.idea/

@@ -5,6 +5,7 @@ package com.itheima
  * 主构造器中不能使用_来实现参数赋值的
  * 需要使用常量数值来完成相关的代码的开发和实现操作的
  * 只有在class内部的成员变量的话，才可以使用下划线操作的。
+ * 主构造器是在class的后面完成相关的代码操作实现的。
  * */
 class MainConstructure(var name:String="",val age:Int=0) {
   // 对应的是主构造器的代码实现的。

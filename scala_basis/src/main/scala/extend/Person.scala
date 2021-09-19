@@ -9,7 +9,7 @@ class Person{
 }
 
 class Student extends  Person {
-    //子类无法查看到父类的name属性信息。
+    //子类无法查看到父类的private name属性信息。不是private属性的是可以继承的。
     //scala中的属性操作不需要set方法的，只需要对象名称.属性名称即可了。
     def setName(name:String): Unit ={
        this.name=name

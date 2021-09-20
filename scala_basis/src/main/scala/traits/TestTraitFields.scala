@@ -12,8 +12,10 @@ object  TestTraitFields {
 //定义特质实现相关的特质操作和实现逻辑
 //在特质中定义属性和方法来完成相关的功能实现的
 trait Loggers{
+     // 定义了具体字段,给出了就提实现
      val format:SimpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm")
     //属性是不存在抽象的,底层对应的是需要重写操作实现的
+    //定义抽象字段，没有给出相关的实现和赋值操作
     val types:String
     def log(msg:String)
 }

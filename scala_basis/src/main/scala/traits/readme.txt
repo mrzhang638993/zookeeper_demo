@@ -3,3 +3,4 @@
 进行操作的。
 java中使用的是implements的,scala中是使用的是extends的,实现多个特质的话，需要使用with实现操作
 的。
+3.trait中可以增加具体的字段以及抽象化的字段信息。

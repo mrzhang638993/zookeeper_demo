@@ -40,15 +40,15 @@
         "name": "uv",
         "fieldName": "user_id",
         "type": "thetaSketch",
-        "isInputThetaSketch":"false",
-        "size":"16384"
+        "isInputThetaSketch": "false",
+        "size": "16384"
       },
       {
         "name": "click_uv",
         "fieldName": "click_user_id",
         "type": "thetaSketch",
-        "isInputThetaSketch":"false",
-        "size":"16384"
+        "isInputThetaSketch": "false",
+        "size": "16384"
       }
     ],
     "granularitySpec": {
@@ -65,7 +65,7 @@
     "topic": "process_ad_click",
     "consumerProperties": {
       "bootstrap.servers": "node01:9092,node02:9092",
-      "group.id":"kafka-index-service"
+      "group.id": "kafka-index-service"
     },
     "taskCount": 1,
     "replicas": 1,

@@ -1,27 +1,30 @@
 {
-  "queryType":"timeseries",
-  "dataSource":"adclicklog",
-  "granularity":"day",
-  "aggregations":[
+  "queryType": "timeseries",
+  "dataSource": "adclicklog",
+  "granularity": "day",
+  "aggregations": [
     {
-      "type":"longSum",
-      "name":"click",
-      "fieldName":"click_cnt"
-    },{
-      "type":"longSum",
-      "name":"pv",
-      "fieldName":"count"
+      "type": "longSum",
+      "name": "click",
+      "fieldName": "click_cnt"
+    },
+    {
+      "type": "longSum",
+      "name": "pv",
+      "fieldName": "count"
     }
   ],
-  "filter":{
-    "type":"bound",
-    "dimension":"age",
-    "lower":"21",
-    "lowerStrict":true,
-    "upper":"31",
-    "upperStrict":true,
-    "alphaNumeric":true
+  "filter": {
+    "type": "bound",
+    "dimension": "age",
+    "lower": "21",
+    "lowerStrict": true,
+    "upper": "31",
+    "upperStrict": true,
+    "alphaNumeric": true
   },
-  "intervals":["2019-05-30/2019-05-31"]
+  "intervals": [
+    "2019-05-30/2019-05-31"
+  ]
 }
 21<value<31

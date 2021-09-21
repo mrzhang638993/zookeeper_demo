@@ -5,7 +5,8 @@
   "intervals": [
     "2019-05-30/2019-05-31"
   ],
-  "dimensions": [  // 指定两个维度进行分组。city维度以及device_type维度进行分组。
+  "dimensions": [
+    // 指定两个维度进行分组。city维度以及device_type维度进行分组。
     "city",
     "device_type"
   ],
@@ -52,16 +53,20 @@
       ]
     }
   ],
-  "limitSpec": {  // limit实现操作
+  "limitSpec": {
+    // limit实现操作
     "type": "default",
-    "limit": 3, //  获取到的limit的条数信息。
+    "limit": 3,
+    //  获取到的limit的条数信息。
     "columns": [
       {
-        "dimension": "pv_cnt", //指定排序的字段实现操作。指定pv_cnt降序排列操作
+        "dimension": "pv_cnt",
+        //指定排序的字段实现操作。指定pv_cnt降序排列操作
         "direction": "descending"
       },
       {
-        "dimension": "city",// 指定city字段，city升序排列操作。
+        "dimension": "city",
+        // 指定city字段，city升序排列操作。
         "direction": "ascending"
       }
     ]

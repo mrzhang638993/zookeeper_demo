@@ -1,29 +1,43 @@
 {
-  "queryType":"groupby",
-  "dataSource":"adclicklog",
-  "granularity":{
+  "queryType": "groupby",
+  "dataSource": "adclicklog",
+  "granularity": {
     "type": "duration",
-    "duration" :"7200000" //时间单位为毫秒维度。2h=7200000
-  },  // 指定聚合维度为day
-  "dimensions":["device_type"], // 聚合的维度，根据device_type分组统计操作。类似group by字段
-  "aggregations":[
+    "duration": "7200000"
+    //时间单位为毫秒维度。2h=7200000
+  },
+  // 指定聚合维度为day
+  "dimensions": [
+    "device_type"
+  ],
+  // 聚合的维度，根据device_type分组统计操作。类似group by字段
+  "aggregations": [
     {
-      "type":"longSum",  // 统计求和操作
-      "name":"click",  //统计后输出的字段名称
-      "fieldName":"click_cnt" // 进行统计的字段名称
-    },{
-      "type":"longSum", // 统计求和操作
-      "name":"pv",   //统计后输出的字段名称
-      "fieldName":"count"  // 进行统计的字段名称
+      "type": "longSum",
+      // 统计求和操作
+      "name": "click",
+      //统计后输出的字段名称
+      "fieldName": "click_cnt"
+      // 进行统计的字段名称
+    },
+    {
+      "type": "longSum",
+      // 统计求和操作
+      "name": "pv",
+      //统计后输出的字段名称
+      "fieldName": "count"
+      // 进行统计的字段名称
     }
   ],
-  "filter":{
-    "type":"bound",
-    "dimension":"age",
-    "lower":"21",
-    "upper":"31",
-    "alphaNumeric":true
+  "filter": {
+    "type": "bound",
+    "dimension": "age",
+    "lower": "21",
+    "upper": "31",
+    "alphaNumeric": true
   },
-  "intervals":["2019-05-30/2019-05-31"]
+  "intervals": [
+    "2019-05-30/2019-05-31"
+  ]
 }
 // 时间段范围之内的查询操作实现

@@ -1,19 +1,26 @@
 {
-  "queryType":"timeseries",
-  "dataSource":"adclicklog",
-  "descending":"true",
-  "granularity":"minute",
-  "aggregations":[
+  "queryType": "timeseries",
+  "dataSource": "adclicklog",
+  "descending": "true",
+  "granularity": "minute",
+  "aggregations": [
     {
-      "type":"longSum",
-      "name":"click",
-      "fieldName":"click_cnt"
-    },{
-      "type":"longSum",
-      "name":"pv",
-      "fieldName":"count"
+      "type": "longSum",
+      "name": "click",
+      "fieldName": "click_cnt"
+    },
+    {
+      "type": "longSum",
+      "name": "pv",
+      "fieldName": "count"
     }
   ],
-  "filter":{"type":"selector","dimension":"city","value":"beijing"},
-  "intervals":["2019-05-30/2019-05-31"]
+  "filter": {
+    "type": "selector",
+    "dimension": "city",
+    "value": "beijing"
+  },
+  "intervals": [
+    "2019-05-30/2019-05-31"
+  ]
 }

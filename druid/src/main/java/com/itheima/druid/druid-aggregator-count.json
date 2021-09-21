@@ -1,20 +1,27 @@
 {
-  "queryType":"timeseries",
-  "dataSource":"ad_event",
-  "granularity":{
-    "type":"period",
-    "period":"P1D"
+  "queryType": "timeseries",
+  "dataSource": "ad_event",
+  "granularity": {
+    "type": "period",
+    "period": "P1D"
   },
-  "aggregations":[
+  "aggregations": [
     {
-      "type":"count", // 对应的是聚合器的名称信息的。统计的是合并之后的总的记录条红素
-      "name":"count"  // 对应的是输出的字段信息,对应的是count字段
+      "type": "count",
+      // 对应的是聚合器的名称信息的。统计的是合并之后的总的记录条红素
+      "name": "count"
+      // 对应的是输出的字段信息,对应的是count字段
     },
     {
-      "type":"longSum", //另外的一个维度进行数据统计，统计的是原始的记录的条数信息
-      "name":"pv",  // 统计之后的字段的
-      "fieldName":"count" //统计的是原始的字段信息。
+      "type": "longSum",
+      //另外的一个维度进行数据统计，统计的是原始的记录的条数信息
+      "name": "pv",
+      // 统计之后的字段的
+      "fieldName": "count"
+      //统计的是原始的字段信息。
     }
   ],
-  "intervals":["2018-12-01/2018-12-3"]
+  "intervals": [
+    "2018-12-01/2018-12-3"
+  ]
 }

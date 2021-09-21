@@ -1,0 +1,18 @@
+{
+  "queryType": "topN",
+  "dataSource": "adclicklog",
+  "dimension": "host",
+  "threshold": 3,
+  "metric": "click_cnt",
+  "granularity": "day",
+  "aggregations": [
+    {
+      "type": "longSum",
+      "name": "click_cnt",
+      "fieldName": "click_cnt"
+    }
+  ],
+  "intervals": [
+    "2019-05-30/2019-05-31"
+  ]
+}

@@ -1,18 +1,26 @@
 {
-  "queryType":"timeseries",
-  "dataSource":"adclicklog",
-  "granularity":"day",
-  "aggregations":[
+  "queryType": "timeseries",
+  "dataSource": "adclicklog",
+  "granularity": "day",
+  "aggregations": [
     {
-      "type":"longSum",
-      "name":"click",
-      "fieldName":"click_cnt"
-    },{
-      "type":"longSum",
-      "name":"pv",
-      "fieldName":"count"
+      "type": "longSum",
+      "name": "click",
+      "fieldName": "click_cnt"
+    },
+    {
+      "type": "longSum",
+      "name": "pv",
+      "fieldName": "count"
     }
   ],
-  "filter":{"type":"regex","dimension":"device_type","pattern":".*pc.*"},//.*代表的是任意长度的任意字符，对应的是正则表达式匹配操作
-  "intervals":["2019-05-30/2019-05-31"]
+  "filter": {
+    "type": "regex",
+    "dimension": "device_type",
+    "pattern": ".*pc.*"
+  },
+  //.*代表的是任意长度的任意字符，对应的是正则表达式匹配操作
+  "intervals": [
+    "2019-05-30/2019-05-31"
+  ]
 }

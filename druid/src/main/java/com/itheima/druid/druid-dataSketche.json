@@ -1,18 +1,22 @@
 {
-  "queryType":"groupBy",
-  "dataSource":"adclicklog",
-  "granularity":{
-    "type":"period",
-    "period":"PT1H",
+  "queryType": "groupBy",
+  "dataSource": "adclicklog",
+  "granularity": {
+    "type": "period",
+    "period": "PT1H",
     "timeZone": "Asia/Shanghai"
   },
-  "dimensions":["device_type"],
-  "aggregations":[
+  "dimensions": [
+    "device_type"
+  ],
+  "aggregations": [
     {
       "type": "thetaSketch",
       "name": "uv",
       "fieldName": "uv"
     }
   ],
-  "intervals":["2019-05-30/2019-05-31"]
+  "intervals": [
+    "2019-05-30/2019-05-31"
+  ]
 }

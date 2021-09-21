@@ -1,3 +1,3 @@
 package com.itheima.akka.demo
 
-case class SuccessSubmitTaskMessage(msg:String)
+case class SuccessSubmitTaskMessage(msg: String)

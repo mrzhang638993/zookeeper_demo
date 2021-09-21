@@ -9,7 +9,7 @@ import org.apache.spark.sql.DataFrame
 object NewRegionReportProcessor extends ReportProcessor {
   /**
    * 对外提供原表的表名称
-   **/
+   * */
   override def sourceTableName(): String = {
     ETLRunner.ODS_TABLE_NAME
   }
@@ -19,7 +19,7 @@ object NewRegionReportProcessor extends ReportProcessor {
    *
    * @param
    *
-   **/
+   * */
   override def process(dataFrame: DataFrame): DataFrame = {
     import dataFrame.sparkSession.implicits._
     import org.apache.spark.sql.functions._
@@ -30,14 +30,14 @@ object NewRegionReportProcessor extends ReportProcessor {
 
   /**
    * 返回目标表的名称
-   **/
+   * */
   override def targetTableName(): String = {
     "report_data_region_" + KuduHelper.getParseDateString()
   }
 
   /**
    * 提供目标表的schema信息
-   **/
+   * */
   override def targetSchema(): Schema = {
     import scala.collection.JavaConverters._
     new Schema(
@@ -51,7 +51,7 @@ object NewRegionReportProcessor extends ReportProcessor {
 
   /**
    * 提供目标表的分区键
-   **/
+   * */
   override def targetTableKeys(): List[String] = {
     List("region", "city")
   }

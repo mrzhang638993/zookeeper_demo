@@ -8,12 +8,12 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 object RegionReportProcessor {
   /**
    * 访问外部的成员变量
-   **/
+   * */
   val keys = List("region", "city")
   /**
    * 由于本地时间和阿里云服务器同步的时间存在差异的，所以对应的时间计算的话存在问题的
    * 这个地方就写死了
-   **/
+   * */
   private val SOURCE_TABLE_NAME = "ods_20201007"
 
   import scala.collection.JavaConverters._

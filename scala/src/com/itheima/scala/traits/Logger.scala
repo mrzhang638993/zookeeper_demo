@@ -5,7 +5,7 @@ package com.itheima.scala.traits
  * */
 trait Logger {
   /**
-   *  特质：提供方法的默认实现.特质中可以增加默认的接口实现的。
+   * 特质：提供方法的默认实现.特质中可以增加默认的接口实现的。
    * */
-  def  log(msg:String)=println(msg)
+  def log(msg: String) = println(msg)
 }

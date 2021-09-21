@@ -8,11 +8,11 @@ import org.lionsoul.ip2region.{DbConfig, DbSearcher}
 
 /**
  * 操作处理：将没有省市信息和经纬度的数据集，加入这些信息之后继续返回即可。
- **/
+ * */
 object IpProcessor extends Processor {
   /**
    * ip处理器
-   **/
+   * */
   override def process(dataset: Dataset[Row]): Dataset[Row] = {
     // 原始数据集,里面必须包含数据列字段ip信息.转换后的数据集必须追加region,city,longitude,latitude
     //  方法一:生成只有ip的数据，将ip对象转化成为(ip,region,city,longitude,latitude)，然后和原来的数据集根据ip操作进行join操作实现

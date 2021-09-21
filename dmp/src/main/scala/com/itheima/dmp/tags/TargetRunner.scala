@@ -11,7 +11,7 @@ import scala.collection.mutable
 
 /**
  * 执行打标签的操作
- **/
+ * */
 object TargetRunner {
 
   import com.itheima.dmp.utils.KuduHelper._
@@ -94,7 +94,7 @@ object TargetRunner {
    * 执行打标签的操作实现
    * row--->mainId,ids,tags
    * 执行row对象转化成为IdsWithTags对象的。
-   **/
+   * */
   def createTags(row: Row): IdsWithTags = {
     // 生成标签数据
     val tags = mutable.Map[String, Int]()

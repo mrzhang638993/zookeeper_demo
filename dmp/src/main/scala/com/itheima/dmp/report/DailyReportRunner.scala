@@ -4,7 +4,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
  * 公共流程处理的类
- **/
+ * */
 object DailyReportRunner {
 
   def main(args: Array[String]): Unit = {

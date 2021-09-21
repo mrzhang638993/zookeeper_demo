@@ -12,19 +12,19 @@ object _23Trail {
   /**
    * 创建特质中创建抽象方法
    * */
-  trait  Logger{
-     def logger(msg:String)
+  trait Logger {
+    def logger(msg: String)
   }
 
   /**
    * 实现控制台消息管理操作
    * */
-  class  ConsoleLogger extends  Logger{
+  class ConsoleLogger extends Logger {
     override def logger(msg: String): Unit = println(msg)
   }
 
   def main(args: Array[String]): Unit = {
-    var nullPoninter=new ConsoleLogger
+    var nullPoninter = new ConsoleLogger
     nullPoninter.logger("null  pointer  exception")
   }
 }

@@ -27,7 +27,7 @@ object BusinessAreaRunner {
 
   /**
    * 更具经纬度获取商圈信息
-   **/
+   * */
   def main(args: Array[String]): Unit = {
     // 1.创建sparksession
     val spark: SparkSession = SparkSession.builder()
@@ -76,7 +76,7 @@ object BusinessAreaRunner {
 
   /**
    * 根据经纬度生成范围信息
-   **/
+   * */
   def locationToGeoHash(longitude: Double, latitude: Double): String = {
     //  借助于geoHash可以将一定范围内的经纬度对应的都指定为一个hash的，从而实现范围的概念的。
     GeoHash.withCharacterPrecision(latitude, longitude, 8).toBase32

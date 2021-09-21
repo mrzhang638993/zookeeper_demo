@@ -23,9 +23,7 @@ public class ObjClonerSeiz {
 
     /**
      * 对象的属性值全部拷贝成功，并且开辟的都是不同的内存空间的。对应的是深拷贝的机制的。
-     *
-     *
-     * */
+     */
     public static void main(String[] args) {
         Body body = new Body("张三", new Fonter(), new Head());
         Body body2 = CloneObj(body);
@@ -100,7 +98,7 @@ class Head implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private Integer size=4;
+    private Integer size = 4;
 
     @Override
     public String toString() {
@@ -115,7 +113,7 @@ class Fonter implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private Integer size=2;
+    private Integer size = 2;
 
     @Override
     public String toString() {
@@ -130,7 +128,7 @@ class Face implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private Integer size=3;
+    private Integer size = 3;
 
     @Override
     public String toString() {

@@ -1,14 +1,14 @@
 package cn.itcast.zookeeper_api.mybatis;
 
-public class MyStudent<T,S,W> extends Person {
-    private  T  name;
-    private  S age;
-    private  W salary;
+public class MyStudent<T, S, W> extends Person {
+    private T name;
+    private S age;
+    private W salary;
 
-    public MyStudent(T name, S age,W salary) {
+    public MyStudent(T name, S age, W salary) {
         this.name = name;
         this.age = age;
-        this.salary=salary;
+        this.salary = salary;
     }
 
 

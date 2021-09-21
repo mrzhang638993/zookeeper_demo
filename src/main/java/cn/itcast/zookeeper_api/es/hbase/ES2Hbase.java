@@ -62,7 +62,7 @@ public class ES2Hbase {
                 String name = Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength());
                 if (name.equals("content")) {
                     byte[] bytes = CellUtil.cloneValue(cell);
-                    System.out.println("====="+ Bytes.toString(cell.getQualifierArray())+"===="+Bytes.toString(bytes));
+                    System.out.println("=====" + Bytes.toString(cell.getQualifierArray()) + "====" + Bytes.toString(bytes));
                 }
             }
         }

@@ -10,9 +10,10 @@ object Entrance {
   def main(args: Array[String]): Unit = {
     val actorSystemSystem: ActorSystem = ActorSystem.create("actorSystem", ConfigFactory.load())
     val actorSender: ActorRef = actorSystemSystem.actorOf(Props(ActorReceivor), "actorRecivior")
+    import actorSystemSystem.dispatcher
+
     import scala.concurrent.duration._
-    import  actorSystemSystem.dispatcher
-    actorSystemSystem.scheduler.schedule(0 seconds,1 seconds){
+    actorSystemSystem.scheduler.schedule(0 seconds, 1 seconds) {
       actorSender ! "send a message every seconds"
     }
   }

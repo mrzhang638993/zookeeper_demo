@@ -16,7 +16,7 @@ class IpTest {
 
   /**
    * 根据ip获取区域信息
-   **/
+   * */
   @Test
   def ip2Location(): Unit = {
     //  创建入口

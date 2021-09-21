@@ -10,12 +10,8 @@ package com.itheima.scala.basis
  * student isInstanceOf Person
  * __________
  * 是student类型
- **/
+ * */
 object _20GetClass {
-
-  class Person
-
-  class Student extends Person
 
   def main(args: Array[String]): Unit = {
     var student: Person = new Student
@@ -26,11 +22,15 @@ object _20GetClass {
     }
     println("_" * 10)
     // getClass 获取对象的类型，classOf 获取类的类型
-    if(student.getClass==classOf[Person]){
+    if (student.getClass == classOf[Person]) {
       println("是person类型")
     }
-    if(student.getClass==classOf[Student]){
+    if (student.getClass == classOf[Student]) {
       println("是student类型")
     }
   }
+
+  class Person
+
+  class Student extends Person
 }

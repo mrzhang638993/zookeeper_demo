@@ -7,8 +7,8 @@ object _01ScheduleDemo {
 
 
   def main(args: Array[String]): Unit = {
-      //  创建actorSystem
-      val actorSystem: ActorSystem = ActorSystem("actorSystem", ConfigFactory.load())
+    //  创建actorSystem
+    val actorSystem: ActorSystem = ActorSystem("actorSystem", ConfigFactory.load())
     val receiveActor: ActorRef = actorSystem.actorOf(Props(ReceiveActor), "receiveActor")
     //final def schedule(
     //    initialDelay: FiniteDuration,
@@ -21,12 +21,12 @@ object _01ScheduleDemo {
     //2.延时任务的周期
     //3.指定接收者的角色
     //4.指定发送的消息
-     import scala.concurrent.duration._
+    import scala.concurrent.duration._
     //  导入隐式参数
-    import  actorSystem.dispatcher
+    import actorSystem.dispatcher
     // 每个一秒执行一次发送消息来实现定时任务的。
-      actorSystem.scheduler.schedule(0 seconds,
-        1 seconds,receiveActor,"hello")
+    actorSystem.scheduler.schedule(0 seconds,
+      1 seconds, receiveActor, "hello")
 
   }
 }

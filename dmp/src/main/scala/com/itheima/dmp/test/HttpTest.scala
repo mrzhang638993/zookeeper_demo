@@ -10,7 +10,7 @@ import org.junit.Test
  * 1.okHttp创建的过程包括2个步骤。
  * 步骤一:创建HttpClient;
  * 步骤二:创建HTTPRequst请求。
- **/
+ * */
 class HttpTest {
   val okHttpClient: OkHttpClient = new OkHttpClient()
 
@@ -77,7 +77,7 @@ case class Gaode(info: String, infocode: String, status: String, regeocode: Opti
 
 /**
  * 可以避免对应的出现元素为空的时候无法解析的操作的
- **/
+ * */
 case class Regeocode(country: String, township: String, businessAreas: Option[List[BusinessArea]])
 
 case class BusinessArea(location: String, name: String, id: String)

@@ -6,12 +6,14 @@ import org.apache.spark.sql._
 
 /**
  * ETL的处理操作实现
- **/
+ * */
 object ETLRunner {
+
   import scala.collection.JavaConverters._
+
   /**
    * ETL操作表示每天执行一次,需要时间分隔操作
-   **/
+   * */
   //val ODS_TABLE_NAME = "ods_" + KuduHelper.getParseDateString()
   val ODS_TABLE_NAME = "ods_20201007"
   private val schema: Schema = new Schema(List(
@@ -113,7 +115,7 @@ object ETLRunner {
 
   /**
    * 执行具体的数据清洗的操作实现
-   **/
+   * */
   def main(args: Array[String]): Unit = {
     import com.itheima.dmp.utils.KuduHelper._
     import com.itheima.dmp.utils.SparkConfigHelper._

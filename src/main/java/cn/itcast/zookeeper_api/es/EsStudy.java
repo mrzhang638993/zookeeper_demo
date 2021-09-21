@@ -840,9 +840,9 @@ public class EsStudy {
     /**
      * 聚合排序
      * 需求：计算每个球队的总的年薪，然后按照年薪进行倒序排序
-     * */
+     */
     @Test
-    public   void totalSalarySort(){
+    public void totalSalarySort() {
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch("player").setTypes("player");
         //  设置根据term字段进行统计，player_count对应的是给结果取的别名的操作的.指定排序的字段。
         TermsAggregationBuilder field = AggregationBuilders.terms("player_count").field("team").order(BucketOrder.count(true));
@@ -870,23 +870,23 @@ public class EsStudy {
     /**
      * elk的sql是收费功能的，需要破解的。或者是自己安装插件的。
      * java.sql.SQLInvalidAuthorizationSpecException: current license is non-compliant for [jdbc]
-     * */
+     */
     @Test
     public void esJdbc() throws SQLException {
         EsDataSource dataSource = new EsDataSource();
-        String address = "jdbc:es://http://node01:9200" ;
+        String address = "jdbc:es://http://node01:9200";
         dataSource.setUrl(address);
         Properties connectionProperties = new Properties();
         dataSource.setProperties(connectionProperties);
         Connection connection = dataSource.getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("select * from library");
-        while(resultSet.next()){
+        while (resultSet.next()) {
             String string = resultSet.getString(0);
             String string1 = resultSet.getString(1);
             int anInt = resultSet.getInt(2);
             String string2 = resultSet.getString(4);
-            System.out.println(string + "\t" +  string1 + "\t" +  anInt + "\t" + string2);
+            System.out.println(string + "\t" + string1 + "\t" + anInt + "\t" + string2);
         }
         connection.close();
     }

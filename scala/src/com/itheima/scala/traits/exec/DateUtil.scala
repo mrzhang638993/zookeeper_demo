@@ -5,8 +5,8 @@ import java.util.Date
 
 object DateUtil {
 
-  val simple=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  val simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
-  def parseDate(date:Date):String=simple.format(date)
+  def parseDate(date: Date): String = simple.format(date)
 
 }

@@ -7,7 +7,7 @@ object _04ActorObject {
    * 不断的发送消息和接收消息
    * */
   def main(args: Array[String]): Unit = {
-     ActorSender.start()
-     ActorReceivor.start()
+    ActorSender.start()
+    ActorReceivor.start()
   }
 }

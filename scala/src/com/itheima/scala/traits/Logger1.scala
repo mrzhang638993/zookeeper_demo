@@ -6,7 +6,7 @@ package com.itheima.scala.traits
  * */
 trait Logger1 {
 
-  val name:String="testFactor"
+  val name: String = "testFactor"
 
-  def  log(msg:String)=println(msg)
+  def log(msg: String) = println(msg)
 }

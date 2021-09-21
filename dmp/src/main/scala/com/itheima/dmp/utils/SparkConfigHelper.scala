@@ -1,18 +1,17 @@
 package com.itheima.dmp.utils
 
 
-import java.util.Map
-
 import com.typesafe.config.{ConfigFactory, ConfigValue}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.SparkSession
 
+import java.util.Map
 import scala.collection.mutable
 
 /**
  * 隐式转换:将spark转换成为SparkConfigHelper，增加loadConfig的功能。
  * 使用scala的隐式转换增加额外的功能实现的。
- **/
+ * */
 class SparkConfigHelper(builder: SparkSession.Builder) {
   val config = ConfigFactory.load("spark.conf")
 
@@ -39,7 +38,7 @@ class SparkConfigHelper(builder: SparkSession.Builder) {
 
 /**
  * 伴生对象
- **/
+ * */
 object SparkConfigHelper {
 
   implicit def sparkToConfig(builder: SparkSession.Builder): SparkConfigHelper = {

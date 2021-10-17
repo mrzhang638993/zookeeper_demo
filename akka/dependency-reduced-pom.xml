@@ -39,7 +39,7 @@
             <artifactId>x-pack-sql-jdbc</artifactId>
             <version>6.7.0</version>
             <scope>system</scope>
-            <systemPath>D:/lib/x-pack-sql-jdbc-6.7.0.jar</systemPath>
+            <systemPath>D:\lib/x-pack-sql-jdbc-6.7.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.apache.flume</groupId>
@@ -67,7 +67,7 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>D:/lib/hive_metastore.jar</systemPath>
+            <systemPath>D:\lib/hive_metastore.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -75,14 +75,14 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>D:/lib/hive_service.jar</systemPath>
+            <systemPath>D:\lib/hive_service.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
             <artifactId>ImpalaJDBC41</artifactId>
             <version>2.5.41</version>
             <scope>system</scope>
-            <systemPath>D:/lib/ImpalaJDBC41.jar</systemPath>
+            <systemPath>D:\lib/ImpalaJDBC41.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
@@ -90,7 +90,7 @@
             <version>0.9.0</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>D:/lib/libfb303-0.9.0.jar</systemPath>
+            <systemPath>D:\lib/libfb303-0.9.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
@@ -98,7 +98,7 @@
             <version>0.9.0</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>D:/lib/libthrift-0.9.0.jar</systemPath>
+            <systemPath>D:\lib/libthrift-0.9.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -106,7 +106,7 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>D:/lib/ql.jar</systemPath>
+            <systemPath>D:\lib/ql.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -114,7 +114,7 @@
             <version>1.5.11</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>D:/lib/slf4j-api-1.5.11.jar</systemPath>
+            <systemPath>D:\lib/slf4j-api-1.5.11.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -122,7 +122,7 @@
             <version>2.5.41</version>
             <type>pom</type>
             <scope>system</scope>
-            <systemPath>D:/lib/ql.jar</systemPath>
+            <systemPath>D:\lib/ql.jar</systemPath>
         </dependency>
     </dependencies>
     <properties>

@@ -41,7 +41,7 @@ public class HbaseOperate {
     @Test
     public void createTable() throws IOException {
         HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("myuser"));
-        HDescriptor f1 = new HColumnDescriptor("f1");
+        HColumnDescriptor f1 = new HColumnDescriptor("f1");
         HColumnDescriptor f2 = new HColumnDescriptor("f2");
         tableDescriptor.addFamily(f1);
         tableDescriptor.addFamily(f2);

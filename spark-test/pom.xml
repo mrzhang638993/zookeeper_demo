@@ -19,6 +19,12 @@
         <esri.version>2.2.2</esri.version>
     </properties>
     <dependencies>
+        <!-- ip 工具类 start-->
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>ip2region</artifactId>
+            <version>1.7.2</version>
+        </dependency>
         <!--scala的json解析包-->
         <!-- 地理位置处理库 -->
         <dependency>

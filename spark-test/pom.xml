@@ -17,8 +17,16 @@
         <log4j.version>1.2.17</log4j.version>
         <json4s.version>3.6.6</json4s.version>
         <esri.version>2.2.2</esri.version>
+        <kafka.version>2.2.0</kafka.version>
     </properties>
     <dependencies>
+        <!--配置kafka依赖 start-->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.11</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+        <!--配置kafka依赖 end-->
         <!-- ip 工具类 start-->
         <dependency>
             <groupId>org.lionsoul</groupId>
@@ -112,6 +120,44 @@
             <version>4.10</version>
             <scope>provided</scope>
         </dependency>
+        <!-- spark start  -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_2.11</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming-kafka-0-10_2.11</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql-kafka-0-10_2.11</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming_2.11</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_2.11</artifactId>
+            <version>${spark.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_2.11</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-hive_2.11</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <!-- spark end  -->
     </dependencies>
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>

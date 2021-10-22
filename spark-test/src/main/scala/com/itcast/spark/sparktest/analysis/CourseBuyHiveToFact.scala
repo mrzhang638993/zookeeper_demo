@@ -24,7 +24,7 @@ object CourseBuyHiveToFact {
     var areaMap=Map[String,String]()
     session.sql("select * from data_dimen.area_dim").as[AreaDimen].collect()
       .foreach(x => {
-        areaMap += x.city->x.area_dim_id
+        areaMap += x.city->x.area_dim_id.toString
       })
     //得到公司维度的数据
     var comMap=Map[String,String]()

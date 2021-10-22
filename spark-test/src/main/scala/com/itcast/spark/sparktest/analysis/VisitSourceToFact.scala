@@ -30,7 +30,7 @@ object VisitSourceToFact {
     var areaMap=Map[String,String]()
      session.sql("select * from data_dimen.area_dim").as[AreaDimen].collect()
       .foreach(x => {
-        areaMap += x.city->x.area_dim_id
+        areaMap += x.city->x.area_dim_id.toString
       })
     //获取课程的维度数据
     var comMap=Map[String,String]()

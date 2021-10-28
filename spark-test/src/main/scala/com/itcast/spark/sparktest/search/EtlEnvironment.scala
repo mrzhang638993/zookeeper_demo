@@ -1,6 +1,5 @@
 package com.itcast.spark.sparktest.search
 
-import com.itcast.spark.sparktest.analysis.StrUtils
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 
@@ -19,22 +18,21 @@ object EtlEnvironment {
    *
    * @param appName
    */
-  def getSparkConf(appName: String): SparkConf = {
-    if (isCluster) {
+ /* def getSparkConf(appName: String): SparkConf = {
+   /* if (isCluster) {
       initCluster(appName)
     } else {
       init(appName)
-    }
-  }
+    }*/
+  }*/
 
   /**
    * spark-submit提交集群
    *
    * @param appName
    */
-  def initCluster(appName: String) = {
-    new SparkConf()
-      .setAppName(StrUtils.getClassName(appName))
+  def initCluster(conf: SparkConf) = {
+     SparkSession.builder().config(conf).enableHiveSupport().getOrCreate()
   }
 
   /**
@@ -42,15 +40,9 @@ object EtlEnvironment {
    *
    * @param appName
    */
-  def init(appName: String) = {
-
-    // 本地模式， 集群不进行计算
-    val master = "local"
-    // spark配置
-    new SparkConf()
-      .setMaster(master)
-      // 根据类名设置appName
-      .setAppName(StrUtils.getClassName(appName))
+  def init(conf: SparkConf) = {
+      conf.setMaster("local")
+      SparkSession.builder().config(conf).enableHiveSupport().getOrCreate()
   }
 
   /**
@@ -68,11 +60,28 @@ object EtlEnvironment {
 
   def  getSparkSession( jobName:String, esTableName:String): SparkSession ={
      //具体的sparkSession的代码改造实现
-    val conf: SparkConf = init(jobName)
-    conf.set("es.index.auto.create","true")
-    conf.set("es.nodes","192.168.47.100:9200")
-    //是否需要配置相关的estable的数据信息的？
-    SparkSession.builder().config(conf).getOrCreate()
+     val  sparkConf:SparkConf=null
+     if(null!=esTableName){
+       esConf(conf(jobName),esTableName)
+     }else{
+       conf(jobName)
+     }
+    if(isCluster){
+      initCluster(sparkConf)
+    }else{
+      init(sparkConf)
+    }
   }
 
+  def  esConf(sparkConf:SparkConf,esTableName:String):SparkConf={
+      sparkConf.set("es.nodes","xc-online-es")
+      sparkConf.set("es.port","9200")
+      sparkConf.set("es.index.auto.create","true")
+      sparkConf.set("es.resource",esTableName)
+      sparkConf.set("es.name","docker-cluster")
+  }
+
+  def  conf(jobName:String):SparkConf={
+     new SparkConf().setAppName(jobName)
+  }
 }

@@ -1,18 +1,18 @@
 package com.itcast.spark.sparktest.search
 
-import com.itcast.spark.sparktest.analysis.UserLeanOnline
+import com.itcast.spark.sparktest.analysis.{DateUtils, UserLeanOnline}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
 /**
  * 数据保存到hive中
  * */
 object InstantQueryStep1ToHive {
   def main(args: Array[String]): Unit = {
-    //获取sparkSession对象信息
+    //获取sparkSession对象信息,同时增加hive数据操作支持。
     val sparkSession: SparkSession = SparkSession.builder().appName(this.getClass.getName).master("local[2]")
-      .getOrCreate()
+      .enableHiveSupport().getOrCreate()
     //获取SparkContext对应的上下文对象信息sc
     val sc: SparkContext = sparkSession.sparkContext
     //获取对应的时间信息
@@ -25,8 +25,48 @@ object InstantQueryStep1ToHive {
     })
     //创建临时表进行数据关联操作和相关逻辑实现操作
     val frame: DataFrame = sparkSession.createDataFrame(learningSourceRdd)
-    frame.createOrReplaceTempView("learnSource_tmp")
-    //使用sparksql完成相关的变量的操作实现
-
+    frame.createOrReplaceTempView("learn_source_tmp")
+    //注册udf函数信息,可以进行中间数据的转换操作和实现逻辑的。
+    sparkSession.udf.register("getUuid",()=>{
+        StrUtils.getUuId()
+    })
+    //注册新的函数操作实现,将分钟信息转换成为day,hour以及minute信息
+    sparkSession.udf.register("minConvertDayHourMin",(time:Long)=>{
+       DateUtils.minConvertDayHourMin(time)
+    })
+    //查询和探测结果,其中使用count(1)的原因在于埋点数据是一分钟发送一次的,所以统计count可以有助于统计相关的指标数据的
+    //得到中间表数据
+    val resultDf: DataFrame = sparkSession.sql(
+      s"""
+         |select
+         | getUuid() learning_course_online_id,
+         | l.course_id,
+         | c.name course_name,
+         | cv.video_name video_name,
+         |  l.user_id,
+         |  u.name user_name,
+         |  l.learn_time ,
+         |  minConvertDayHourMin(l.learn_count_tmp) learn_count,
+         |  from_unixtime(l.learn_time,'yyyy-MM-dd')
+         | from (
+         |select user_id, course_id,course_video_id,user_session_id,
+         |min(learn_time) learn_time,
+         |count(1)  learn_count_tmp
+         |from learn_source_tmp
+         |group by user_id,course_id,course_video_id,user_session_id
+         |) l
+         |left join data_dimen.course_dim c  on c.course_dim_id=l.course_id
+         |left join data_dimen.course_video_dim cv on cv.course_video_dim_id=l.course_video_id
+         |left join data_dimen.user_dim u on u.user_dim_id=l.user_id
+         |""".stripMargin)
+    //指定hive参数,将数据保存到hive中
+    sparkSession.conf.set("hive.exec.dynamic.partition.mode","nostrict")
+    //定义中间表的名称信息
+    val  tableName="data_course.learning_course_online_dwm"
+    //数据保存到hive表中进行数据保存操作
+    resultDf.repartition(1)
+      .write
+      .mode(SaveMode.Overwrite)
+      .insertInto(tableName)
   }
 }

@@ -68,5 +68,6 @@ object InstantQueryStep1ToHive {
       .write
       .mode(SaveMode.Overwrite)
       .insertInto(tableName)
+    sparkSession.close()
   }
 }

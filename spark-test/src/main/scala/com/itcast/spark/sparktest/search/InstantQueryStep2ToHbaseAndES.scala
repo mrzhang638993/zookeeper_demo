@@ -1,6 +1,6 @@
 package com.itcast.spark.sparktest.search
 
-import com.itcast.spark.sparktest.analysis.LearningCourseOnlineDwm
+import com.itcast.spark.sparktest.analysis.{LearningCourseOnlineDwm, LearningCourseOnlineEsIndex}
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
@@ -34,10 +34,18 @@ object InstantQueryStep2ToHbaseAndES {
       import sparkSession.implicits._
       val learnDs: Dataset[LearningCourseOnlineDwm] = sparkSession.sql(
           s"""
-             | select *  from  ${hiveTableName} where date_info=${date_info}
+             | select *  from  ${hiveTableName} where date_info='${date_info}'
              |""".stripMargin).as[LearningCourseOnlineDwm]
-      //数据保存到es中
-      EsSparkSQL.saveToEs(learnDs,esTabeleName)
+      //数据保存到es中,es中只是保存了es索引稳定的数据操作
+      val learningEs: Dataset[LearningCourseOnlineEsIndex] = learnDs.map(obj => {
+          LearningCourseOnlineEsIndex(obj.learning_course_online_id,
+              obj.course_name,
+              obj.video_name,
+              obj.user_name,
+              obj.date_info
+          )
+      })
+      EsSparkSQL.saveToEs(learningEs,esTabeleName)
       //对应的进行put操作转换,对应的只有Rdd格式才是可以保存的,其他的格式是无法保存和实现的
       //hbase只是一个应用层的软件的,数据最终还是需要写入到hdfs文件系统之中的.
       learnDs.map(p => {

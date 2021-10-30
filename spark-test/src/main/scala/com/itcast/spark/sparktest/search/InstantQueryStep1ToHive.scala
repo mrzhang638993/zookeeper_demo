@@ -47,7 +47,7 @@ object InstantQueryStep1ToHive {
          |  u.name user_name,
          |  l.learn_time ,
          |  minConvertDayHourMin(l.learn_count_tmp) learn_count,
-         |  from_unixtime(l.learn_time,'yyyy-MM-dd')
+         |  from_unixtime(l.learn_time/1000,'yyyy-MM-dd')
          | from (
          |select user_id, course_id,course_video_id,user_session_id,
          |min(learn_time) learn_time,
@@ -64,6 +64,7 @@ object InstantQueryStep1ToHive {
     //定义中间表的名称信息
     val  tableName="data_course.learning_course_online_dwm"
     //数据保存到hive表中进行数据保存操作
+    //需要注意的是overwrite模式的话,只能处理的是正确的数据的,错误的数据需要手动的进行操作处理实现
     resultDf.repartition(1)
       .write
       .mode(SaveMode.Overwrite)

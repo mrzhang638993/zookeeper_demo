@@ -21,12 +21,12 @@ object InstantQueryStep2ToHbaseAndES {
       val hbaseUtils=new HbaseUtils
       val hbaseTableName="LearningOnlineDetail"
       val hbaseColumnName="learning_online_detail"
-      val esTabeleName:String="demo/doc"
+      val esTabeleName:String="demo/_doc"
       //创建表,如果表不存在的话
       hbaseUtils.createTable(hbaseTableName,hbaseColumnName)
       //得到相关的jobConf的相关的配置信息。hbase写入需要使用到相关的jobConf操作机制的
       val  conf=hbaseUtils.getJobConf(hbaseTableName)
-      //表的信息
+      //表的信息,需要指定数据库名称以及表的名称的。
       val hiveTableName="data_course.learning_course_online_dwm"
       //日期信息
       val date_info="2019-11-11"

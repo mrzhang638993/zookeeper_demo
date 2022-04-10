@@ -1,18 +1,11 @@
 package com.itcast.spark.sparktest.search
 
-import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
-import org.elasticsearch.spark.sparkContextFunctions
-
-import scala.collection.mutable.ArrayBuffer
-
 /**
  * query:对应的实现相关es数据的查询操作和实现
  * */
 object Query {
   def main(args: Array[String]): Unit = {
-    val esTabeleName:String="demo/doc"
+   /* val esTabeleName:String="demo/doc"
     val spark:SparkSession=EtlEnvironment.getSparkSession(this.getClass.getName,esTabeleName)
     val sc: SparkContext = spark.sparkContext
     val query=
@@ -33,6 +26,6 @@ object Query {
     for(str<-values){
       println(str)
     }
-    spark.close()
+    spark.close()*/
   }
 }

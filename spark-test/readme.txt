@@ -136,6 +136,10 @@ parquet.bloom.filter.enabled#favorite_color=true
 parquet.bloom.filter.expected.ndv#favorite_color=1000000
 parquet.enable.dictionary=true
 parquet.page.write-checksum.enabled=false
+spark.sql.sources.partitionColumnTypeInference.enabled=true 是否启用分区键自动推断,默认是启用的。不启用的话,可以设置为false。此时string类型的是
+作为分区键的类型的。默认是只会发现指定路径下面的分区信息，spark会自动的抽取分区信息。抽取分区路径信息会根据指定的路径实现操作的
+根据路径抽取相关的分区信息。
+
 
 需要重点关注的是
 1.partition
@@ -144,6 +148,60 @@ parquet.page.write-checksum.enabled=false
 4.table的使用和用法。
 各种格式的基于文件的sql操作实现还没有看到特别明显的操作实现的。对于整体的sql实现需要进行关注和
 支持理解操作。spark sql的充分的使用还需要进行关注实现的。
+5.模式合并的操作实现如下:
+spark.sql.parquet.mergeSchema=true或者是mergeSchema=true
+可以将单个文件夹下面的多个不同的schema进行智能的合并操作实现的
+6.spark.sql.hive.convertMetastoreParquet=true 默认使用的是spark的parquet的支持的,
+需要注意的是spark的schema以及hive的schema的话,我们是需要执行归一化的操作处理的。最为简单的方式是将
+spark的schema约束和hive的schema保持一致的。这种不一致的schema会导致后续很多的莫名其妙的异常情况的。
+在配置层面不是很好解决的，最好是数据类型保持一致,这样的话,对应的就可以完成相关的问题的。
+还存在一个问题就是当hive的schema刷新的时候,对应的spark的schema是没有刷新的,这个时候需要设置如下的选线的
+# 对应的可以刷新相关的hive的schema的约束的。
+spark.catalog.refreshTable("my_table")
+7.spark的列加密技术。针对的是parquet的列的加解密操作实现的。
+spark.sparkContext.hadoopConfiguration.set("parquet.encryption.kms.client.class" ,
+      "org.apache.parquet.crypto.keytools.mocks.InMemoryKMS")
+    // Explicit master keys (base64 encoded) - required only for mock InMemoryKMS
+    spark.sparkContext.hadoopConfiguration.set("parquet.encryption.key.list" ,
+      "keyA:AAECAwQFBgcICQoLDA0ODw== ,  keyB:AAECAAECAAECAAECAAECAA==")
+    // Activate Parquet encryption, driven by Hadoop properties
+    spark.sparkContext.hadoopConfiguration.set("parquet.crypto.factory.class" ,
+      "org.apache.parquet.crypto.keytools.PropertiesDrivenCryptoFactory")
+    // Write encrypted dataframe files.
+    // Column "square" will be protected with master key "keyA".
+    // Parquet file footers will be protected with master key "keyB"
+    nameDs.write.
+      option("parquet.encryption.column.keys" , "keyA:square").
+      option("parquet.encryption.footer.key" , "keyB").
+      parquet("/path/to/table.parquet.encrypted")
+    // Read encrypted dataframe files
+    val df2 = spark.read.parquet("/path/to/table.parquet.encrypted")
+8.parquet的option包含了如下的选项的：
+spark 相关的parquet的option的设置是通过
+DataFrameReader
+DataFrameWriter
+DataStreamReader
+DataStreamWriter
+这些参数设置的。
+datetimeRebaseMode=spark.sql.parquet.datetimeRebaseModeInRead 仅用于read
+int96RebaseMode=spark.sql.parquet.int96RebaseModeInRead 仅使用于read
+mergeSchema=spark.sql.parquet.mergeSchema 适用于read
+compression=snappy是默认的选项，spark.sql.parquet.compression.codec. 使用这个参数可以设置
+设置的格式如下:none, uncompressed, snappy, gzip, lzo, brotli, lz4, and zstd
+9.spark的parquet的设置参数可以如下的：
+spark.sql("set spark.sql.parquet.binaryAsString=false")
+spark.sql("set spark.sql.parquet.int96AsTimestamp=false")
+spark.sql("set spark.sql.parquet.compression.codec=snappy")
+spark.sql("set spark.sql.parquet.filterPushdown=true")
+spark.sql("set spark.sql.hive.convertMetastoreParquet=true")
+spark.sql("set spark.sql.parquet.mergeSchema=true")
+spark.sql("set spark.sql.parquet.writeLegacyFormat=true")
+spark.sql("set spark.sql.parquet.datetimeRebaseModeInRead=EXCEPTION")
+spark.sql("set spark.sql.parquet.datetimeRebaseModeInWrite=EXCEPTION")
+spark.sql("set spark.sql.parquet.int96RebaseModeInRead=EXCEPTION")
+spark.sql("set spark.sql.parquet.int96RebaseModeInWrite=EXCEPTION")
+spark.sql("set spark.sql.parquet.int96RebaseModeInWrite=EXCEPTION")
+10.orc相关的参数是如下的:
 
 
 

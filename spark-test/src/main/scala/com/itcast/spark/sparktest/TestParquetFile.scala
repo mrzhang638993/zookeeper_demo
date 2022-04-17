@@ -22,5 +22,10 @@ object TestParquetFile {
     import  spark.implicits._
     //执行相关的数据查询操作实现
     nameDs.map(attr=>"Name:"+attr(0)).show()
+    //Text/CSV/JSON/ORC/Parquet 文件格式信息。都能够自动的发现和推断分区消息。load操作是可以推断出来相关的信息的。
+    //分区键失效的情况如何设置。设置参数的时候设置basePath即可的,spark会自动识别分区信息的
+    //.option("path","spark-test/person_bucket"),path/to/table/gender=male这种路径指定的话,gender是不会识别为分区键的
+    // spark的模式合并操作。模式合并是一个非常昂贵的操作的,默认是关闭的。
+
   }
 }

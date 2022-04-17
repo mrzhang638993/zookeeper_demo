@@ -128,6 +128,22 @@ spark sql处理的是结构化的数据的。
 Datasets ：对应的是无结构话约束的数据的
 DataFrames：有点类似于关系型数据库中的关系表结构，包含了相关的列结构信息。
 
+需要更多的关注orc/parquet文件的option选项的，里面很多的选项是很有意义的。
+orc.bloom.filter.columns=name
+orc.dictionary.key.threshold=1.0
+orc.column.encoding.direct=name
+parquet.bloom.filter.enabled#favorite_color=true
+parquet.bloom.filter.expected.ndv#favorite_color=1000000
+parquet.enable.dictionary=true
+parquet.page.write-checksum.enabled=false
+
+需要重点关注的是
+1.partition
+2.bucket
+3.sortBy操作
+4.table的使用和用法。
+各种格式的基于文件的sql操作实现还没有看到特别明显的操作实现的。对于整体的sql实现需要进行关注和
+支持理解操作。spark sql的充分的使用还需要进行关注实现的。
 
 
 

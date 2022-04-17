@@ -67,6 +67,8 @@
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.7.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-annotations:2.7.5" level="project" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.38" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba.ververica:flink-connector-mysql-cdc:1.4.0" level="project" />
+    <orderEntry type="library" name="Maven: org.lionsoul:ip2region:1.7.2" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-xml:2.11.0-M4" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:dubbo:2.5.3" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring:2.5.6.SEC03" level="project" />

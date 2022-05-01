@@ -232,6 +232,9 @@ mergeSchema=true
 spark.sql.orc.mergeSchema=true
 11.json格式:
 json默认的是单行的数据的格式的，如果json的数据跨越了多行的话，需要设置多行模式支持的。
+json相关的参数设置如下:
+spark.sql.session.timeZone  推断时区
+primitivesAsString=true  是否将基础类型的数据全部推断为string
 
 
 

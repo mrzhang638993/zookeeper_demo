@@ -18,7 +18,7 @@ object WriteJson {
       .schema(structType)
       .csv("spark-test/person.csv")
     frame.write
-      //需要在输出端指定对应的输出时间格式信息的。
+      //需要在输出端指定对应的输出时间格式信息的。主要的原因是pom的依赖还存在一些问题的。
       .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ")
       .mode(SaveMode.Overwrite).json("spark-test/jsonTest")
   }

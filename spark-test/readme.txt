@@ -158,6 +158,16 @@ spark的schema约束和hive的schema保持一致的。这种不一致的schema�
 还存在一个问题就是当hive的schema刷新的时候,对应的spark的schema是没有刷新的,这个时候需要设置如下的选线的
 # 对应的可以刷新相关的hive的schema的约束的。
 spark.catalog.refreshTable("my_table")
+分区表中数据是存在到不同的目录下面的。Text/CSV/JSON/ORC/Parquet都是可以自动的发现分区信息的。
+spark可以自动的从路径中解析出来分区键的信息。
+hdfs://spark1:9000/spark-study/users/gender=male/country=US/users.parquet
+上面的路径,对应的会将gender以及country作为分区键的。前提是没有禁用分区自动识别功能。
+hive的Parquet以及spark的parquet对应的是存在一些问题的，需要做相关的转换操作的。数据类型方面的要求是特别关键的。
+默认情况下，hive的parquet格式到spark的parquet的格式转换是默认支持的。对应的配置参数是如下的:
+spark.sql.hive.convertMetastoreParquet=true的，在spark使用cache的时候，这种转换信息也是存在的。
+需要手动的刷新相关的这种schame的转换信息的。对应的配置参数如下:spark.catalog.refreshTable("my_table")
+避免hive的schema发生变化导致的schema的信息不同步的问题。
+
 7.spark的列加密技术。针对的是parquet的列的加解密操作实现的。
 spark.sparkContext.hadoopConfiguration.set("parquet.encryption.kms.client.class" ,
       "org.apache.parquet.crypto.keytools.mocks.InMemoryKMS")
@@ -202,6 +212,28 @@ spark.sql("set spark.sql.parquet.int96RebaseModeInRead=EXCEPTION")
 spark.sql("set spark.sql.parquet.int96RebaseModeInWrite=EXCEPTION")
 spark.sql("set spark.sql.parquet.int96RebaseModeInWrite=EXCEPTION")
 10.orc相关的参数是如下的:
+orc的实现，是存在两个的。一个是hive的orc实现的，一个是spark的orc实现的
+对应的orc的实现其本质的底层的区别在于底层的序列化方式的不一致的。当从hive的
+orc实现转移到spark的orc实现上面去的话,对应的是需要这种转化的细微的差异的
+这种序列化的差异体现在如下的地方的，比如:
+CHAR/VARCHAR 类型的话，spark的native方式会解析成为String,对应的spark的hive模式
+会解析成为CHAR/VARCHAR的类型的。
+parquet也是存在如下的特性的。
+配置参数是如下的：spark.sql.orc.impl 具体的参考SQLCONF的实现类的。
+spark.sql.orc.impl=native
+spark.sql.orc.enableVectorizedReader=true
+spark.sql.orc.enableNestedColumnVectorizedReader=true可以嵌套的读取复杂的数据类型
+比如，array, map and struct这些类型。
+spark默认使用的是native模式的，对应的建表语句使用如下的：USING ORC
+如果想要使用hive支持的序列化模式的话,使用hive option fileFormat 'ORC'进行数据的限制操作
+spark.sql.hive.convertMetastoreOrc=true
+orc格式的mergeschema约束配置如下:
+mergeSchema=true
+spark.sql.orc.mergeSchema=true
+11.json格式:
+json默认的是单行的数据的格式的，如果json的数据跨越了多行的话，需要设置多行模式支持的。
+
+
 
 
 

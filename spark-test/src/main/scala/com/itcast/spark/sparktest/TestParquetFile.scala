@@ -26,6 +26,5 @@ object TestParquetFile {
     //分区键失效的情况如何设置。设置参数的时候设置basePath即可的,spark会自动识别分区信息的
     //.option("path","spark-test/person_bucket"),path/to/table/gender=male这种路径指定的话,gender是不会识别为分区键的
     // spark的模式合并操作。模式合并是一个非常昂贵的操作的,默认是关闭的。
-
   }
 }

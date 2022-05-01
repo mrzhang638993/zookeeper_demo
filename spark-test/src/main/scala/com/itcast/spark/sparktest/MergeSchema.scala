@@ -16,7 +16,7 @@ object MergeSchema {
     //创建模式2
     val cubesDF = spark.sparkContext.makeRDD(6 to 10).map(i => (i, i * i * i)).toDF("value", "cube")
     cubesDF.write.parquet("data/test_table/key=2")
-    //进行模式合并操作
+    //进行模式合并操作，可以探测同一个basePath目录下面的多个子目录对应的schema的合并信息的。
     val mergedDF = spark.read.option("mergeSchema", "true").parquet("data/test_table")
     mergedDF.printSchema()
   }

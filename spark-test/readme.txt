@@ -235,6 +235,8 @@ json默认的是单行的数据的格式的，如果json的数据跨越了多行
 json相关的参数设置如下:
 spark.sql.session.timeZone  推断时区
 primitivesAsString=true  是否将基础类型的数据全部推断为string
+12.text文件
+text文件的话，每一行对应的都是一个row数据的，对应的列名称是value的
 
 
 

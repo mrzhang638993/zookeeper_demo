@@ -1,6 +1,6 @@
 package com.itcast.spark.sparktest
 
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 
 /**
  * 测试学习text文档相关的操作
@@ -18,10 +18,13 @@ object TextStudy {
       //设置如下的option,这样的话,一个文件当做一行来进行输入。默认的是
       .option("wholetext","true")
       .textFile(path)
-    //对应的是提个array的数组信息的
+    //val value: Dataset[Seq[Char]] = textValue.map(text => text.toSeq)(Encoders.kryo[Seq[Char]])
+    val value: Dataset[String] = textValue.flatMap(text => text.split("\r\n"))(Encoders.STRING)
+    value.show()
+   /* //对应的是提个array的数组信息的
     val values: Array[String] = textValue.take(1)
     //数组的长度唯一,元素也是只有一个元素的,最终是可以得到相关的元素的切分操作的
     val lastValues: Array[String] = values.toSeq.head.split("\r\n")
-    println(lastValues.seq)
+    println(lastValues.seq)*/
   }
 }

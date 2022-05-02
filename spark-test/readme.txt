@@ -237,6 +237,21 @@ spark.sql.session.timeZone  推断时区
 primitivesAsString=true  是否将基础类型的数据全部推断为string
 12.text文件
 text文件的话，每一行对应的都是一个row数据的，对应的列名称是value的
+相关的option:
+wholetext 是否将一整个的文件当做单独的一行
+lineSep  行分隔符
+compression  文件压缩方式 。none, bzip2, gzip, lz4, snappy and deflate  支持如下的几种，仅用于write操作
+13.hive的相关的操作
+spark也是支持hive的相关的操作的，spark读写hive的时候，需要hive加载相关的依赖的，对于每一个worker节点的话
+，对应的也是需要能够加载到相关的节点的。主要的原因在于hive的序列化和反序列化的相关的操作的
+spark需要启动hive相关的支持，包括如下的：hive的metastore的持久化连接，序列化和反序列化，hive的用户自定义函数。
+还需要如下的配置文件 hive-site.xml, core-site.xml 用于安全配置，hdfs-site.xml 用于hdfs配置，放在对应的conf目录下面
+需要注意的是,不建议使用load的方式来加载数据的，这个是存在很多的性能问题的。一般的hive有相关的加载分区的操作的
+alter table  add partition 的操作的
+需要注意的是使用text格式的话，只能有单个的列的
+同时如果需要按照分隔符加载的话,只能使用\001进行分隔操作实现的。否则建议使用其他的分割的格式的。
+
+
 
 
 

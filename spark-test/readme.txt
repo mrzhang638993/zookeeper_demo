@@ -250,6 +250,62 @@ spark需要启动hive相关的支持，包括如下的：hive的metastore的持�
 alter table  add partition 的操作的
 需要注意的是使用text格式的话，只能有单个的列的
 同时如果需要按照分隔符加载的话,只能使用\001进行分隔操作实现的。否则建议使用其他的分割的格式的。
+需要指定hive表的存储方式的：
+CREATE TABLE src(id int) USING hive OPTIONS(fileFormat 'parquet') 对应的是使用的是spark的parquet格式的。
+CREATE EXTERNAL TABLE if not exists hive_bigints(id bigint) STORED AS PARQUET LOCATION   这种方式是使用的是hive的parquet的格式的。
+创建hive表常见的参数如下:
+fileFormat:主要包含如下的6种格式,'sequencefile', 'rcfile', 'orc', 'parquet', 'textfile' and 'avro'
+inputFormat,outputFormat:输入格式以及输出格式，对应的需要成对的出现。不能单一的出现
+serde：序列化方式,sequencefile以及textfile，rcfile对应的是不包含相关的序列化方式的,需要单独的指定序列化方式的
+fieldDelim, escapeDelim, collectionDelim, mapkeyDelim, lineDelim 这些仅用于textfile格式的文件，指定读取方式的。
+14.jdbc连接spark方式
+If the requirements are not met, please consider using the JdbcConnectionProvider developer API to handle custom authentication.
+目前jdbc连接的方式仅支持如下的选项的:DB2,MariaDB,MS Sql,Oracle,PostgreSQL
+15.spark还支持Avro,Binary等相关的文件的。
+val usersDF = spark.read.format("avro").load("examples/src/main/resources/users.avro")
+usersDF.select("name", "favorite_color").write.format("avro").save("namesAndFavColors.avro")
+#使用相关的binaryFile文件信息
+spark.read.format("binaryFile").option("pathGlobFilter", "*.png").load("/path/to/data")
+spark使用jdbc连接方式的话,需要确保的是所有的worker节点上面都是需要有相关的驱动包文件的
+16.性能调优操作
+spark  sql相关的性能调优的方式是包括如下的:
+spark.catalog.cacheTable("tableName")或者是dataFrame.cache()
+spark.catalog.uncacheTable("tableName")或者是dataFrame.unpersist()可以消除内存缓存的使用
+配置参数的设置可以使用如下的两种方式来实现操作
+spark.sqlContext.setConf("hive.exec.dynamic.partition", "true")
+spark.sqlContext.setConf("hive.exec.dynamic.partition.mode", "nonstrict")
+或者是运行如下的命令
+spark.sql("set hive.exec.dynamic.partition.mode=nonstrict")
+spark.sql.inMemoryColumnarStorage.compressed 内存压缩方式
+spark.sql.inMemoryColumnarStorage.batchSize	一次缓存多少列。spark内存中的数据缓存方式是使用列的方式来进行缓存的
+spark.sql.files.maxPartitionBytes 单个分区的文件的大小,仅适用于Parquet, JSON and ORC格式的文件
+spark.sql.files.openCostInBytes  打开文件的成本，仅适用于Parquet, JSON and ORC
+spark.sql.files.minPartitionNum 切割文件的分区数量，不是绝对的。默认值是spark.default.parallelism，仅适用于Parquet, JSON and ORC
+spark.sql.broadcastTimeout  广播超时时间
+spark.sql.autoBroadcastJoinThreshold  广播的数据量的限值
+spark.sql.shuffle.partitions 配置shuffle操作使用到的分区数量
+spark.sql.sources.parallelPartitionDiscovery.threshold
+spark主要使用的两个特性如下:1)spark的缓存使用;2)spark sql查询优化
+spark join的5中方式如下:
+1)broadcast hash  join:用于map端进行join操作，一般的用于维度表和事实表的join操作,这个过程中broadcast的数据量是少量的
+配置参数如下的：spark.sql.autoBroadcastJoinThreshold  默认是50MB的内存的
+2)shuffle hash join:默认是true
+17 spark可以作为分布式的sql查询引擎的
+使用jdbc或者是odbc的方式来作为sql引擎使用的。
+spark sql主要设计来适用于结构化的数据的。
+spark sql对应的可以使用内置的函数，包括如下的三种内置的函数特性的
+UDFS/UDAFS/集成hive的UDFs/UDAFs/UDTFs函数的。
+18.spark的结构化流式编程技术
+spark的流式编程是基于spark sql基础之上的。也就是spark  streaming的话是需要spark sql的支持的
+spark streaming的流式操作相关的概念包括如下的：
+aggregations, event-time windows, stream-to-batch joins,
+通过checkpoint机制以及预写日志的方式可以保证流式的端到端的exactly-once特性以及容错性
+Structured Streaming provides fast, scalable, fault-tolerant, end-to-end exactly-once stream processing
+spark  streaming使用的是微批的处理引擎的，延迟最低可以达到100毫秒。
+spark 2.3之后使用了新的技术  Continuous Processing ，可以将最低延迟做到1毫秒并且保证至少一次的语义。
+
+
+
 
 
 

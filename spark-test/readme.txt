@@ -303,6 +303,34 @@ aggregations, event-time windows, stream-to-batch joins,
 Structured Streaming provides fast, scalable, fault-tolerant, end-to-end exactly-once stream processing
 spark  streaming使用的是微批的处理引擎的，延迟最低可以达到100毫秒。
 spark 2.3之后使用了新的技术  Continuous Processing ，可以将最低延迟做到1毫秒并且保证至少一次的语义。
+19.spark的streaming对应的可以理解为无界表的模式的，数据是不断的追加的
+20.streaming模式需要解决的几个问题：
+1)exactly-once即数据只是处理一次;
+2)数据容错处理,出现错误可以及时和快速的恢复;
+3)迟到数据的处理操作;一般的认为延时一定的时间之后对应的数据都会全部到达的。可以基于这个时间认为全部的数据都是到达的。
+事件时间对应的是作为原始数据的一部分的数据的,是其中的一列的数据的。这样可以基于事件时间做一些聚合和分组操作
+时间窗口可以用于静态的dataset也是可以适用于动态的dataStream的数据的。
+对于那些设置了延时时间，任然没有到达的数据的话，有如下的两种处理方式：
+1）丢弃数据:
+2)存储那些尚未达到的数据，后续进行处理操作；
+每一个数据源都有offset或者是sequence来记录数据读取的位置的。使用检查点以及预写日志的方式记录处理每一次trigger数据的范围，
+sink端被设计来支持，使用可以重放的数据源以及幂等的sink，可以保证端到端的exactly-once特性的
+SparkSession.readStream() 返回的是DataStreamReader对象的。使用DataStreamReader可以获取得到对应的流式的dataset以及dataFrame的
+spark内置的source包含如下的部分的：
+1)text, CSV, JSON, ORC, Parquet对应的文件格式是默认支持的文件的source
+2)Kafka source:对应的仅支持0.10以上的
+3)Socket source以及Rate source (for testing)   仅仅用于测试
+其中的一些数据源并不支持容错机制。其中文件以及kafka是支持容错的。
+数据被多个窗口统计到这个怎么处理？对应的选择滑动时间窗口的，对应的数据计算的话。
+使用水印需要解决的一个问题是超时数据丢弃的问题,这个怎么解决超时数据丢弃的问题。
+怎么解决超时数据丢弃的问题?需要主要的是watermark使用的是临时的状态的，窗口关闭的时候对应的状态执行清除操作的
+spark.sql.streaming.multipleWatermarkPolicy=max可以设置多个stream的watermark水印的相关的设置，默认的是min，可以设置为max方式的
+flink的超时存在侧向的输出流的。spark存在侧向输出流吗？
+存在如下的问题：
+1.watermark导致的数据的乱序问题如何解决？对于数据的更新操作如果遇到了对应的乱序的问题的，这个怎么处理？
+在一个trigger中的数据可以理解为是没有顺序的。这个解决不了顺序问题的。
+
+
 
 
 

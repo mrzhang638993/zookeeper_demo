@@ -330,6 +330,104 @@ flink的超时存在侧向的输出流的。spark存在侧向输出流吗？
 1.watermark导致的数据的乱序问题如何解决？对于数据的更新操作如果遇到了对应的乱序的问题的，这个怎么处理？
 在一个trigger中的数据可以理解为是没有顺序的。这个解决不了顺序问题的。
 数据最终写入到mysql中，grafana可以使用mysql作为数据源来实现数据可视化管理。
+tEnv.executeSql("CREATE TABLE transactions (\n" +
+     "    account_id  BIGINT,\n" +
+     "    amount      BIGINT,\n" +
+     "    transaction_time TIMESTAMP(3),\n" +
+     "    WATERMARK FOR transaction_time AS transaction_time - INTERVAL '5' SECOND\n" + #对应的关键是这个地方,可以声明相关的水印时间信息。
+     ") WITH (\n" +
+     "    'connector' = 'kafka',\n" +
+     "    'topic'     = 'transactions',\n" +
+     "    'properties.bootstrap.servers' = 'kafka:9092',\n" +
+     "    'format'    = 'csv'\n" +  #对应的格式指的是数据的格式,而不是数据存储的格式。
+     ")");
+1.flink对应的是batch模式和stream模式和一的,对应的可以执行如下的操作的。
+在开发和测试的时候使用batch模式进行开发和测试,部署和运行的时候使用stream模式运行。
+public class MyFloor extends ScalarFunction  用户自定义函数,可以将自定义函数用于scala的sql查询和实现的
+public class MyFloor extends ScalarFunction {
+    public @DataTypeHint("TIMESTAMP(3)") LocalDateTime eval(
+        @DataTypeHint("TIMESTAMP(3)") LocalDateTime timestamp) {
+        return timestamp.truncatedTo(ChronoUnit.HOURS);
+    }
+}
+#引用自定义的函数实现操作
+public static Table report(Table transactions) {
+    return transactions.select(
+            $("account_id"),
+            call(MyFloor.class, $("transaction_time")).as("log_ts"),
+            $("amount"))
+        .groupBy($("account_id"), $("log_ts"))
+        .select(
+            $("account_id"),
+            $("log_ts"),
+            $("amount").sum().as("amount"));
+}
+flink的分组操作group和基于时间的分组window操作,
+#需要注意的是基于时间的分组,需要将窗口的时间放到对应的groupBy操作之前。
+public static Table report(Table transactions) {
+    return transactions
+        .window(Tumble.over(lit(1).hour()).on($("transaction_time")).as("log_ts"))
+        .groupBy($("account_id"), $("log_ts"))
+        .select(
+            $("account_id"),
+            $("log_ts").start().as("log_ts"),
+            $("amount").sum().as("amount"));
+}
+
+2.flink的exactly-once机制对应的还需要其他的机制来保证的
+flink的savepoint可以解决升级和中断的问题的。
+启动的时候需要指定对应的exactly-once的参数的
+docker-compose run --no-deps client flink run -p 3 -s <savepoint-path> \
+-d /opt/ClickCountJob.jar \
+--bootstrap.servers kafka:9092 --checkpointing --event-time
+ # 其中-s选项对应的指定了savepoint的相关的参数的
+ # --checkpointing  启用checkpoint机制
+ # --event-time 使用eventTime机制来实现相关的操作实现。
+ 需要注意的是flink的exactly-once的机制需要严格的机制和参数来保证的。想要完善的使用好exactly-once
+ 机制的话,对应的还是需要相关的参数来保证的。
+ 3.flink编写可扩展的流式的etl语句,分析和时间驱动的应用机制。
+ flink管理状态和时间的相关的api数据。
+ flink的state管理以及事件一致性操作保证分析的准确性。
+ 事件驱动的持续stream代码。
+ flink的容错,状态的exactly-once要求。
+
+ #
+ 通常的情况下，转换对应的是一对一的关系的。也就是说转换对应着单个的算子
+ 当时也有一些的情况是，一个转换对应的多个算子的。
+ 一个stream包含了一个或者是多个的stream partitions分区信息，
+ 每一个算子对应的包含了多个子算子任务，子算子任务之间彼此独立，每一个子算子任务执行在不同的线程上，
+ 或者不同的机器或者是容器中的。
+ 每一个算子对应的都有不同的子算子的数量的，一个程序的不同的算子有不同的级别的并行度的。
+ 一个算子的子算子的数量对应的是这个算子的并行度的。
+ #对应的数据传输的方式的。
+ 算子之间可以使用一对一的方式来传递数据的，也可以采用分发模式来传递数据的。一对一模式的话，后面的算子是
+ 可以看到前面算子一模一样的数据的。数据保证循序的。同一个集群内部的数据可以考虑是同样顺序的，集群内部的数据是和输入的顺序一样的。
+ flink的操作符是可以包含状态的，
+ 需要注意的是，处理数据的时候，使用event-time的话，这个event-time对应的是数据产生的时间的，
+ 当使用水印时间的话，对应的是存在如何的问题的。并且可以考虑到了相关的数据处理的延迟问题的，比如说，可以增加延时时间的
+ 所以，对于由此造成的数据丢失的可能是微乎其微的，因为数据其本身是处于内网的，延迟本身是很低的。
+ 使用event-time以及延迟的话，是可以解决数据丢失的问题的。
+ 一个算子的多个实例是独立执行的。使用的是独立的线程和独立的机器的。
+ flink的state的状态快照是异步的增量的方式的。flink的state对应的是存在于本地机器上的，采用异步增量的方式追加写入的。
+ 使用状态快照来实现增量的写入操作实现。增量快照的方式。
+ # stream的重放机制的。这个是很关键的机制的。分布式快照和stream重放机制保证了exactly-once的语义的。
+ 状态快照来保证容错机制的。flink关于分布式共享的状态的保存其实实现机制和redis的是类似的，这个机制可以参考的。
+ flink使用状态快照以及stream的重放功能可以实现精确的exactly-once的语义的。stream的partition stream对应的是存在
+ 有相关的数据的。stream重放对应的就是数据的重放操作的，flink的分布式快照的话，对应的是状态的重置的。
+ 也就是从上面的逻辑上来说吧,对应的是需要如下的操作逻辑的。数据重放是flink本身的一个特性的，对于不同的应用而言，我们需要考虑的状态数据的。
+ #flink使用stream的一个前提就是数据的序列化，所以，数据的序列化问题需要关注的。
+ flink对于数据序列化的支持包含了如下的多个层面的。比如如下的：
+ 1) 基础数据类型的序列化支持；String, Long, Integer, Boolean, Array
+ 2) 组合类型：uples, POJOs, and Scala case classes
+ 3) 其他类型使用Avro的序列化方式。
+
+
+
+
+
+
+
+
 
 
 

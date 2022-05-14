@@ -14,6 +14,5 @@ import java.util.Map;
 
 public class TestFlink {
     public static void main(String[] args) {
-        RowData
     }
 }

@@ -7,8 +7,6 @@ public class MySource extends RichSourceFunction<String> {
 
     @Override
     public void run(SourceContext<String> ctx) throws Exception {
-        //定时器是在处理元素的时候得到的相关的time的上下文的。source中是不可能存在timer上下文的东西的
-        ctx.collect();
     }
 
     @Override

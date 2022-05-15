@@ -115,10 +115,24 @@ WatermarkStrategy.forMonotonousTimestamps();用于数据内部是根据时间升
 WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(10)); 固定延时时间的水印机制。
 
 #flink的状态 stream 程序编程
-
-
-
-
-
-
+1)ValueState:
+2)ListState:
+3)ReducingState:
+4)AggregatingState:
+5)MapState:
+需要注意的是state的相关的接口仅用于状态的操作的，还有状态值的获取与当前的元素是相关的。不同的元素在同样的一个函数中会获取到不同的结果的。
+使用state需要有对应的StateDescriptor，对应的常见的StateDescriptor包含了如下的:
+1)ValueStateDescriptor
+2)ListStateDescriptor
+3)AggregatingStateDescriptor
+4)ReducingStateDescriptor
+5)MapStateDescriptor
+state的访问仅仅可以在RuntimeContext中使用的,所以，其定义只能在RichFunction中的。
+ValueState<T> getState(ValueStateDescriptor<T>)
+ReducingState<T> getReducingState(ReducingStateDescriptor<T>)
+ListState<T> getListState(ListStateDescriptor<T>)
+AggregatingState<IN, OUT> getAggregatingState(AggregatingStateDescriptor<IN, ACC, OUT>)
+MapState<UK, UV> getMapState(MapStateDescriptor<UK, UV>)
+这些state的获取都是可以在RuntimeContext中获取得到的。
+state对应的存在失效时间的，state的失效时间是需要进行配置的。对应的配置是如下的:需要引入的是StateTtlConfig配置参数的。
 

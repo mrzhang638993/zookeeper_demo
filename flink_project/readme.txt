@@ -101,6 +101,73 @@ dataStream中的数据是不可变的，一旦创建的话，不可修改和删�
 5.触发程序的执行 Trigger the program execution。
 
 
+flink应用对应的就是在dataStream上运用相关的转换算子实现操作。
+DataStream在flink中代表的是一种特定的集合数据，代表的是不可变的数据集合。他和java中的集合的使用是
+有很多的类似的方式的。一旦创建的话,对应的就是不可变的，不能增加和移除相关的内容的。不能检测里面的数据的，
+我们称之为数据的转换操作的。
+需要注意的是这种dataStream的转换操作，不建议创建过多的中间过度的过程的，flink其实只需要指定对应的转换算子的操作实现即可的
+所以，我们不需要过多的关注太多的细节的，其整个的过程对应的是一个流式的过程的。
+所以，整个的过程是这样的。
+1.source的创建;
+2.转换算子的运用;
+3.sink操作实现
+flink的sink操作不建议使用write*相关的操作的，write相关的操作对应的不是exactly-once语义的，推荐使用的是addSink实现相关的操作的，
+其本质是调用底层的StreamingFileSink来实现相关的exactly-once的语义的。
+setAutoWatermarkInterval(long milliseconds):控制自动产生水印的时间间隔，
+flink批处理的执行结果和stream处理得到的执行结果是一样的，这个是flink的stream以及batch处理的相似特性所在的。
+在stream以及batch模式下的话，可以使用不同的策略来实现相关的优化的，使用不同的各种优化措施，最终是需要得到相同的结果的。
+问题:如何在将批处理模式下面的结果延续到stream模式下面去,从而实现优化操作和实现机制。
+flink默认的对应的是stream模式操作的，需要配置batch模式或者是其他的模式的话。
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+env.setRuntimeMode(RuntimeExecutionMode.BATCH);
+###对应的执行操作语句和实现逻辑
+-Dexecution.runtime-mode=BATCH
+不建议在程序中设置运行模式，在运行参数中设置运行模式比较的好。
+flink将相同的operator组成了对应的task，不同的task之间对应的存在数据的shuffle操作的。多个operator对应的是一个chain的过程的。
+多个任务之间构成了对应的flink的执行任务的job graph流程图。根据对应的shuffle操作我们可以将其划分为对应的stage的。
+flink的多个操作符而言：在stream模式下面，不涉及操作符的顺序问题，数据来了就处理。在批处理模式下面是会涉及到数据的处理操作的。
+在批模式下面，水印对应的是不产生作用的。但是设置一个WatermarkStrategy任然是需要的。增加水印时间戳信息。批模式下面可以指定最大的水印时间间隔的，对应的数据可以理解为完美的使用水印间隔的。
+水印时间的意义，对应的意思是如下的：时间是timestamp-延迟时间<t。对应的不允许水印时间层面的t<T的延迟的。需要注意的是同样的一个数据，两次不同的时间处理的话，
+对应的时间戳是不一样的。批模式下面的timers机制也是有用的，但是触发的机制对应的都是在输入的结束阶段触发的，所以，意义不大。
+
+stream的执行模式中，flink使用checkpoint作为错误的恢复机制。flink的stream任务失败的话，对应的会从checkpoint成功的地方启动的。这个会造成很大的性能损耗的，相比较于batch而言。
+在batch模式下面，flink会根据stage来启动的，只需要启动失败的stage的任务的，前面已经完成的任务是不会重新启动的，从而节约了很多的资源的。
+spark Streaming以及flink的streaming的特点是会持续的占用资源的，如果可以动态的调节资源的占用和使用的话,是会存在很大的性能提升的。
+需要注意的是flink的exactly-once保证是通过checkpoint来保证的。那么在batch模式下面如何保证对应的exactly-once的语义的。
+水印策略实现机制：
+1:水印策略主要是用于对应的source上面的。推荐使用这种操作的。
+
+###处理逻辑操作实现
+1.数据源的空闲间隔控制:
+#当超过了配置时间之后,下游将不再处于等待状态的。增加了空闲检测机制的。下游水印会不断的增加的，从而解决相关的问题的。
+WatermarkStrategy
+        .<Tuple2<Long, String>>forBoundedOutOfOrderness(Duration.ofSeconds(20))
+        .withIdleness(Duration.ofMinutes(1));
+2.水印对其机制:
+当单个或者部分分区产生数据的速度明显的多余其他的分区的话，这个时候下游处理的operator会产生背压的效果的。
+可以启用水印对其机制
+#配置水印对其策略，避免出现数据消费不一致的问题。
+WatermarkStrategy
+        .<Tuple2<Long, String>>forBoundedOutOfOrderness(Duration.ofSeconds(20))
+        .withWatermarkAlignment("alignment-group-1", Duration.ofSeconds(20), Duration.ofSeconds(1));
+需要注意的是过量的水印的话，会降低程序的处理性能的。不需要频繁的创建水印。
+PunctuatedAssigner:对应的是根据数据本身的特征来生成水印的。比如携带有某些特征标志的。
+PeriodicAssigner:对应的是根据配置的间隔时间定期的生产相关的水印数据的。可以通过配置参数，ExecutionConfig.setAutoWatermarkInterval(...)来控制水印生成的频率特性的。
+kafka connector的分区水印对其机制:
+flink中的operators是如何处理水印的:operator需要先处理watermark然后让数据往下流动的，这个处理过程中，包括了窗口触发的相关的内容。
+当所有触发的数据生成了之后，才会存在水印往下继续传递的操作的。
+WatermarkStrategy.forMonotonousTimestamps(); #单调递增水印
+WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(10));#规定延迟的水印,需要提前知道对应的延迟时间的。
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -17,3 +17,99 @@
 9.trait对应的是可以继承一个class的。对于trait以及相关的class的话,对应的理解为一套逻辑
 概念即可的,不需要过多的领会相关的其他的知识体系的。过多的理解,相关的泛化的效果就很差了。
 
+需要注意的是keyed的元素的话,对应的key是会发送到单个的分区中实现操作的。
+####window的lifecycle
+1.属于本窗口的第一个元素到来的时候,窗口开始创建的；窗口结束的时间是事件时间+处理时间+允许的延迟时间的所有的元素
+都已经处理了。flink可以保证基于时间的窗口的移除的，其他的类型则不保证的。
+例如：5分钟的固定窗口+1分钟的延迟的，对应的会从12:00--->12:06分结束的。
+每一个window对应的都是存在有一个trigger以及function的。触发器指定了窗口触发的条件的。
+Evictor:对应的会在窗口触发的时候实现元素的清除操作的。
+2.区分Keyed vs Non-Keyed Windows
+区分的方式：是否使用了keyBy的operator操作。不使用keyed的话，数据是单个的task处理的，不存在什么并行度的
+使用keyed的话，对应的是存在并行度的，有助于提交效率的。
+
+####window
+1.window对应的是无限流的核心，window会将无限流转换成为bucket，可以在这些bucket上面执行计算。
+2.如何在flink中执行window以及如何从window中获益。
+对于keyBy得到的keyedStream而言,可以使用window操作
+对于non-keyed的stream的话,使用windowAll操作
+trigger引发的数据清除，只会影响window中的数据，不会影响到相关的元数据的。所以在清除的过程中是允许源数据进入的。
+window数据处理的逻辑如下:
+1)数据进入到window中----->trigger触发器处理数据------->evictor处理数据------>function处理数据
+non-keyed stream会将整个的stream作为一个task进行处理的，不存在并行度控制的。
+keyed-stream对应的会根据keyed来进行并行操作的，相同的key会发送到相同的task上去的。
+WindowAssigner:对应的会决定将元素送到那个assigner中进行操作。大多数的情况下，flink预定义了很多的window，
+包含了如下的window的:tumbling windows, sliding windows, session windows and global windows
+可以自定义window,实现相关的WindowAssigner,
+如下:public class MyWindow extends WindowAssigner
+除了global window而言，其他的window对应的都是基于时间进行处理的。包括processing time 以及event-time时间。
+基于时间的窗口对应的是左闭又开的区间的,[a,b)
+Tumbling Windows:固定的时间窗口，固定大小并且不滑动的窗口。需要主要的是固定时间窗口的话，可以对应的指定offset的，可以用于解决时区的问题的。
+TumblingEventTimeWindows:固定事件时间，TumblingProcessingTimeWindows:固定处理时间
+input
+    .keyBy(<key selector>)
+    //解决时区的问题,示例代码如下:Time.hours(-8)对应的延时8小时实行操作实现
+    .window(TumblingEventTimeWindows.of(Time.days(1), Time.hours(-8)))
+    .<windowed transformation>(<window function>);
+Sliding Windows:滑动窗口,使用的是SlidingEventTimeWindows(事件时间),SlidingProcessingTimeWindows(处理时间)
+Session Windows:基于activity的session来处理数据,一定时间没有数据的话，对应的会关闭窗口。使用如下的类实现操作。
+EventTimeSessionWindows以及ProcessingTimeSessionWindows
+EventTimeSessionWindows.withGap(Time.minutes(10)):静态的时间间隔
+SessionWindowTimeGapExtractor:动态的时间间隔,实现对应的抽取时间间隔的逻辑。需要注意的是SessionWindow需要
+一个trigger以及对应的window function。
+Global Windows:全局window的特性是窗口不会关闭的，除非自定义trigger进行触发。否则是不会存在有任何的输出的。
+#需要注意的是global window对应的是针对每一个key指定全局的window的，并不是全局使用一个window的。这个窗口会一直开启的。
+input
+    .keyBy(<key selector>)
+    .window(GlobalWindows.create())
+    .<windowed transformation>(<window function>);
+#######常见的window function
+常见的window  function包括了:ReduceFunction,AggregateFunction,以及对应的ProcessWindowFunction。
+ReduceFunction:输入两个元素，生成一个同类型的元素。
+input
+    .keyBy(<key selector>)
+    .window(<window assigner>)
+    .reduce(new ReduceFunction<Tuple2<String, Long>>() {
+      public Tuple2<String, Long> reduce(Tuple2<String, Long> v1, Tuple2<String, Long> v2) {
+        return new Tuple2<>(v1.f0, v1.f1 + v2.f1);
+      }
+    });
+AggregateFunction:包含了三个部分，输入元素，accumulator，输出元素
+private static class AverageAggregate
+    implements AggregateFunction<Tuple2<String, Long>, Tuple2<Long, Long>, Double> {
+    //定义累加器
+  @Override
+  public Tuple2<Long, Long> createAccumulator() {
+    return new Tuple2<>(0L, 0L);
+  }
+  //实现累加器叠加操作
+  @Override
+  public Tuple2<Long, Long> add(Tuple2<String, Long> value, Tuple2<Long, Long> accumulator) {
+    return new Tuple2<>(accumulator.f0 + value.f1, accumulator.f1 + 1L);
+  }
+  //实现数据抽取操作
+  @Override
+  public Double getResult(Tuple2<Long, Long> accumulator) {
+    return ((double) accumulator.f0) / accumulator.f1;
+  }
+  //元素相加操作
+  @Override
+  public Tuple2<Long, Long> merge(Tuple2<Long, Long> a, Tuple2<Long, Long> b) {
+    return new Tuple2<>(a.f0 + b.f0, a.f1 + b.f1);
+  }
+}
+ProcessWindowFunction:包含了迭代window中的所有元素的迭代器,还包含了访问时间以及状态信息的context上下文信息。
+//自定义的ProcessWindowFunction实现。
+public class MyProcessWindowFunction extends ProcessWindowFunction<Tuple2<String, Long>, String, String, TimeWindow> {
+}
+//需要注意的是MyProcessWindowFunction可以结合ReduceFunction以及AggregateFunction来提高聚合效率的
+
+#################################################
+triggers:定义了窗口什么时候准备好了，可以处理数据了。
+
+
+
+
+
+
+

@@ -479,6 +479,12 @@ DataStream<Tuple2<String, String>> resultStream =
 4.输出结果的顺序:
 1)无序:AsyncDataStream.unorderedWait
 2)有序:AsyncDataStream.orderedWait 按照请求的顺序执行或者是超时。
+#############################使用线程池处理对应的callback#########
+1.org.apache.flink.util.concurrent.Executors.directExecutor()获取回调的线程池
+或者是使用
+com.google.common.util.concurrent.MoreExecutors.directExecutor()
+#需要注意的是异步操作可以在除了source以外任何的operator中操作的,不要在source中使用异步操作。
+
 
 
 

@@ -342,7 +342,86 @@ processElement1或者是processElement2来调用不同的输入流中的元素�
 1)在一个输入流上面创建state对象或者是在相同的scope上;
 2)基于输入的元素来执行state的更新操作;
 3)基于另外一个stream的元素的输入,探测状态和生成join之后的结果;
-
+下面是一个典型的processFunction的操作示例代码
+DataStream<Tuple2<String, String>> stream = ...;
+DataStream<Tuple2<String, Long>> result = stream
+    .keyBy(value -> value.f0)
+    .process(new CountWithTimeoutFunction());
+//定义状态存储的数据信息
+public class CountWithTimestamp {
+    public String key;
+    public long count;
+    public long lastModified;
+}
+//定义KeyedProcessFunction的具体的实现
+public class CountWithTimeoutFunction
+        extends KeyedProcessFunction<Tuple, Tuple2<String, String>, Tuple2<String, Long>> {
+    private ValueState<CountWithTimestamp> state;
+    //初始化ValueStateDescriptor
+    @Override
+    public void open(Configuration parameters) throws Exception {
+        state = getRuntimeContext().getState(new ValueStateDescriptor<>("myState", CountWithTimestamp.class));
+    }
+    //处理状态ValueState,并且注册一个timer
+    @Override
+    public void processElement(
+            Tuple2<String, String> value,
+            Context ctx,
+            Collector<Tuple2<String, Long>> out) throws Exception {
+        // retrieve the current count
+        CountWithTimestamp current = state.value();
+        if (current == null) {
+            current = new CountWithTimestamp();
+            current.key = value.f0;
+        }
+        // update the state's count
+        current.count++;
+        // set the state's timestamp to the record's assigned event time timestamp
+        current.lastModified = ctx.timestamp();
+        // write the state back
+        state.update(current);
+        // schedule the next timer 60 seconds from the current event time
+        ctx.timerService().registerEventTimeTimer(current.lastModified + 60000);
+    }
+   //调度定时器的相关的方法，可以在这个地方完成其他的调用操作实现的，比如httpClient的调用操作。
+   可以将每一次调动的结果对应的存储到state中去的,后续的话，可以根据对应的存储的状态来实现数据的恢复的。
+    @Override
+    public void onTimer(
+            long timestamp,
+            OnTimerContext ctx,
+            Collector<Tuple2<String, Long>> out) throws Exception {
+        // get the state for the key that scheduled the timer
+        CountWithTimestamp result = state.value();
+        // check if this is an outdated timer or the latest timer
+        if (timestamp == result.lastModified + 60000) {
+            // emit the state on timeout
+            out.collect(new Tuple2<String, Long>(result.key, result.count));
+        }
+    }
+}
+3.KeyedProcessFunction:基于keyed的processFunction操作实现
+基于event-time或者是processing-time的timer最终是TimerService进行管理调度的。如果基于某个时间戳注册了
+多个timer的话，只会触发一次的timer的。
+flink同步调用onTimer以及对应的processElement元素的，所以，不存在对应的并发修改的问题。
+timer是具备容错特性的,checkpoint对应的也是具备容错特性的。
+checkpoint的processing-time timers会在错误恢复的时候触发的，比如，应用从savePoint中重启的时候或者是应用从失败中重启的时候。
+需要注意的是timer是和checkpoint同步的，大量的timer的话会增加checkpoint的时间的，因为定时器是checkpoint的state的一部分的
+当然在结合其他的操作等的情况下，是可以异步的。
+####################定时器的合并操作###############
+timer属于checkpoint的一部分的，可以使用如下的方式来降低timer的数量，达到合并timer的效果的。
+1)降低timer的精度，比如可以将定时器的精度从毫秒提升到秒的精度来降低定时器的数量的
+long coalescedTime = ((ctx.timestamp() + timeout) / 1000) * 1000; //从毫秒提升到了秒级别
+ctx.timerService().registerProcessingTimeTimer(coalescedTime);
+示例2：
+long coalescedTime = ctx.timerService().currentWatermark() + 1;
+ctx.timerService().registerEventTimeTimer(coalescedTime);
+2)定时器的移除操作:
+long timestampOfTimerToStop = ...;
+ctx.timerService().deleteProcessingTimeTimer(timestampOfTimerToStop);
+或者是这样
+long timestampOfTimerToStop = ...;
+ctx.timerService().deleteEventTimeTimer(timestampOfTimerToStop);
+###################外部数据源使用异步io的方式##########################
 
 
 

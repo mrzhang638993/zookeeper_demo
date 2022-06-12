@@ -103,9 +103,143 @@ ProcessWindowFunction:包含了迭代window中的所有元素的迭代器,还包
 public class MyProcessWindowFunction extends ProcessWindowFunction<Tuple2<String, Long>, String, String, TimeWindow> {
 }
 //需要注意的是MyProcessWindowFunction可以结合ReduceFunction以及AggregateFunction来提高聚合效率的
-
+1.在处理函数中引入reduce操作。
+input
+  .keyBy(<key selector>)
+  .window(<window assigner>)
+  //实现高效的元素处理以及增加更新机制实现
+  .reduce(new MyReduceFunction(), new MyProcessWindowFunction());
+// Function definitions
+private static class MyReduceFunction implements ReduceFunction<SensorReading> {
+  public SensorReading reduce(SensorReading r1, SensorReading r2) {
+      return r1.value() > r2.value() ? r2 : r1;
+  }
+}
+private static class MyProcessWindowFunction
+    extends ProcessWindowFunction<SensorReading, Tuple2<Long, SensorReading>, String, TimeWindow> {
+  public void process(String key,
+                    Context context,
+                    Iterable<SensorReading> minReadings,
+                    Collector<Tuple2<Long, SensorReading>> out) {
+      SensorReading min = minReadings.iterator().next();
+      out.collect(new Tuple2<Long, SensorReading>(context.window().getStart(), min));
+  }
+}
+2.引入增量聚合操作实现
+input
+  .keyBy(<key selector>)
+  .window(<window assigner>)
+  .aggregate(new AverageAggregate(), new MyProcessWindowFunction());
+//增量聚合操作实现
+private static class AverageAggregate
+    implements AggregateFunction<Tuple2<String, Long>, Tuple2<Long, Long>, Double> {
+  @Override
+  public Tuple2<Long, Long> createAccumulator() {
+    return new Tuple2<>(0L, 0L);
+  }
+  @Override
+  public Tuple2<Long, Long> add(Tuple2<String, Long> value, Tuple2<Long, Long> accumulator) {
+    return new Tuple2<>(accumulator.f0 + value.f1, accumulator.f1 + 1L);
+  }
+  @Override
+  public Double getResult(Tuple2<Long, Long> accumulator) {
+    return ((double) accumulator.f0) / accumulator.f1;
+  }
+  @Override
+  public Tuple2<Long, Long> merge(Tuple2<Long, Long> a, Tuple2<Long, Long> b) {
+    return new Tuple2<>(a.f0 + b.f0, a.f1 + b.f1);
+  }
+}
+//ProcessWindowFunction处理元素
+private static class MyProcessWindowFunction
+    extends ProcessWindowFunction<Double, Tuple2<String, Double>, String, TimeWindow> {
+  public void process(String key,
+                    Context context,
+                    Iterable<Double> averages,
+                    Collector<Tuple2<String, Double>> out) {
+      Double average = averages.iterator().next();
+      out.collect(new Tuple2<>(key, average));
+  }
+}
+#####在window中使用状态
+1.ProcessWindowFunction中使用状态进行操作
+1)只有在richContext中可以访问keyed state的；
+2)使用基于window的keyed state：这个时候window中的每一个元素都有对应的state信息。
+对于window中的每一个元素的state的话,可以采用如下的方式实现访问操作:
+1)globalState:全局的window,不属于window的state
+2)windowState:当前window范围的state信息。
 #################################################
-triggers:定义了窗口什么时候准备好了，可以处理数据了。
+triggers:定义了窗口什么时候准备好了，可以处理数据了，执行processFunction函数调用操作实现。
+WindowAssigner对应的是存在默认的实现的，当默认的实现满足不了条件的话,可以自定义WindowAssigner。
+trigger的几个主要的方法:
+1)onElement:窗口中的元素的处理方法,当窗口中的元素到达的时候,触发相关的方法;
+2)onEventTime:当注册的基于时间的timer触发的时候调用
+3)onProcessingTime:基于processingTime的timer触发的时候调用
+4)onMerge:合并两个触发器的状态
+5)clear:移除窗口的时候执行清理操作实现。
+可以在上面的方法中注册timer用于后续的触发操作实现的。
+#################触发和清理操作################################
+当触发器决定处理元素的时候，触发器触发了，对应的返回FIRE或者是FIRE_AND_PURGE状态的。
+FIRE:对应的执行计算的时候还会保持window中的元素，FIRE_AND_PURGE会在触发的时候清理元素,执行元素清除操作，但是会保存window的元数据信息的。
+WindowAssigners:定义了window中的元素的处理逻辑。
+1)基于event-time的WindowAssigner:底层默认使用的是EventTimeTrigger作为触发器的。水印通过窗口结尾处的时候触发的。
+2)GlobalWindow的trigger是NeverTrigger,对应的是不会触发window的，所以，我们需要自定义一个trigger来进行window的触发操作的。
+trigger()对应的使用相关的trigger方法来实现相关的触发实现操作的。
+3)可以使用自定义的trigger触发器来覆盖默认的触发器实现，自定义自己的window的触发策略实现。
+#################内置的以及自定义的触发器############################
+EventTimeTrigger:基于event-time的watermark
+ProcessingTimeTrigger:基于processing-time
+CountTrigger:基于window中的元素的数量
+PurgingTrigger:传递另外的一个trigge作为触发器参数，并将其作为清理的触发器。nestedTrigger.clear(window, ctx);
+###############Evictors###############################
+Evictors:可以在触发器触发之后，在元素处理之前执行部分的元素的移除操作实现。可以执行一些元素的验证和检查匹配操作实现
+evictBefore():对应的是在window执行之前执行调用逻辑实现
+evictAfter():对应的是在window function执行之后调用逻辑实现
+内置的evict如下：
+1)CountEvictor:超过了一定数量的话，会从buffer的开始销毁部分数据;
+2)DeltaEvictor:删除大于或者是等于限值的。
+3)TimeEvictor:计算出window中的最大的时间戳,删除时间戳满足:<=max_ts - interval的元素。
+默认情况下,所有的内置的evictors处理的都是在window  function之前的元素的。配置了evictor可以避免预先聚合操作。
+flink中不保证window中元素的顺序的，所以，移除元素是无法保证顺序的，是一种不可控的行为的。
+##############允许的延迟##################
+1.处理event-time window的时候，需要考虑到延迟的。
+2.使用globalWindow的话，设置的延迟是Long.MAX_VALUE。其他的是waterTimeStamp+lateness
+3.迟到的数据作为侧向输出结果，
+//定义侧向输出标志
+final OutputTag<T> lateOutputTag = new OutputTag<T>("late-data"){};
+DataStream<T> input = ...;
+SingleOutputStreamOperator<T> result = input
+    .keyBy(<key selector>)
+    .window(<window assigner>)
+    .allowedLateness(<time>)
+    //迟到的数据输入到侧向输出流中进行操作管理。可以将丢失的数据写入到hbase中，后续从hbase中进行进一步的消费管理的。
+    .sideOutputLateData(lateOutputTag)
+    .<windowed transformation>(<window function>);
+DataStream<T> lateStream = result.getSideOutput(lateOutputTag);
+使用Lateness任然可以触发计算的原因在于：定义了另外的一个trigger的，称之为late firings。这种触发的元素是作为更新操作的
+所以，我们需要在这里面考虑到元素的重复特性的。需要考虑重复结果和消除重复的结果。
+4.window之间是可以持续计算的，上一个window的数据是可以持续的传递到下一个operator中的，所以，结果可以重用的
+DataStream<Integer> input = ...;
+//定义了5秒钟的固定大小的窗口
+DataStream<Integer> resultsPerKey = input
+    .keyBy(<key selector>)
+    .window(TumblingEventTimeWindows.of(Time.seconds(5)))
+    .reduce(new Summer());
+//使用了上面的5秒钟大小的窗口的，由于上面已经划分了窗口,所以，这边使用windowAll来实现窗口操作的。
+DataStream<Integer> globalResults = resultsPerKey
+    .windowAll(TumblingEventTimeWindows.of(Time.seconds(5)))
+    .process(new TopKWindowFunction());
+//需要注意的是，window会对经过的每一个元素执行一个元素的拷贝操作的，所以会形成巨大的state的数据的。
+这个过程中需要考虑如下的因素的：
+1.使用固定窗口，元素只会保存一份。相对应的滑动窗口会保留多份数据的。所以1天的滑动窗口或者是1秒的滑动窗口不是一个号的方式
+2.ReduceFunction以及AggregateFunction能够显著的降低存储的空间占用，所以，不要使用ProcessWindowFunction来执行window的聚合操作
+3.推荐使用Evictor来避免预聚合操作。
+################window的join操作####################
+
+
+
+
+
 
 
 

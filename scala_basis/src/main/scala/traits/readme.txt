@@ -422,6 +422,63 @@ ctx.timerService().deleteProcessingTimeTimer(timestampOfTimerToStop);
 long timestampOfTimerToStop = ...;
 ctx.timerService().deleteEventTimeTimer(timestampOfTimerToStop);
 ###################外部数据源使用异步io的方式##########################
+使用异步io数据源的前提是source提供了异步的client。使用异步的数据源需要如下的三个步骤：
+1)AsyncFunction的实现,用于处理异步请求;
+2)回调结果获取得到对应的ResultFuture;
+3)在数据源上面执行异步io的转换操作
+//定义异步数据源的实现，RichAsyncFunction的一个实现
+class AsyncDatabaseRequest extends RichAsyncFunction<String, Tuple2<String, String>> {
+    /** The database specific client that can issue concurrent requests with callbacks */
+    private transient DatabaseClient client;
+    @Override
+    public void open(Configuration parameters) throws Exception {
+        client = new DatabaseClient(host, post, credentials);
+    }
+    @Override
+    public void close() throws Exception {
+        client.close();
+    }
+    @Override
+    public void asyncInvoke(String key, final ResultFuture<Tuple2<String, String>> resultFuture) throws Exception {
+        // issue the asynchronous request, receive a future for result
+        final Future<String> result = client.query(key);
+        // set the callback to be executed once the request by the client is complete
+        // the callback simply forwards the result to the result future
+        //获取异步执行的结果
+        CompletableFuture.supplyAsync(new Supplier<String>() {
+            @Override
+            public String get() {
+                try {
+                    return result.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    // Normally handled explicitly.
+                    return null;
+                }
+            }
+        }).thenAccept( (String dbResult) -> {
+            //真正获取异步执行结果的地方是这个地方。
+            resultFuture.complete(Collections.singleton(new Tuple2<>(key, dbResult)));
+        });
+    }
+    //重写相关的timeOut的实现操作
+    @Override
+        public void timeout(String input, ResultFuture<Tuple2<String, String>> resultFuture) throws Exception {
+
+        }
+}
+// create the original stream
+DataStream<String> stream = ...;
+// apply the async I/O transformation。在这个地方执行异步数据源的转换操作
+DataStream<Tuple2<String, String>> resultStream =
+    AsyncDataStream.unorderedWait(stream, new AsyncDatabaseRequest(), 1000, TimeUnit.MILLISECONDS, 100);
+#######重要参数#########
+1.Timeout:异步请求的超时时间;
+2.Capacity:定义了同一个时刻可以执行请求的数量。
+3.需要注意的是超时的话,对应的默认是会抛出异常和停止任务的。如果需要处理超时导致的任务重启的话
+需要重写相关的或者是不产生任何的输出结果,调用如下的操作:ResultFuture.complete(Collections.emptyList())
+4.输出结果的顺序:
+1)无序:AsyncDataStream.unorderedWait
+2)有序:AsyncDataStream.orderedWait 按照请求的顺序执行或者是超时。
 
 
 

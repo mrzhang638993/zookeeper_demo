@@ -235,6 +235,113 @@ DataStream<Integer> globalResults = resultsPerKey
 2.ReduceFunction以及AggregateFunction能够显著的降低存储的空间占用，所以，不要使用ProcessWindowFunction来执行window的聚合操作
 3.推荐使用Evictor来避免预聚合操作。
 ################window的join操作####################
+了解window join的本质特性操作实现:
+1.window join操作:
+window join操作是处理两个stream中的同样的key，同样的window的。
+//对应的两个stream划分到了同样的一个window中的，然后进行对应的key的join操作实现。
+stream.join(otherStream)
+    .where(<KeySelector>)
+    .equalTo(<KeySelector>)
+    .window(<WindowAssigner>)
+    .apply(<JoinFunction>);
+注意事项：
+1)需要注意的是上面的join对应的是inner-join操作的，当两个stream基于某一个key没有不关联的
+话，对应的是没有结果输出的；
+2)无法join的元素的话,对应的元素还是会存在于window中的。
+###########下面是几种不同类型的join操作的###########
+1.固定窗口的join操作：Tumbling Window Join
+相同key，相同window的数据，基于相同的key可以连接的话，会长生数据，类似于inner-join操作机制的。
+DataStream<Integer> orangeStream = ...;
+DataStream<Integer> greenStream = ...;
+orangeStream.join(greenStream)
+    //第一个stream的选择条件
+    .where(<KeySelector>)
+    //第二个stream的选择条件
+    .equalTo(<KeySelector>)
+    //指定基于固定窗口执行join操作
+    .window(TumblingEventTimeWindows.of(Time.milliseconds(2)))
+    //选择条件符合之后的apply操作实现。
+    .apply (new JoinFunction<Integer, Integer, String> (){
+        @Override
+        public String join(Integer first, Integer second) {
+            return first + "," + second;
+        }
+    });
+2.滑动窗口的join操作:Sliding Window Join
+基于同样的key以及同样的滑动窗口的话，会执行join操作的。没有join上的会没有元素的输出的
+DataStream<Integer> orangeStream = ...;
+DataStream<Integer> greenStream = ...;
+orangeStream.join(greenStream)
+    //指定join条件
+    .where(<KeySelector>)
+    //指定join条件
+    .equalTo(<KeySelector>)
+    //指定滑动窗口执行join操作
+    .window(SlidingEventTimeWindows.of(Time.milliseconds(2) /* size */, Time.milliseconds(1) /* slide */))
+    //指定join操作
+    .apply (new JoinFunction<Integer, Integer, String> (){
+        @Override
+        public String join(Integer first, Integer second) {
+            return first + "," + second;
+        }
+    });
+3.会话窗口join:Session Window Join
+同样的key且满足完全满足会话条件的话，执行join操作。也是基于inner-join的机制来join的
+DataStream<Integer> orangeStream = ...;
+DataStream<Integer> greenStream = ...;
+orangeStream.join(greenStream)
+    //定义join条件
+    .where(<KeySelector>)
+    //定义join条件
+    .equalTo(<KeySelector>)
+    //指定基于session window实现join操作
+    .window(EventTimeSessionWindows.withGap(Time.milliseconds(1)))
+    //执行joinFunction操作
+    .apply (new JoinFunction<Integer, Integer, String> (){
+        @Override
+        public String join(Integer first, Integer second) {
+            return first + "," + second;
+        }
+    });
+4.Interval Join
+基于相同的key，并且stream b中的元素位于stream a指定的上下限的时间区域范围之内，可以执行join操作
+b.timestamp ∈ [a.timestamp + lowerBound; a.timestamp + upperBound]
+或者可以理解为如下的：a.timestamp + lowerBound <= b.timestamp <= a.timestamp + upperBound
+其执行的join方式对应的也是inner-join操作的，不满足inner-join操作的话，元素也是不会输出的。
+并且这种Interval Join只是支持基于event-time的。
+DataStream<Integer> orangeStream = ...;
+DataStream<Integer> greenStream = ...;
+orangeStream
+    .keyBy(<KeySelector>)
+    .intervalJoin(greenStream.keyBy(<KeySelector>))
+    .between(Time.milliseconds(-2), Time.milliseconds(1))
+    .process (new ProcessJoinFunction<Integer, Integer, String(){
+        @Override
+        public void processElement(Integer left, Integer right, Context ctx, Collector<String> out) {
+            out.collect(left + "," + right);
+        }
+    });
+上面是关于flink相关的窗口的join机制的体现的，那么我们常见的mysql的各种jojn操作以及mongodb等的join操作是如何实现的？
+##################################
+##########处理函数################
+1.ProcessFunction:
+可以访问如下的内容：
+1)events:事件;
+2)state:基于容错或者是持久化操作,仅用于keyed stream
+3)timers:基于event-time或者是processing-time,但是也是基于keyed stream的
+ProcessFunction处理所有的input stream中的元素的,其可以访问对应的keyed state以及对应的定时器的。
+可以通过RuntimeContext来访问对应的state实现容错机制。
+定时器可以实现对于processing time以及event time的变化做出反馈操作。TimerService可以用于注册定时器的，
+注意:需要访问keyed state的话，需要定义基于keyed stream的ProcessFunction的。
+stream.keyBy(...).process(new MyProcessFunction());
+##############低级别的join操作####################
+1.实现更低级别的两个输入流的join操作,可以使用CoProcessFunction或者是KeyedCoProcessFunction
+因为他们可以绑定两个输入流的元素，同时可以调用不同的处理方法来调用不同的输入流中的元素的。比如
+processElement1或者是processElement2来调用不同的输入流中的元素。
+2.join操作通常执行如下的模式的:
+1)在一个输入流上面创建state对象或者是在相同的scope上;
+2)基于输入的元素来执行state的更新操作;
+3)基于另外一个stream的元素的输入,探测状态和生成join之后的结果;
 
 
 

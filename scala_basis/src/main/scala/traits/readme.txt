@@ -571,6 +571,14 @@ SingleOutputStreamOperator<Integer> mainDataStream = input
 final OutputTag<String> outputTag = new OutputTag<String>("side-output"){};
 SingleOutputStreamOperator<Integer> mainDataStream = ...;
 DataStream<String> sideOutputStream = mainDataStream.getSideOutput(outputTag);
+3.延迟到达的数据也是可以使用侧向输出流的。
+SingleOutputStreamOperator<T> result = input
+    .keyBy(<key selector>)
+    .window(<window assigner>)
+    .allowedLateness(<time>)
+    //迟到的数据输入到侧向输出流中进行操作管理。可以将丢失的数据写入到hbase中，后续从hbase中进行进一步的消费管理的。
+    .sideOutputLateData(lateOutputTag)
+    .<windowed transformation>(<window function>);
 
 #解决flink应用的参数传递的问题：
 1.下面是使用flink的参数传递的示例代码:

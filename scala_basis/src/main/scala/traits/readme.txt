@@ -540,6 +540,78 @@ flink会针对于独立的单个的split支持运行watermark generators的。�
 需要注意的是,如果需要生成对应的能够基于单个的split生成相关的水印的话，需要实现对应的接口的。需要将不同splits的数据输出到不同的输出当中。这个时候可以使用ReaderOutput.createOutputForSplit来实现对应的
 为每一个split创建单独的Output的操作的,需要注意的是当对应的split处理完成之后，需要手动的释放相关的Output的，可以使用如下的操作的:ReaderOutput.releaseOutputForSplit完成对应的Output的释放操作。
 
+flink可以增加任何数量的侧向输出流。侧向输出流中的数据不要求和主输出流保持一直，并且不同的侧向输出流也不要求保持一样。
+1.使用如下的方式:
+OutputTag<String> outputTag = new OutputTag<String>("side-output") {};
+2.可以使用如下的function对应的生成侧向输出流:
+ProcessFunction
+KeyedProcessFunction
+CoProcessFunction
+KeyedCoProcessFunction
+ProcessWindowFunction
+ProcessAllWindowFunction
+3.下面是使用示例代码:
+3-1)使用示例代码如下:
+DataStream<Integer> input = ...;
+final OutputTag<String> outputTag = new OutputTag<String>("side-output"){};
+SingleOutputStreamOperator<Integer> mainDataStream = input
+  .process(new ProcessFunction<Integer, Integer>() {
+      @Override
+      public void processElement(
+          Integer value,
+          Context ctx,
+          Collector<Integer> out) throws Exception {
+        // emit data to regular output
+        out.collect(value);
+        // emit data to side output
+        ctx.output(outputTag, "sideout-" + String.valueOf(value));
+      }
+    });
+2.获取得到侧向输出流数据:
+final OutputTag<String> outputTag = new OutputTag<String>("side-output"){};
+SingleOutputStreamOperator<Integer> mainDataStream = ...;
+DataStream<String> sideOutputStream = mainDataStream.getSideOutput(outputTag);
+
+#解决flink应用的参数传递的问题：
+1.下面是使用flink的参数传递的示例代码:
+#####从指定路径中获取属性信息#######
+String propertiesFilePath = "/home/sam/flink/myjob.properties";
+ParameterTool parameter = ParameterTool.fromPropertiesFile(propertiesFilePath);
+#####从文件中获取属性信息#######
+File propertiesFile = new File(propertiesFilePath);
+ParameterTool parameter = ParameterTool.fromPropertiesFile(propertiesFile);
+#####从文件流中获取属性信息#######
+InputStream propertiesFileInputStream = new FileInputStream(file);
+ParameterTool parameter = ParameterTool.fromPropertiesFile(propertiesFileInputStream);
+#####从命令函数参数中获取#######
+ParameterTool parameter = ParameterTool.fromArgs(args);
+#####从文件系统中获取#######
+ParameterTool parameter = ParameterTool.fromSystemProperties();
+需要指定参数-Dinput=hdfs:///mydata.
+在flink项目中使用参数:
+ParameterTool parameters = // ...
+parameter.getRequired("input");
+parameter.get("output", "myDefaultValue");
+parameter.getLong("expectedCount", -1L);
+parameter.getNumberOfParameters();
+ParameterTool parameters = ParameterTool.fromArgs(args);
+int parallelism = parameters.get("mapParallelism", 2);
+DataStream<Tuple2<String, Integer>> counts = text.flatMap(new Tokenizer()).setParallelism(parallelism);
+甚至可以将ParameterTool当作参数,传递给对应的函数。
+1.全局注册参数,后续在函数中使用的
+ParameterTool parameters = ParameterTool.fromArgs(args);
+// set up the execution environment
+final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+env.getConfig().setGlobalJobParameters(parameters);
+public static final class Tokenizer extends RichFlatMapFunction<String, Tuple2<String, Integer>> {
+    @Override
+    public void flatMap(String value, Collector<Tuple2<String, Integer>> out) {
+	ParameterTool parameters = (ParameterTool)
+	   //全局获取对应的配置参数信息
+	getRuntimeContext().getExecutionConfig().getGlobalJobParameters();
+	parameters.getRequired("input");
+2.问题:其他的相关的工具也是可以使用的，比如对应的客户端或者是其他的也是可以支持的。
+需要关注一下外部的配置参数的话,在flink中内部是如何使用的，这个需要观察一下具体的使用方式的。
 
 
 

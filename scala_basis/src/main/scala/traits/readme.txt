@@ -621,7 +621,172 @@ public static final class Tokenizer extends RichFlatMapFunction<String, Tuple2<S
 2.问题:其他的相关的工具也是可以使用的，比如对应的客户端或者是其他的也是可以支持的。
 需要关注一下外部的配置参数的话,在flink中内部是如何使用的，这个需要观察一下具体的使用方式的。
 
-
+#################flink中自定义函数的测试操作和实现##############
+1.自定义函数和对应的测试用例1:
+public class IncrementMapFunction implements MapFunction<Long, Long> {
+    @Override
+    public Long map(Long record) throws Exception {
+        return record + 1;
+    }
+}
+###########执行对应的测试用例操作和实现管理###########
+public class IncrementMapFunctionTest {
+    @Test
+    public void testIncrement() throws Exception {
+        // instantiate your function
+        IncrementMapFunction incrementer = new IncrementMapFunction();
+        // call the methods that you have implemented
+        assertEquals(3L, incrementer.map(2L));
+    }
+}
+2.测试用例二:测试自定义的udf函数功能和实现特性
+public class IncrementFlatMapFunctionTest {
+    @Test
+    public void testIncrement() throws Exception {
+        // instantiate your function
+        IncrementFlatMapFunction incrementer = new IncrementFlatMapFunction();
+        Collector<Integer> collector = mock(Collector.class);
+        // call the methods that you have implemented
+        incrementer.flatMap(2L, collector);
+        //verify collector was called with the right output
+        Mockito.verify(collector, times(1)).collect(3L);
+    }
+}
+3.flink关于state以及对应的timer的测试用例使用:
+使用这些测试用例的话,对应的需要一些其他的测试依赖和数据的。
+OneInputStreamOperatorTestHarness (for operators on DataStreams)
+KeyedOneInputStreamOperatorTestHarness (for operators on KeyedStreams)
+TwoInputStreamOperatorTestHarness (for operators of ConnectedStreams of two DataStreams)
+KeyedTwoInputStreamOperatorTestHarness (for operators on ConnectedStreams of two KeyedStreams)
+1)下面是测试用例的:
+OneInputStreamOperatorTestHarness:用于DataStreams的测试
+public class StatefulFlatMapTest {
+    private OneInputStreamOperatorTestHarness<Long, Long> testHarness;
+    private StatefulFlatMap statefulFlatMapFunction;
+    @Before
+    public void setupTestHarness() throws Exception {
+        //instantiate user-defined function
+        statefulFlatMapFunction = new StatefulFlatMapFunction();
+        // wrap user defined function into a the corresponding operator
+        testHarness = new OneInputStreamOperatorTestHarness<>(new StreamFlatMap<>(statefulFlatMapFunction));
+        // optionally configured the execution environment
+        testHarness.getExecutionConfig().setAutoWatermarkInterval(50);
+        // open the test harness (will also call open() on RichFunctions)
+        testHarness.open();
+    }
+    @Test
+    public void testingStatefulFlatMapFunction() throws Exception {
+        //push (timestamped) elements into the operator (and hence user defined function)
+        testHarness.processElement(2L, 100L);
+        //trigger event time timers by advancing the event time of the operator with a watermark
+        testHarness.processWatermark(100L);
+        //trigger processing time timers by advancing the processing time of the operator directly
+        testHarness.setProcessingTime(100L);
+        //retrieve list of emitted records for assertions
+        assertThat(testHarness.getOutput(), containsInExactlyThisOrder(3L));
+        //retrieve list of records emitted to a specific side output for assertions (ProcessFunction only)
+        //assertThat(testHarness.getSideOutput(new OutputTag<>("invalidRecords")), hasSize(0))
+    }
+}
+2)测试用例二:
+OneInputStreamOperatorTestHarness:用于测试dataStream进行测试操作
+public class StatefulFlatMapFunctionTest {
+    private OneInputStreamOperatorTestHarness<String, Long, Long> testHarness;
+    private StatefulFlatMap statefulFlatMapFunction;
+    @Before
+    public void setupTestHarness() throws Exception {
+        //instantiate user-defined function
+        statefulFlatMapFunction = new StatefulFlatMapFunction();
+        // wrap user defined function into a the corresponding operator
+        testHarness = new KeyedOneInputStreamOperatorTestHarness<>(new StreamFlatMap<>(statefulFlatMapFunction), new MyStringKeySelector(), Types.STRING);
+        // open the test harness (will also call open() on RichFunctions)
+        testHarness.open();
+    }
+}
+3)测试用例三:
+org.apache.flink.streaming.runtime.operators.windowing.WindowOperatorTest
+org.apache.flink.streaming.api.functions.sink.filesystem.LocalStreamingFileSinkTest
+4)测试用户定义的ProcessFunction
+public static class PassThroughProcessFunction extends ProcessFunction<Integer, Integer> {
+	@Override
+	public void processElement(Integer value, Context ctx, Collector<Integer> out) throws Exception {
+        out.collect(value);
+	}
+}
+###测试对应的自定义的ProcessFunction函数实现相关的操作实现的。可以使用这个ProcessFunctionTestHarnesses更加轻易的进行测试操作
+可以用于测试KeyedProcessFunction,KeyedCoProcessFunction,BroadcastProcessFunction,
+public class PassThroughProcessFunctionTest {
+    @Test
+    public void testPassThrough() throws Exception {
+        //instantiate user-defined function
+        PassThroughProcessFunction processFunction = new PassThroughProcessFunction();
+        // wrap user defined function into a the corresponding operator
+        OneInputStreamOperatorTestHarness<Integer, Integer> harness = ProcessFunctionTestHarnesses
+        	.forProcessFunction(processFunction);
+        //push (timestamped) elements into the operator (and hence user defined function)
+        harness.processElement(1, 10);
+        //retrieve list of emitted records for assertions
+        assertEquals(harness.extractOutputValues(), Collections.singletonList(1));
+    }
+}
+###测试对应的flink的job操作
+1)需要引入相关的依赖:
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-test-utils</artifactId>
+    <version>1.15.0</version>
+    <scope>test</scope>
+</dependency>
+2)测试的项目和代码样例:
+public class IncrementMapFunction implements MapFunction<Long, Long> {
+    @Override
+    public Long map(Long record) throws Exception {
+        return record + 1;
+    }
+}
+####对应的执行代码用例操作和实现#####
+public class ExampleIntegrationTest {
+     @ClassRule
+     public static MiniClusterWithClientResource flinkCluster =
+         new MiniClusterWithClientResource(
+             new MiniClusterResourceConfiguration.Builder()
+                 .setNumberSlotsPerTaskManager(2)
+                 .setNumberTaskManagers(1)
+                 .build());
+    @Test
+    public void testIncrementPipeline() throws Exception {
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        // configure your test environment
+        env.setParallelism(2);
+        // values are collected in a static variable
+        CollectSink.values.clear();
+        // create a stream of custom elements and apply transformations
+        env.fromElements(1L, 21L, 22L)
+                .map(new IncrementMapFunction())
+                .addSink(new CollectSink());
+        // execute
+        env.execute();
+        // verify your results
+        assertTrue(CollectSink.values.containsAll(2L, 22L, 23L));
+    }
+    // create a testing sink
+    private static class CollectSink implements SinkFunction<Long> {
+        // must be static
+        public static final List<Long> values = Collections.synchronizedList(new ArrayList<>());
+        @Override
+        public void invoke(Long value, SinkFunction.Context context) throws Exception {
+            values.add(value);
+        }
+    }
+}
+使用的建议:
+1.source以及对应的sink要求是可以配置的,不要写死在代码中。
+2.建议本地测试的时候使用并行度为1的进行测试。
+parallelism > 1
+3.推荐使用@ClassRule而不是@Rule进行测试操作。
+4.测试flink集群的checkpoint以及对应的抛出异常的时候的处理操作的话,可以在mini cluster中启用checkpoint
+测试flink相关的机制和确保机制的实现，需要本地上执行确保想要的和最终输出的结果是一直的结果的。
+flink的测试需要加强和关注相关的特性的,这个方式是一个很重要的特性的。加强flink代码的本地测试功能和输出操作控制实现。
 
 
 

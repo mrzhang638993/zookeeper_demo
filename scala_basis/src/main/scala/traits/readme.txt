@@ -788,6 +788,65 @@ parallelism > 1
 测试flink相关的机制和确保机制的实现，需要本地上执行确保想要的和最终输出的结果是一直的结果的。
 flink的测试需要加强和关注相关的特性的,这个方式是一个很重要的特性的。加强flink代码的本地测试功能和输出操作控制实现。
 
+#########lamada表达式的学习和理解#########
+1.lamada表达式的限制因素:
+lamada表达式存在的问题是:lamada表达式在运行的时候会进行泛型擦除操作。flink中关于lamada表达式的操作会需要指定对应的返回值的类型的
+1)示例代码如下:
+input.flatMap((Integer number, Collector<String> out) -> {
+    StringBuilder builder = new StringBuilder();
+    for(int i = 0; i < number; i++) {
+        builder.append("a");
+        out.collect(builder.toString());
+    }
+})
+// provide type information explicitly
+//指定返回值的类型，原因在于flatMap的返回值是无法推断的。
+//void flatMap(T value, Collector<O> out) throws Exception;
+.returns(Types.STRING)
+// prints "a", "a", "aa", "a", "aa", "aaa"
+.print();
+2)示例代码二:
+env.fromElements(1, 2, 3)
+    .map(i -> Tuple2.of(i, i))    // no information about fields of Tuple2
+    .print();
+// use the explicit ".returns(...)"
+//解决这种办法的措施包括如下的两种情况:
+1)使用returns显式的指定返回数值的类型。
+2)使用内部类的方式指定返回值的类型。
+env.fromElements(1, 2, 3)
+    .map(i -> Tuple2.of(i, i))
+    .returns(Types.TUPLE(Types.INT, Types.INT))
+    .print();
+// use a class instead
+env.fromElements(1, 2, 3)
+    .map(new MyTuple2Mapper())
+    .print();
+public static class MyTuple2Mapper extends MapFunction<Integer, Tuple2<Integer, Integer>> {
+    @Override
+    public Tuple2<Integer, Integer> map(Integer i) {
+        return Tuple2.of(i, i);
+    }
+}
+// use an anonymous class instead
+env.fromElements(1, 2, 3)
+    .map(new MapFunction<Integer, Tuple2<Integer, Integer>> {
+        @Override
+        public Tuple2<Integer, Integer> map(Integer i) {
+            return Tuple2.of(i, i);
+        }
+    })
+    .print();
+// or in this example use a tuple subclass instead
+env.fromElements(1, 2, 3)
+    .map(i -> new DoubleTuple(i, i))
+    .print();
+public static class DoubleTuple extends Tuple2<Integer, Integer> {
+    public DoubleTuple(int f0, int f1) {
+        this.f0 = f0;
+        this.f1 = f1;
+    }
+}
+
 
 
 

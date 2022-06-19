@@ -847,6 +847,137 @@ public static class DoubleTuple extends Tuple2<Integer, Integer> {
     }
 }
 
+################flink运行时的配置因素################
+1)执行期的配置:
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+ExecutionConfig executionConfig = env.getConfig();
+###设置失败的时候重新执行的次数,在程序中不建议使用的,推荐使用
+getNumberOfExecutionRetries() / setNumberOfExecutionRetries(int numberOfExecutionRetries)
+###指定任务重启的时间间隔,可以和全面的getNumberOfExecutionRetries()等配合起来一起使用的,不建议使用,推荐使用重启策略来执行操作。
+getExecutionRetryDelay() / setExecutionRetryDelay(long executionRetryDelay)
+#设置运行模式,默认是PIPELINED的
+getExecutionMode() / setExecutionMode()
+#使用kryo序列化方式
+enableForceKryo() / disableForceKryo
+#使用avro序列化方式
+enableForceAvro() / disableForceAvro().
+#允许对象重用,会提升性能,但是会报错的。
+enableObjectReuse() / disableObjectReuse()
+#获取或者是设置全局参数,可以传递全部的参数的，因为这个是可以在所有的用户自定义的函数中使用的。
+getGlobalJobParameters() / setGlobalJobParameters()
+#注册指定类型的序列化器作为kryo的序列化器
+addDefaultKryoSerializer(Class<?> type, Serializer<?> serializer)
+#注册指定类型为kyro的序列化器
+addDefaultKryoSerializer(Class<?> type, Class<? extends Serializer<?>> serializerClass)
+registerTypeWithKryoSerializer(Class<?> type, Serializer<?> serializer)
+registerKryoType(Class<?> type)
+registerPojoType(Class<?> type)
+#设置连续取消任务的时间间隔。
+setTaskCancellationInterval (long interval)
+具体的特别的参数,可以参考下面的网址:https://my.oschina.net/lfxu/blog/5444559
+可以使用这个来传递全局的参数的。setGlobalJobParameters
+
+
+#flink项目集群环境运行
+1.需要使用如下的语句获取执行环境,否则对应的是local模式的
+StreamExecutionEnvironment.getExecutionEnvironment()
+2.需要指定main-class以及对应的jar文件的
+main-class 或者是program-class,两者都存在的时候会优先使用program-class。
+
+
+#flink的并行执行程序操作
+1.如果想要使用savePoint的话,可以考虑设置最大的并行度。
+并行度的设置方式:
+1)操作符级别:operator
+final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+DataStream<String> text = [...];
+DataStream<Tuple2<String, Integer>> wordCounts = text
+    .flatMap(new LineSplitter())
+    .keyBy(value -> value.f0)
+    .window(TumblingEventTimeWindows.of(Time.seconds(5)))
+    .sum(1).setParallelism(5);
+wordCounts.print();
+env.execute("Word Count Example");
+2)执行环境级别:
+flink默认的话会给对应的operator设置相关的并发级别的.可以自定义相关的并发度级别来实现覆盖默认配置操作
+final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+###在环境级别设置并行度
+env.setParallelism(3);
+DataStream<String> text = [...];
+DataStream<Tuple2<String, Integer>> wordCounts = [...];
+wordCounts.print();
+env.execute("Word Count Example");
+###客户端级别设置并行度 Client Level
+使用这种方式,可以实现flink任务的工程化创建和提交操作实现的.yarn部署方式的操作存在很大的局限性的。
+1)使用-p参数进行设置
+./bin/flink run -p 10 ../examples/*WordCount-java*.jar
+//这种情况的话,对应的可以自定义提交很多的flink的任务的,而不是需要一个个的配置任何和进行调度操作的
+try {
+    PackagedProgram program = new PackagedProgram(file, args);
+    //对应的获取jobManager的地址的,提交相关的client的配置信息的
+    InetSocketAddress jobManagerAddress = RemoteExecutor.getInetFromHostport("localhost:6123");
+    Configuration config = new Configuration();
+    Client client = new Client(jobManagerAddress, config, program.getUserCodeClassLoader());
+    // set the parallelism to 10 here
+    client.run(program, 10, true);
+} catch (ProgramInvocationException e) {
+    e.printStackTrace();
+}
+###系统级别的并行度
+1.配置文件中配置:./conf/flink-conf.yaml 配置并行度参数 parallelism.default
+2.设置最大程度的并行度参数:setMaxParallelism()
+operatorParallelism + (operatorParallelism / 2) 初略的可以设置并行度指标,128~32768
+
+
+###CEP:复杂事件匹配模式,在无界的数据流中发现重要数据.flink cep默认的是不会和flink clutser一起的。
+flink cep的使用需要满足如下的条件:
+1)引入相关的依赖:
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-cep</artifactId>
+    <version>1.15.0</version>
+</dependency>
+2)定义对应的pattern信息:
+DataStream<Event> input = ...;
+//定义搜索匹配的pattern信息,pattern对应的是一组链条。
+Pattern<Event, ?> pattern = Pattern.<Event>begin("start").where(
+        new SimpleCondition<Event>() {
+            @Override
+            public boolean filter(Event event) {
+                return event.getId() == 42;
+            }
+        }
+    ).next("middle").subtype(SubEvent.class).where(
+        new SimpleCondition<SubEvent>() {
+            @Override
+            public boolean filter(SubEvent subEvent) {
+                return subEvent.getVolume() >= 10.0;
+            }
+        }
+    ).followedBy("end").where(
+         new SimpleCondition<Event>() {
+            @Override
+            public boolean filter(Event event) {
+                return event.getName().equals("end");
+            }
+         }
+    );
+PatternStream<Event> patternStream = CEP.pattern(input, pattern);
+DataStream<Alert> result = patternStream.process(
+    new PatternProcessFunction<Event, Alert>() {
+        @Override
+        public void processMatch(
+                Map<String, List<Event>> pattern,
+                Context ctx,
+                Collector<Alert> out) throws Exception {
+            out.collect(createAlertFrom(pattern));
+        }
+    });
+#核心或者是关键因素在于定义pattern模型,pattern模型对应的是由多个简单的模型来组成的。
+其实质是定义pattern的graph结构的,使用条件可以将一个模式传递给另外的一个模式。需要注意的是模式的名称不能包含:
+1.首先定义简单的模式;
+2.定义复杂的模式;
+
 
 
 

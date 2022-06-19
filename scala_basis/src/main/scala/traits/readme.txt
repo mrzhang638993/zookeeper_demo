@@ -976,7 +976,142 @@ DataStream<Alert> result = patternStream.process(
 #核心或者是关键因素在于定义pattern模型,pattern模型对应的是由多个简单的模型来组成的。
 其实质是定义pattern的graph结构的,使用条件可以将一个模式传递给另外的一个模式。需要注意的是模式的名称不能包含:
 1.首先定义简单的模式;
+a b+ c? d: a后面存在1到多个的b,0到1个的c,然后是一个d
+pattern.oneOrMore():flink表示的是可以出现1或者多个;
+pattern.times(#ofTimes):出现固定次数
+pattern.times(#fromTimes, #toTimes):出现指定范围次数
+pattern.greedy():循环条件出现贪婪模式,但是对于group而言,不存在
+pattern.optional():对应的表示可有可无。
+下面是使用示例:
+// expecting 4 occurrences  出现4次
+start.times(4);
+// expecting 0 or 4 occurrences  出现4次或者不出现，即0次或者4次
+start.times(4).optional();
+// expecting 2, 3 or 4 occurrences 出现2-4之间的，包括2,3,4
+start.times(2, 4);
+// expecting 2, 3 or 4 occurrences and repeating as many as possible
+start.times(2, 4).greedy();
+// expecting 0, 2, 3 or 4 occurrences
+start.times(2, 4).optional();
+// expecting 0, 2, 3 or 4 occurrences and repeating as many as possible
+start.times(2, 4).optional().greedy();
+// expecting 1 or more occurrences
+start.oneOrMore();
+// expecting 1 or more occurrences and repeating as many as possible
+start.oneOrMore().greedy();
+// expecting 0 or more occurrences
+start.oneOrMore().optional();
+// expecting 0 or more occurrences and repeating as many as possible
+start.oneOrMore().optional().greedy();
+// expecting 2 or more occurrences
+start.timesOrMore(2);
+// expecting 2 or more occurrences and repeating as many as possible
+start.timesOrMore(2).greedy();
+// expecting 0, 2 or more occurrences
+start.timesOrMore(2).optional()
+// expecting 0, 2 or more occurrences and repeating as many as possible
+start.timesOrMore(2).optional().greedy();
+####下面定义conditions
+pattern.where()
+pattern.or()
+pattern.until()
+##使用示例代码
+middle.oneOrMore()
+    //限制初始类型的子类型,这种就是在初始类型中继续对其包含的子类型进行进一步的过滤操作
+    .subtype(SubEvent.class)
+    .where(new IterativeCondition<SubEvent>() {
+        @Override
+        public boolean filter(SubEvent value, Context<SubEvent> ctx) throws Exception {
+            //名称以foo开始
+            if (!value.getName().startsWith("foo")) {
+                return false;
+            }
+            double sum = value.getPrice();
+            //获取之前符合条件的元素,计算之前的元素和当前的元素的求和数值
+            for (Event event : ctx.getEventsForPattern("middle")) {
+                sum += event.getPrice();
+            }
+            //比较之前的数值和当前的数值的求和是否小于5.0级别。
+            return Double.compare(sum, 5.0) < 0;
+        }
+    });
+    #简单条件
+    start.where(new SimpleCondition<Event>() {
+        @Override
+        public boolean filter(Event value) {
+            return value.getName().startsWith("foo");
+        }
+    });
+###需要注意的是顺序调用where条件的话,对应的是and操作逻辑的
+需要实现or操作逻辑的话,可以使用or()的条件实现操作。
+#下面是使用or条件实现的操作，对应的可以实现条件的or组合操作
+pattern.where(new SimpleCondition<Event>() {
+    @Override
+    public boolean filter(Event value) {
+        return ...; // some condition
+    }
+}).or(new SimpleCondition<Event>() {
+    @Override
+    public boolean filter(Event value) {
+        return ...; // or condition
+    }
+});
+#条件停止操作,循环的stop条件
+#常见的几种条件
+1)where条件
+pattern.where(new IterativeCondition<Event>() {
+    @Override
+    public boolean filter(Event value, Context ctx) throws Exception {
+        return ...; // some condition
+    }
+});
+2)where条件之后是or条件
+pattern.where(new IterativeCondition<Event>() {
+    @Override
+    public boolean filter(Event value, Context ctx) throws Exception {
+        return ...; // some condition
+    }
+}).or(new IterativeCondition<Event>() {
+    @Override
+    public boolean filter(Event value, Context ctx) throws Exception {
+        return ...; // alternative condition
+    }
+});
+3)until条件:
+pattern.oneOrMore().until(new IterativeCondition<Event>() {
+    @Override
+    public boolean filter(Event value, Context ctx) throws Exception {
+        return ...; // alternative condition
+    }
+});
+4)匹配子类型
+pattern.subtype(SubEvent.class);
+5)oneOrMore():模式可以出现一到多次的结果
+6)timesOrMore(#times):出现至少多少次数
+timesOrMore(#times)
+7)times(#ofTimes):精确匹配多少次
+8)times(#fromTimes, #toTimes):出现指定范围的次数
+9)optional():模式是可选的。
+10)贪婪模式:greedy()
+pattern.oneOrMore().greedy();
+pattern.oneOrMore().optional();
 2.定义复杂的模式;
+1)组合条件的编写需要开始以初始模式开始
+#创建初始模式
+Pattern<Event, ?> start = Pattern.<Event>begin("start");
+flink cep的一致性条件:
+1)Strict Contiguity:严格一致性。元素一个接着一个的匹配,中间不允许出现不匹配的元素
+2)Relaxed Contiguity:可以忽略匹配元素中间的不匹配元素,不匹配元素是存在的
+3)Non-Deterministic Relaxed Contiguity:进一步的放宽匹配条件,忽略匹配条件的附件条件
+###模式如下:
+1)next(), for strict,
+2)followedBy(), for relaxed, and
+3)followedByAny(), for non-deterministic relaxed contiguity.
+4)notNext(),不直接相连
+5)notFollowedBy():事件不会介于两者之间
+
+
+
 
 
 

@@ -1087,6 +1087,7 @@ pattern.oneOrMore().until(new IterativeCondition<Event>() {
 4)匹配子类型
 pattern.subtype(SubEvent.class);
 5)oneOrMore():模式可以出现一到多次的结果
+如果程序中使用了 oneOrMore 或者 oneOrMore().optional()方法，则必须 指定终止条件，否则模式中的规则会一直循环下去
 6)timesOrMore(#times):出现至少多少次数
 timesOrMore(#times)
 7)times(#ofTimes):精确匹配多少次
@@ -1109,6 +1110,156 @@ flink cep的一致性条件:
 3)followedByAny(), for non-deterministic relaxed contiguity.
 4)notNext(),不直接相连
 5)notFollowedBy():事件不会介于两者之间
+notFollowedBy()不用用于模式的结尾
+not模式之前不能存在有可选模式
+// strict contiguity  严格模式
+Pattern<Event, ?> strict = start.next("middle").where(...);
+// relaxed contiguity 松弛模式
+Pattern<Event, ?> relaxed = start.followedBy("middle").where(...);
+// non-deterministic relaxed contiguity
+Pattern<Event, ?> nonDetermin = start.followedByAny("middle").where(...);
+// NOT pattern with strict contiguity
+Pattern<Event, ?> strictNot = start.notNext("not").where(...);
+// NOT pattern with relaxed contiguity
+Pattern<Event, ?> relaxedNot = start.notFollowedBy("not").where(...);
+#下面使用示例代码来说明对应的逻辑匹配规则:
+输入元素:"a", "c", "b1", "b2"
+模式 "a b"
+strict:要求a后面是b,无法匹配元素
+Relaxed:要求a之后是b,中间允许出现不匹配的元素,符合条件的是 "a  b1"
+Non-Deterministic Relaxed: a之后出现b,对a和b之间不做任何限制,对应的匹配到的元素是"a b1"以及"a b2"
+这是一种极为松弛的情况,可以忽略相关的内容。
+pattern.within():在指定时间之内必须出现。一个模式序列只能有一个within语句的,当出现多个within()之后,
+会取最小的一个模式来作为最终的within的结果
+next.within(Time.seconds(10));  #示例情况如下
+
+输入元素:"a", "b1", "d1", "b2", "d2", "b3" "c"
+输入模式:"a b+ c"
+strict模式:输出结果为 "a b3 c"
+Relaxed模式:{a b1 c}, {a b1 b2 c}, {a b1 b2 b3 c}, {a b2 c}, {a b2 b3 c}, {a b3 c}  至少保留了先后顺序
+Non-Deterministic Relaxed:{a b1 c}, {a b1 b2 c}, {a b1 b3 c}, {a b1 b2 b3 c}, {a b2 c}, {a b2 b3 c}, {a b3 c} 匹配中间可以缺少元素。还可以不保持顺序来组合
+####
+oneOrMore()以及times()对应的是relax模式的,如果想要严格模式的话,需要使用consecutive()
+consecutive():对应的会在匹配元素之间增加严格连续性的检查的，其结果和next是相似的.
+###下面这段代码描述的约束规则是如下的：
+模式:"c a+ b" 其中a和b之间是严格的,c和a之间没有限制
+输入:C D A1 A2 A3 D A4 B
+匹配结果如下:
+1.使用consecutive()输出结果如下:要求A是连续的。对应的其实还是relaxed模式的,只是存在约束的。
+{C A1 B}, {C A1 A2 B}, {C A1 A2 A3 B},后面的A3以及A4不是之间联系的，存在间隔D
+2.不使用consecutive()的数据结果如下:follow会忽略掉不匹配的元素的。
+{C A1 B}, {C A1 A2 B}, {C A1 A2 A3 B}, {C A1 A2 A3 A4 B}.
+Pattern.<Event>begin("start").where(new SimpleCondition<Event>() {
+  @Override
+  public boolean filter(Event value) throws Exception {
+    return value.getName().equals("c");
+  }
+})
+.followedBy("middle").where(new SimpleCondition<Event>() {
+  @Override
+  public boolean filter(Event value) throws Exception {
+    return value.getName().equals("a");
+  }
+}).oneOrMore().consecutive()
+.followedBy("end1").where(new SimpleCondition<Event>() {
+  @Override
+  public boolean filter(Event value) throws Exception {
+    return value.getName().equals("b");
+  }
+});
+#下面的模式如下:
+模式:"c a+ b"
+输入:C D A1 A2 A3 D A4 B
+allowCombinations:non-deterministic relaxed contiguitym,对应的是左侧的连续性的。
+1)不使用allowCombinations：对应的是followBy。可以理解为扩展的操作实现，不断的扩展
+{C,A1,B},{C,A1,A2,B},{C,A1,A2,A3,B},{C,A1,A2,A3,A4,B}
+2)使用allowCombinations,对应的是non-deterministic relaxed。
+输出结果如下:对应的可以理解为一个组合的操作。随机组合操作的。
+{C,A1,B},{C,A1,A2,B},{C,A1,A3,B},{C,A1,A4,B},{C,A1,A2,A3,B},{C,A1,A2,A4,B}{C,A1,A2,A3,A4,B},
+Pattern.<Event>begin("start").where(new SimpleCondition<Event>() {
+  @Override
+  public boolean filter(Event value) throws Exception {
+    return value.getName().equals("c");
+  }
+})
+.followedBy("middle").where(new SimpleCondition<Event>() {
+  @Override
+  public boolean filter(Event value) throws Exception {
+    return value.getName().equals("a");
+  }
+}).oneOrMore().allowCombinations()
+.followedBy("end1").where(new SimpleCondition<Event>() {
+  @Override
+  public boolean filter(Event value) throws Exception {
+    return value.getName().equals("b");
+  }
+});
+#####更加高级的特性:模式pattern的组合操作
+1.模式组合之间可以使用如下的操作符号:begin, followedBy, followedByAny and next
+//定义模式一:
+Pattern<Event, ?> start = Pattern.begin(
+    Pattern.<Event>begin("start").where(...).followedBy("start_middle").where(...)
+);
+//定义模式二:
+// strict contiguity
+Pattern<Event, ?> strict = start.next(
+    Pattern.<Event>begin("next_start").where(...).followedBy("next_middle").where(...)
+).times(3);
+//定义模式三:
+// relaxed contiguity
+Pattern<Event, ?> relaxed = start.followedBy(
+    Pattern.<Event>begin("followedby_start").where(...).followedBy("followedby_middle").where(...)
+).oneOrMore();
+//定义模式四:
+// non-deterministic relaxed contiguity
+Pattern<Event, ?> nonDetermin = start.followedByAny(
+    Pattern.<Event>begin("followedbyany_start").where(...).followedBy("followedbyany_middle").where(...)
+).optional();
+
+###pattern模式
+#begin(#name) 定义一个起始的pattern
+Pattern<Event, ?> start = Pattern.<Event>begin("start");
+begin(#pattern_sequence) 定义一个起始的pattern
+Pattern<Event, ?> start = Pattern.<Event>begin(
+    //对应的是pattern_sequence序列信息
+    Pattern.<Event>begin("start").where(...).followedBy("middle").where(...)
+);
+next(#name):严格模式追加后续的pattern模式
+Pattern<Event, ?> next = start.next("middle");
+next(#pattern_sequence):严格模式追加一个pattern模式
+Pattern<Event, ?> next = start.next(
+    //内部定义的strict模式的序列信息
+    Pattern.<Event>begin("start").where(...).followedBy("middle").where(...)
+);
+followedBy(#name):relaxed contiguity追加的序列信息
+Pattern<Event, ?> followedBy = start.followedBy("middle");
+Pattern<Event, ?> followedBy = start.followedBy(
+    //followedBy追加的模式序列信息
+    Pattern.<Event>begin("start").where(...).followedBy("middle").where(...)
+);
+followedByAny(#name):non-deterministic relaxed contiguity 追加模式序列操作
+Pattern<Event, ?> followedByAny = start.followedByAny("middle");
+followedByAny(#pattern_sequence):同上对应的是一个序列的
+Pattern<Event, ?> next = start.next(
+    //non-deterministic relaxed contiguity 追加一个序列
+    Pattern.<Event>begin("start").where(...).followedBy("middle").where(...)
+);
+notNext():追加负向模式,和next类似，要求后续的模式不能是对应的模式。
+Pattern<Event, ?> notNext = start.notNext("not");
+notFollowedBy():负向模式,要求relaxed contiguity后面不能是某些模式
+Pattern<Event, ?> notFollowedBy = start.notFollowedBy("not");
+within(time):指定时间间隔之内,下一个模式需要满足条件
+pattern.within(Time.seconds(10));
+
+######################匹配跳过策略######################
+skip策略:
+1.NO_SKIP:不跳过任何的匹配,任何的匹配都会产生结果;
+2.SKIP_TO_NEXT:
+3.SKIP_PAST_LAST_EVENT:
+4.SKIP_TO_FIRST:
+5.SKIP_TO_LAST:
+下面根据指定的输入来比较几种模式的相关的区别信息:
+
 
 
 

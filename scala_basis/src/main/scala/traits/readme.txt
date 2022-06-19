@@ -1259,6 +1259,89 @@ skip策略:
 4.SKIP_TO_FIRST:
 5.SKIP_TO_LAST:
 下面根据指定的输入来比较几种模式的相关的区别信息:
+输入信息:b1 b2 b3 c
+模式信息:b+ c
+no_skip的结果:{b1,b2,b3,c},{b2,b3,c},{b3,c}.不会跳过任何的输出结果的。
+SKIP_TO_NEXT的结果:{b1,b2,b3,c},{b2,b3,c},{b3,c}，不会跳过任何的输出结果。
+SKIP_PAST_LAST_EVENT:删除部分匹配的结果,{b1,b2,b3,c}
+对应的跳过策略的话,需要参考文档https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/libs/cep/钻研的。
+####指定匹配策略和是实现操作
+AfterMatchSkipStrategy skipStrategy = ...;
+Pattern.begin("patternName", skipStrategy);
+AfterMatchSkipStrategy.skipToFirst(patternName).throwExceptionOnMiss();
+#运用cep理论实现操作
+1)指定dataStream,指定pattern,指定EventComparator对应的用于元素的排序操作实现。
+DataStream<Event> input = ...;
+Pattern<Event, ?> pattern = ...;
+EventComparator<Event> comparator = ...; // optional
+PatternStream<Event> patternStream = CEP.pattern(input, pattern, comparator);
+
+
+#从模式中筛选数据
+1.实现PatternProcessFunction用于处理对应的模式数据
+class MyPatternProcessFunction<IN, OUT> extends PatternProcessFunction<IN, OUT> {
+    @Override
+    public void processMatch(Map<String, List<IN>> match, Context ctx, Collector<OUT> out) throws Exception;
+        //match中的key对应的是match的pattern的key的,List对应的是匹配到的结果的。
+        IN startEvent = match.get("start").get(0);
+        IN endEvent = match.get("end").get(0);
+        out.collect(OUT(startEvent, endEvent));
+    }
+}
+2.处理pattern超时的相关的问题,可以将超时的元素输出到sideOutput中的
+class MyPatternProcessFunction<IN, OUT> extends PatternProcessFunction<IN, OUT> implements TimedOutPartialMatchHandler<IN> {
+    //对应的处理匹配到的元素
+    @Override
+    public void processMatch(Map<String, List<IN>> match, Context ctx, Collector<OUT> out) throws Exception;
+    }
+    //处理延时到达的元素
+    @Override
+    public void processTimedOutMatch(Map<String, List<IN>> match, Context ctx) throws Exception;
+        IN startEvent = match.get("start").get(0);
+        ctx.output(outputTag, T(startEvent));
+    }
+}
+#收集延迟到达的数据。
+PatternStream<Event> patternStream = CEP.pattern(input, pattern);
+OutputTag<String> lateDataOutputTag = new OutputTag<String>("late-data"){};
+SingleOutputStreamOperator<ComplexEvent> result = patternStream
+    .sideOutputLateData(lateDataOutputTag)
+    .select(
+        new PatternSelectFunction<Event, ComplexEvent>() {...}
+    );
+DataStream<String> lateData = result.getSideOutput(lateDataOutputTag);
+##对应的执行相关的元素的调用操作实现
+TimeContext.currentProcessingTime 对应的获取当前的处理时间。当前处理的时间是优于System.currentTimeMillis()时间戳的设置的
+####下面对应的是一个典型的使用示例代码和实践操作上下####
+StreamExecutionEnvironment env = ...;
+DataStream<Event> input = ...;
+DataStream<Event> partitionedInput = input.keyBy(new KeySelector<Event, Integer>() {
+	@Override
+	public Integer getKey(Event value) throws Exception {
+		return value.getId();
+	}
+});
+//定义pattern操作,start---->middle------>end执行操作实现
+Pattern<Event, ?> pattern = Pattern.<Event>begin("start")
+	.next("middle").where(new SimpleCondition<Event>() {
+		@Override
+		public boolean filter(Event value) throws Exception {
+			return value.getName().equals("error");
+		}
+	}).followedBy("end").where(new SimpleCondition<Event>() {
+		@Override
+		public boolean filter(Event value) throws Exception {
+			return value.getName().equals("critical");
+		}
+	}).within(Time.seconds(10));
+PatternStream<Event> patternStream = CEP.pattern(partitionedInput, pattern);
+DataStream<Alert> alerts = patternStream.select(new PatternSelectFunction<Event, Alert>() {
+	@Override
+	public Alert select(Map<String, List<Event>> pattern) throws Exception {
+		return createAlert(pattern);
+	}
+});
+
 
 
 

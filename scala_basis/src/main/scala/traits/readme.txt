@@ -1387,6 +1387,10 @@ flink以及spark相关的扩展操作可以参考对应的很多的第三方的�
 我们可以将这种对数据库的查询或者是调用的第三方的接口转换成为异步的数据源实现操作处理逻辑的。
 在对应的RichAsyncFunction的function中实现相关的异步调用机制的。
 
+需要注意的是flink的savepoint对应的是处理flink任务的暂停,恢复等的操作，设置savepoint的时候,肯定是存在对应的flink的job的相关的信息的。
+hudi的java源码中对应的是存在java-client的相关的信息的,使用java操作hudi的相关的代码可以参考对应的hudi的client的源代码实现相关的操作的。
+
+
 
 
 

@@ -1341,6 +1341,60 @@ DataStream<Alert> alerts = patternStream.select(new PatternSelectFunction<Event,
 		return createAlert(pattern);
 	}
 });
+##############分析和处理状态数据##############
+1.使用flink状态相关的api
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-state-processor-api</artifactId>
+    <version>1.15.0</version>
+</dependency>
+2.flink 有状态任务的组成
+flink的job对应的是由多个operator组成的,可能包含了一个或者多个的source operator,一些实际执行处理的operator,
+然后是一到多个的sink operator的操作符的。
+每一个operator都可以运行一个或者是多个的task,并且每一个的operator对应的都可以和一个或者是多种类型的state协作操作。
+每一个的operator对应的都是包含了一个或者多个的operator的state的信息的,对应的使用的是list的数据结构最终包含到了操作符的任务列表中的。
+如果对应的operator对应的是keyed stream的话,他可以包含0,1或者是多个的keyed state的,对应的是作用于对应个的key上面的。
+keyed stream对应的是一个分布式的keyed-value的map结构的。
+对应的flink的operator对应的是根据task来实现绑定的，我们可以将对应的savepoint或者是keypoint对应的理解为一个数据库的。
+每一个操作符对应的是一个namespace或者称之为命名空间的。operator的每一个state对应的映射成为namespace下面的一张表的，表中有且仅有单列数据
+并且该列数据中保存了该operator对应的所有的task对应的state状态数据信息。
+所有的keyed state对应的包含了两列数据，一个对应的是key,另外对应的是key对应的keyed state的数据的。
+
+########################设计对应的逻辑体系和结构体系的########################
+整个的逻辑体系设计是如下的:
+1.operator对应的是数据库namespace;
+2.operator下面的每一个的state对应的是一个table的;
+3.table里面对应的是如下规定的:
+对于不是keyed-stream的话,对应的只会包含一列数据的
+对于keyed stream的话,结构包含了两个数据的，一个对应的是key,另外对应的是key相关联的state的信息的。
+需要注意的是单个的state的operator对于该operator的所有的task是可见的,对于其他的operator是不可见的，也就是说
+不存在对应的跨越namespace的state分享的,所以不同的operator的话,对应的是不能够共享state信息的。
+需要关注的是flink的operator的自定义的uid的生成策略和相关实现机制,怎么生成operator的uid信息。
+需要注意的是操作符operator状态对应的是non-keyed state的。
+
+keyed state以及partitioned state对应的都是和key相关的,
+使用SavepointWriter向state中写入数据的话,对应的是需要batch模式的数据和要求的。
+需要注意的是flink写入hadoop的文件的话,是需要遵从相关的hadoopInputFormat的概念的,所以,写入文件需要遵从相关的输入格式的
+flink对应的写入hadoop的文件的话，需要的是hadoop的bucket的相关的api机制来实现的。
+flink接入新的数据源,对应的只需要接入相关InputFormat的。
+
+flink以及spark相关的扩展操作可以参考对应的很多的第三方的相关的组件和信息的,这个是值得关注的。
+1.flink-connectors;
+2.Apache bahir相关的第三方的扩展操作实现的；
+3.flink使用异步数据源访问外部的数据库或者是web服务器的接口实现相关的查询操作实现的。对于比较耗时的异步的数据源的话
+对应的可以将数据源转换成为异步的数据源实现调用操作实现的
+对于需要的第三方的接口调用的话，可以使用上面的异步调用的方式外加上对应的状态数据的存储和保存的,是可以实现相关的优秀的机制的。
+我们可以将这种对数据库的查询或者是调用的第三方的接口转换成为异步的数据源实现操作处理逻辑的。
+在对应的RichAsyncFunction的function中实现相关的异步调用机制的。
+
+
+
+
+
+
+
+
+
 
 
 
